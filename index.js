@@ -49,9 +49,10 @@ app.all('*', (req, res, next) => next(ErrorHandler(res, null, 'Route not found',
 // Start the server
 // server : http://127.0.0.1:5000
 let port = process.env.PORT || 5000
+let xx = 'https://node-server-seven-gamma.vercel.app'
 // let host = "127.0.0.1";
 // // vercel
 // host = "https://node-server-seven-gamma.vercel.app"
-app.listen(port, () => {
+app.listen(xx, () => {
   console.log('Server Started')
 })
