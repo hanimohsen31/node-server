@@ -148,8 +148,8 @@ async function DeleteTour(req, res) {
 }
 
 router.route('').get(ProtectedRoute, GetAllTours).post(PostTour)
-router.route('/top5').get(top5, GetAllTours)
-router.route('/apis-features').get(GetAllToursUsingAPIsFeatures)
-router.route('/tours-stats').get(GetToursStats)
-router.route('/:id').get(ProtectedRoute, RestrictTo('admin'), GetToursById).patch(PatchTour).delete(DeleteTour)
+router.route('/top5').get(ProtectedRoute, top5, GetAllTours)
+router.route('/apis-features').get(ProtectedRoute, GetAllToursUsingAPIsFeatures)
+router.route('/tours-stats').get(ProtectedRoute, GetToursStats)
+router.route('/:id').get(ProtectedRoute, GetToursById).patch(ProtectedRoute, RestrictTo('admin'), PatchTour).delete(ProtectedRoute, RestrictTo('admin'), DeleteTour)
 module.exports = router
