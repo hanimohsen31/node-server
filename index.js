@@ -31,7 +31,8 @@ app.use(morgan('dev')) // morgan dev lgos in terminal
 app.use(express.static(`${__dirname}/public`)) // serving static path
 app.use(rateLimit({ max: 100, windowMs: 60 * 60 * 1000, message: 'Requsets limit exceeded for this ip' })) // 100 request per hour
 // ---------------------  DIVIDER  database ---------------------------------------------
-const DB = process.env.MONGO_CONNECT_URI + 'traveller'
+// const DB = process.env.MONGO_CONNECT_URI + 'traveller'
+const DB = 'mongodb+srv://hanimohsen3131:npccNFit7CD7eOea@cluster0.dsyn0.mongodb.net/' + 'traveller'
 console.log(DB)
 mongoose.connect(DB, {}).then((con) => console.log('Mongo Connected'))
 
