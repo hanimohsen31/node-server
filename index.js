@@ -9,7 +9,7 @@ const helmet = require('helmet')
 const sanitize = require('express-mongo-sanitize')
 const xss = require('xss-clean')
 const hpp = require('hpp')
-dotenv.config({ path: './config.env' }) // environment variables
+dotenv.config({ path: './.env' }) // environment variables
 // ---------------------  DIVIDER  restarting app ---------------------------------------
 process.on('uncaughtException', (err) => {
   console.log('uncaughtException', err)
