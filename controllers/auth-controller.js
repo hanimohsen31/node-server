@@ -24,7 +24,7 @@ async function Signup(req, res) {
     const token = jwt.sign({ id: newUser._id }, env.JWT_KEY, { expiresIn: env.EXPIRATION })
     // send cookie
     // res.cookie('jwt', token, { expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), secure: true, httpOnly: true })
-    res.status(201).json({ message: 'User Created', data: newUser, token })
+    res.status(201).json({ message: 'User Created', token })
   } catch (err) {
     ErrorHandler(res, err, 'Invalid user data', 400, 'su1')
   }
