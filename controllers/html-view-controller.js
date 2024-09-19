@@ -1,8 +1,8 @@
 const express = require("express");
-const fs = require('fs')
+// const fs = require('fs')
 const router = express.Router();
 
-let path =`${__dirname}/public/overviview.html`
+// let path =`${__dirname}/public/overviview.html`
 
 // function shape 1
 function GetRoot(req, res) {
