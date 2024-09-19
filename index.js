@@ -10,7 +10,7 @@ const xss = require('xss-clean')
 const hpp = require('hpp')
 // const dotenv = require('dotenv')
 // dotenv.config({ path: './.env' }) // environment variables
-const env = require('../env')
+const env = require('./env')
 // ---------------------  DIVIDER  restarting app ---------------------------------------
 process.on('uncaughtException', (err) => {
   console.log('uncaughtException', err)
