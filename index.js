@@ -11,10 +11,10 @@ const xss = require('xss-clean')
 const hpp = require('hpp')
 dotenv.config({ path: './.env' }) // environment variables
 // ---------------------  DIVIDER  restarting app ---------------------------------------
-process.on('uncaughtException', (err) => {
-  console.log('uncaughtException', err)
-  process.exit(1)
-})
+// process.on('uncaughtException', (err) => {
+//   console.log('uncaughtException', err)
+//   process.exit(1)
+// })
 
 // ---------------------  DIVIDER  adding app -------------------------------------------
 // app create
