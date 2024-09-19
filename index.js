@@ -12,7 +12,7 @@ const dotenv = require('dotenv')
 dotenv.config({ path: './.env' }) // environment variables
 const env = require('./env')
 console.log("-----------------------------------------");
-console.log(process.env);
+console.log(env);
 console.log("-----------------------------------------");
 // ---------------------  DIVIDER  restarting app ---------------------------------------
 process.on('uncaughtException', (err) => {
