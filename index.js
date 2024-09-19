@@ -2,19 +2,20 @@ const express = require('express')
 const cors = require('cors')
 const morgan = require('morgan')
 const mongoose = require('mongoose')
-const dotenv = require('dotenv')
+// const dotenv = require('dotenv')
 const ErrorHandler = require('./utils/ErrorHandler')
 const rateLimit = require('express-rate-limit')
 const helmet = require('helmet')
 const sanitize = require('express-mongo-sanitize')
 const xss = require('xss-clean')
 const hpp = require('hpp')
-dotenv.config({ path: './.env' }) // environment variables
+// dotenv.config({ path: './.env' }) // environment variables
+const env = require('../env')
 // ---------------------  DIVIDER  restarting app ---------------------------------------
-// process.on('uncaughtException', (err) => {
-//   console.log('uncaughtException', err)
-//   process.exit(1)
-// })
+process.on('uncaughtException', (err) => {
+  console.log('uncaughtException', err)
+  process.exit(1)
+})
 
 // ---------------------  DIVIDER  adding app -------------------------------------------
 // app create
@@ -31,9 +32,7 @@ app.use(morgan('dev')) // morgan dev lgos in terminal
 app.use(express.static(`${__dirname}/public`)) // serving static path
 app.use(rateLimit({ max: 100, windowMs: 60 * 60 * 1000, message: 'Requsets limit exceeded for this ip' })) // 100 request per hour
 // ---------------------  DIVIDER  database ---------------------------------------------
-// const DB = process.env.MONGO_CONNECT_URI + 'traveller'
-const DB = 'mongodb+srv://hanimohsen3131:npccNFit7CD7eOea@cluster0.dsyn0.mongodb.net/' + 'traveller'
-console.log(DB)
+const DB = env.MONGO_CONNECT_URI + env.COLLECTION
 mongoose.connect(DB, {}).then((con) => console.log('Mongo Connected'))
 
 // ---------------------  DIVIDER  routes -----------------------------------------------
@@ -50,10 +49,9 @@ app.all('*', (req, res, next) => next(ErrorHandler(res, null, 'Route not found',
 // Start the server
 // server : http://127.0.0.1:5000
 let port = process.env.PORT || 5000
-let xx = 'https://node-server-seven-gamma.vercel.app'
 // let host = "127.0.0.1";
 // // vercel
 // host = "https://node-server-seven-gamma.vercel.app"
-app.listen(5000 || process.env.PORT, () => {
+app.listen(port, () => {
   console.log('Server Started')
 })

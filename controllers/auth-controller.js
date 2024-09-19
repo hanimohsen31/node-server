@@ -7,10 +7,7 @@ const SendEmail = require('../utils/SendEmail')
 const jwt = require('jsonwebtoken')
 const crypto = require('crypto')
 const ProtectedRoute = require('../utils/ProtectedRoute')
-// let tokenKey = process.env.JWT_KEY
-// let tokenExpiration = process.env.EXPIRATION
-let tokenKey = 'onix-3810-this-may-be-the-secret-of-my-application'
-let tokenExpiration = '30d'
+const env = require('../env')
 
 // Signup
 async function Signup(req, res) {
@@ -24,9 +21,9 @@ async function Signup(req, res) {
       password: body.password,
       confirmPassword: body.confirmPassword,
     })
-    const token = jwt.sign({ id: newUser._id }, tokenKey, { expiresIn: tokenExpiration })
+    const token = jwt.sign({ id: newUser._id }, env.JWT_KEY, { expiresIn: env.EXPIRATION })
     // send cookie
-    res.cookie('jwt', token, { expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), secure: true, httpOnly: true })
+    // res.cookie('jwt', token, { expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), secure: true, httpOnly: true })
     res.status(201).json({ message: 'User Created', data: newUser, token })
   } catch (err) {
     ErrorHandler(res, err, 'Invalid user data', 400, 'su1')
@@ -45,7 +42,7 @@ async function Login(req, res) {
     let isPasswordMatching = await user.correctPassword(password, user.password)
     if (!isPasswordMatching) return ErrorHandler(res, null, 'Password is not correct', 401, 'li3')
 
-    const token = jwt.sign({ id: user._id }, tokenKey, { expiresIn: tokenExpiration })
+    const token = jwt.sign({ id: user._id }, env.JWT_KEY, { expiresIn: env.EXPIRATION })
     res.status(200).json({ message: 'User Logged in', token })
   } catch (err) {
     ErrorHandler(res, err, 'Invalid user data', 400, 'li2')
@@ -94,7 +91,7 @@ async function RestPassword(req, res) {
   await user.save()
   // send toke
 
-  const token = jwt.sign({ id: user._id }, tokenKey, { expiresIn: tokenExpiration })
+  const token = jwt.sign({ id: user._id }, env.JWT_KEY, { expiresIn: env.EXPIRATION })
   res.status(200).json({ message: 'User Logged in', token })
 }
 
@@ -107,7 +104,7 @@ async function UpdatePassword(req, res) {
     // get user
     let decoded = ''
     try {
-      decoded = await jwt.verify(token, tokenKey)
+      decoded = await jwt.verify(token, env.JWT_KEY)
       req.user = decoded
     } catch (err) {
       return ErrorHandler(res, err, 'Invalid token', 401, 'prt3')
@@ -123,7 +120,7 @@ async function UpdatePassword(req, res) {
     await user.save()
     // send token
 
-    const newToken = jwt.sign({ id: user._id }, tokenKey, { expiresIn: tokenExpiration })
+    const newToken = jwt.sign({ id: user._id }, env.JWT_KEY, { expiresIn: env.EXPIRATION })
     res.status(201).json({ message: 'Password updated', newToken })
   } catch (err) {
     ErrorHandler(res, err, 'Invalid user data', 400, 'up6')
