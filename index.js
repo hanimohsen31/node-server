@@ -8,8 +8,8 @@ const helmet = require('helmet')
 const sanitize = require('express-mongo-sanitize')
 const xss = require('xss-clean')
 const hpp = require('hpp')
-// const dotenv = require('dotenv')
-// dotenv.config({ path: './.env' }) // environment variables
+const dotenv = require('dotenv')
+dotenv.config({ path: './.env' }) // environment variables
 const env = require('./env')
 console.log(env);
 // ---------------------  DIVIDER  restarting app ---------------------------------------
