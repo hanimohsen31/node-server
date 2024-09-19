@@ -10,13 +10,9 @@ const xss = require('xss-clean')
 const hpp = require('hpp')
 const dotenv = require('dotenv')
 dotenv.config({ path: './.env' }) // environment variables
-const env = require('./env')
-console.log("-----------------------------------------");
-console.log(env);
-console.log("-----------------------------------------");
 // ---------------------  DIVIDER  restarting app ---------------------------------------
 process.on('uncaughtException', (err) => {
-  console.log('uncaughtException', err)
+  console.log('uncaughtException onix error', err)
   process.exit(1)
 })
 
@@ -35,7 +31,7 @@ app.use(morgan('dev')) // morgan dev lgos in terminal
 app.use(express.static(`${__dirname}/public`)) // serving static path
 app.use(rateLimit({ max: 100, windowMs: 60 * 60 * 1000, message: 'Requsets limit exceeded for this ip' })) // 100 request per hour
 // ---------------------  DIVIDER  database ---------------------------------------------
-const DB = env.MONGO_CONNECT_URI + env.COLLECTION
+const DB = process.env.MONGO_CONNECT_URI + process.env.COLLECTION
 mongoose.connect(DB, {}).then((con) => console.log('Mongo Connected'))
 
 // ---------------------  DIVIDER  routes -----------------------------------------------
