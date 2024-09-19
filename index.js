@@ -53,6 +53,6 @@ let xx = 'https://node-server-seven-gamma.vercel.app'
 // let host = "127.0.0.1";
 // // vercel
 // host = "https://node-server-seven-gamma.vercel.app"
-app.listen(xx, () => {
+app.listen(5000 || process.env.PORT, () => {
   console.log('Server Started')
 })
