@@ -11,6 +11,10 @@ const hpp = require('hpp')
 // const dotenv = require('dotenv')
 // dotenv.config({ path: './.env' }) // environment variables
 const env = require('./env')
+console.log(process.env.MONGO_CONNECT_URI);
+console.log(process.env.COLLECTION);
+console.log(process.env.JWT_KEY);
+console.log(process.env.EXPIRATION);
 // ---------------------  DIVIDER  restarting app ---------------------------------------
 process.on('uncaughtException', (err) => {
   console.log('uncaughtException', err)
