@@ -32,7 +32,10 @@ app.use(express.static(`${__dirname}/public`)) // serving static path
 app.use(rateLimit({ max: 100, windowMs: 60 * 60 * 1000, message: 'Requsets limit exceeded for this ip' })) // 100 request per hour
 // ---------------------  DIVIDER  database ---------------------------------------------
 const DB = process.env.MONGO_CONNECTION + 'traveller'
-mongoose.connect(DB, {}).then((con) => console.log('Mongo Connected'))
+mongoose.connect(DB, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+}).then((con) => console.log('Mongo Connected'))
 
 // ---------------------  DIVIDER  routes -----------------------------------------------
 app.use('/', require('./controllers/root-controller'))
