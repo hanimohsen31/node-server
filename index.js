@@ -11,6 +11,7 @@ const hpp = require('hpp')
 // const dotenv = require('dotenv')
 // dotenv.config({ path: './.env' }) // environment variables
 const env = require('./env')
+console.log(env);
 // ---------------------  DIVIDER  restarting app ---------------------------------------
 process.on('uncaughtException', (err) => {
   console.log('uncaughtException', err)
