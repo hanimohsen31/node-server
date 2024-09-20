@@ -8,6 +8,12 @@ const jwt = require('jsonwebtoken')
 const crypto = require('crypto')
 const ProtectedRoute = require('../utils/ProtectedRoute')
 
+function createToken(userData) {
+  let payload = { id: userData._id, role: userData?.role, modules: userData?.modules, subscriptionActive: userData?.subscriptionActive }
+  const token = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: process.env.EXPIRATION })
+  return token
+}
+
 // Signup
 async function Signup(req, res) {
   let body = req.body
@@ -20,10 +26,10 @@ async function Signup(req, res) {
       password: body.password,
       confirmPassword: body.confirmPassword,
     })
-    const token = jwt.sign({ id: newUser._id, role: newUser.role }, process.env.JWT_KEY, { expiresIn: process.env.EXPIRATION })
+    const token = createToken(newUser)
     // send cookie
     // res.cookie('jwt', token, { expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), secure: true, httpOnly: true })
-    res.status(201).json({ message: 'User Created', token, role: user.role, modules: user.modules, subscriptionActive: user.subscriptionActive })
+    res.status(201).json({ message: 'User Created', token })
   } catch (err) {
     ErrorHandler(res, err, 'Invalid user data', 400, 'su1')
   }
@@ -40,9 +46,8 @@ async function Login(req, res) {
 
     let isPasswordMatching = await user.correctPassword(password, user.password)
     if (!isPasswordMatching) return ErrorHandler(res, null, 'Password is not correct', 401, 'li3')
-
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_KEY, { expiresIn: process.env.EXPIRATION })
-    res.status(200).json({ message: 'User Logged in', token, role: user.role, modules: user.modules, subscriptionActive: user.subscriptionActive })
+    const token = createToken(user)
+    res.status(200).json({ message: 'User Logged in', token })
   } catch (err) {
     ErrorHandler(res, err, 'Invalid user data', 400, 'li2')
   }
@@ -65,7 +70,7 @@ async function CheckAuth(req, res) {
 
     let user = await User.findById(decoded.id)
     if (!user) return ErrorHandler(res, null, 'User not found', 404, 'ca3')
-    res.status(200).json({ message: 'Auth checked', checked: true, role: user.role, modules: user.modules, subscriptionActive: user.subscriptionActive })
+    res.status(200).json({ message: 'Auth checked', checked: true, token })
   } catch (err) {
     ErrorHandler(res, err, 'Invalid token data', 400, 'ca4')
   }
@@ -112,7 +117,7 @@ async function RestPassword(req, res) {
   user.PasswordResetExpiration = undefined
   await user.save()
   // send token
-  const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_KEY, { expiresIn: process.env.EXPIRATION })
+  const token = createToken(user)
   res.status(200).json({ message: 'User Logged in', token })
 }
 
@@ -140,8 +145,7 @@ async function UpdatePassword(req, res) {
     user.confirmPassword = req.body.confirmPassword
     await user.save()
     // send token
-
-    const newToken = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_KEY, { expiresIn: process.env.EXPIRATION })
+    const newToken = createToken(user)
     res.status(201).json({ message: 'Password updated', newToken })
   } catch (err) {
     ErrorHandler(res, err, 'Invalid user data', 400, 'up6')
