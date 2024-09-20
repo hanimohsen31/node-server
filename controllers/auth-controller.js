@@ -23,7 +23,7 @@ async function Signup(req, res) {
     const token = jwt.sign({ id: newUser._id }, process.env.JWT_KEY, { expiresIn: process.env.EXPIRATION })
     // send cookie
     // res.cookie('jwt', token, { expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), secure: true, httpOnly: true })
-    res.status(201).json({ message: 'User Created', token })
+    res.status(201).json({ message: 'User Created', token, role: user.role, modules: user.modules, subscriptionActive: user.subscriptionActive })
   } catch (err) {
     ErrorHandler(res, err, 'Invalid user data', 400, 'su1')
   }
@@ -42,9 +42,32 @@ async function Login(req, res) {
     if (!isPasswordMatching) return ErrorHandler(res, null, 'Password is not correct', 401, 'li3')
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_KEY, { expiresIn: process.env.EXPIRATION })
-    res.status(200).json({ message: 'User Logged in', token })
+    res.status(200).json({ message: 'User Logged in', token, role: user.role, modules: user.modules, subscriptionActive: user.subscriptionActive })
   } catch (err) {
     ErrorHandler(res, err, 'Invalid user data', 400, 'li2')
+  }
+}
+
+// check auth
+async function CheckAuth(req, res) {
+  let token = req.headers?.authorization?.replace('Bearer ', '')
+
+  try {
+    if (!token) return ErrorHandler(res, null, 'no token found', 400, 'ca1')
+
+    let decoded = ''
+    try {
+      decoded = await jwt.verify(token, process.env.JWT_KEY)
+      console.log(decoded)
+    } catch (err) {
+      return ErrorHandler(res, err, 'Invalid token', 401, 'ca2')
+    }
+
+    let user = await User.findById(decoded.id)
+    if (!user) return ErrorHandler(res, null, 'User not found', 404, 'ca3')
+    res.status(200).json({ message: 'Auth checked', checked: true, role: user.role, modules: user.modules, subscriptionActive: user.subscriptionActive })
+  } catch (err) {
+    ErrorHandler(res, err, 'Invalid token data', 400, 'ca4')
   }
 }
 
@@ -88,8 +111,7 @@ async function RestPassword(req, res) {
   user.passwordResetToken = undefined
   user.PasswordResetExpiration = undefined
   await user.save()
-  // send toke
-
+  // send token
   const token = jwt.sign({ id: user._id }, process.env.JWT_KEY, { expiresIn: process.env.EXPIRATION })
   res.status(200).json({ message: 'User Logged in', token })
 }
@@ -128,6 +150,7 @@ async function UpdatePassword(req, res) {
 
 router.route('/signup').post(Signup)
 router.route('/login').post(Login)
+router.route('/check-auth').get(CheckAuth)
 router.route('/forget-password').post(ForgetPassword)
 router.route('/reset-password/:token').patch(RestPassword)
 router.route('/update-password').patch(ProtectedRoute, UpdatePassword)

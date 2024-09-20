@@ -47,18 +47,19 @@ const userScema = new mongoose.Schema(
       select: false,
     },
     // Subscription
-    subscriptionStart: Boolean,
-    subscriptionEnd: Boolean,
+    subscriptionStartDate: Date,
+    subscriptionEndDate: Date,
     subscriptionActive: {
       type: Boolean,
       default: false,
     },
     subscriptionPlan: {
-      type: Boolean,
+      type: String,
       enum: {
         values: ['plan1', 'plan2', 'plan3'],
         message: 'Plan wrong',
       },
+      default: 'plan1',
     },
     passwordChangedAt: Date,
     role: {
@@ -68,14 +69,16 @@ const userScema = new mongoose.Schema(
     },
     passwordResetToken: String,
     PasswordResetExpiration: Date,
-    active: {
+    activeAccount: {
       type: Boolean,
       default: true,
       select: false,
     },
-    modules: {
+    modules: Array,
+    project: {
       type: String,
-      enum: ['asrya-electircs'],
+      enum: ['onix', 'general'],
+      default: 'general',
     },
   },
   {
