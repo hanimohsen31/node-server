@@ -19,10 +19,10 @@ async function Signup(req, res) {
   let body = req.body
   try {
     let newUser = await User.create({
-      username: body.username,
+      username: body.username.toLowerCase(),
       fullName: body.fullName,
       image: body.image,
-      email: body.email,
+      email: body.email.toLowerCase(),
       password: body.password,
       confirmPassword: body.confirmPassword,
     })
@@ -41,7 +41,7 @@ async function Login(req, res) {
   try {
     if (!email || !password) return ErrorHandler(res, null, 'email and password are required', 418, 'li1')
 
-    let user = await User.findOne({ email }).select('+password')
+    let user = await User.findOne({ email: email.toLowerCase() }).select('+password')
     if (!user) return ErrorHandler(res, null, 'User not found', 404, 'li2')
 
     let isPasswordMatching = await user.correctPassword(password, user.password)
@@ -76,7 +76,7 @@ async function CheckAuth(req, res) {
   }
 }
 
-// reset password
+// forget password
 async function ForgetPassword(req, res) {
   // find user by email
   const user = await User.findOne({ email: req.body.email })
@@ -106,6 +106,7 @@ async function ForgetPassword(req, res) {
   }
 }
 
+// reset password
 async function RestPassword(req, res) {
   const user = await User.findOne({ passwordResetToken: req.params.token, PasswordResetExpiration: { $gte: Date.now() } })
   if (!user) return ErrorHandler(res, null, `Token invalid or expired`, 400, 'rp1')
