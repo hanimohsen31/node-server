@@ -77,8 +77,7 @@ const userScema = new mongoose.Schema(
     modules: Array,
     project: {
       type: String,
-      enum: ['onix', 'general'],
-      default: 'general',
+      enum: ['general', 'onix', 'omra'],
     },
   },
   {
