@@ -63,7 +63,7 @@ async function CheckAuth(req, res) {
     let decoded = ''
     try {
       decoded = await jwt.verify(token, process.env.JWT_KEY)
-      console.log(decoded)
+      // console.log(decoded)
     } catch (err) {
       return ErrorHandler(res, err, 'Invalid token', 401, 'ca2')
     }
@@ -90,7 +90,7 @@ async function ForgetPassword(req, res) {
   // perpare token to be sent in email
   const resetUrl = `${req.protocol}://${req.get('host')}/auth/reset-password/${user.passwordResetToken}`
   const message = `click on link bellow mf \n${resetUrl}`
-  console.log('message', message)
+  // console.log('message', message)
   try {
     await SendEmail({
       email: user.email,
