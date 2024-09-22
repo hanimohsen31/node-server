@@ -25,6 +25,7 @@ async function Signup(req, res) {
       email: body.email.toLowerCase(),
       password: body.password,
       confirmPassword: body.confirmPassword,
+      project: body?.project,
     })
     const token = createToken(newUser)
     // send cookie
