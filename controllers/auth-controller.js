@@ -9,7 +9,7 @@ const crypto = require('crypto')
 const ProtectedRoute = require('../utils/ProtectedRoute')
 
 function createToken(userData) {
-  let payload = { id: userData._id, role: userData?.role, modules: userData?.modules, subscriptionActive: userData?.subscriptionActive }
+  let payload = { id: userData._id, username: userData?.fullName, role: userData?.role, modules: userData?.modules, subscriptionActive: userData?.subscriptionActive }
   const token = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: process.env.EXPIRATION })
   return token
 }
