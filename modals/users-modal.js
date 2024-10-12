@@ -100,6 +100,11 @@ userScema.pre('save', async function (next) {
   next()
 })
 
+userScema.pre('save', async function (next) {
+  this.modules = ['default']
+  next()
+})
+
 // schema methods
 userScema.methods.correctPassword = async function (bodyPass, mongoPass) {
   return await bcryptjs.compare(bodyPass, mongoPass)
