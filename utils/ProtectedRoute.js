@@ -15,7 +15,7 @@ async function ProtectedRoute(req, res, next) {
   let decoded = ''
   try {
     // TODO reset token key
-    decoded = await jwt.verify(token, 'onix-3810-this-may-be-the-secret-of-my-application')
+    decoded = await jwt.verify(token, process.env.JWT_KEY)
     req.user = decoded
   } catch (err) {
     return ErrorHandler(res, err, 'Invalid token', 401, 'prt2')
