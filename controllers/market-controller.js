@@ -19,19 +19,20 @@ async function CreatePost(req, res) {
 
 // get all
 async function GetAllPosts(req, res) {
-  // console.log(req.query)
   let reqQuery = { ...req.query }
   let excluded = ['PageIndex', 'PageSize', 'sort', 'fields']
   excluded.forEach((elm) => delete reqQuery[elm])
   try {
     // now for chaining
     // this way returning a new querey to chain multible quiries
-    let query = Post.find()
+    query = Post.find()
+
     // Sorting
     if (req.query.sort) {
       let sortBy = req.query.sort.split(',').join()
       query = query.sort(sortBy)
     }
+
     // Limit fields
     if (req.query.fields) {
       let fields = req.query.fields.split(',').join()
@@ -41,21 +42,31 @@ async function GetAllPosts(req, res) {
       // to exclue a field
       query = query.select('-__v -content')
     }
+
+    // Search
+    if (req.query.search) {
+      const searchText = req.query.search
+      query = query.find({ title: { $regex: searchText, $options: 'i' } })
+    }
+
     // Pagination
+    // Count matching items
+    // Clone the query conditions for counting
+    const countQuery = Post.find(query._conditions)
+    let totalCount = await countQuery.countDocuments()
     let PageIndex = +req.query.PageIndex || 1
     let PageSize = +req.query.PageSize || 10
+    let totalPages = Math.ceil(totalCount / PageSize)
     let skippedRecords = (PageIndex - 1) * PageSize
     query = query.skip(skippedRecords).limit(PageSize)
     // check length
-    if (req.query.page) {
-      const length = await Post.countDocuments()
-      if (skippedRecords >= length) throw new Error('Page Not Found')
-    }
+    if (req.query.page && skippedRecords >= totalCount) throw new Error('Page Not Found')
+
     let posts = await query
-    res.status(200).json({ message: 'Posts', data: posts, total: posts.length })
+    res.status(200).json({ message: 'Posts', data: posts, totalCount, totalPages })
   } catch (err) {
-    // console.log(err)
-    res.status(404).json({ message: 'No Posts Found', data: null, error: err })
+    console.log(err)
+    res.status(400).json({ message: 'Error Happened', data: null, error: err })
   }
 }
 
@@ -104,11 +115,13 @@ async function GetAllProducts(req, res) {
     // now for chaining
     // this way returning a new querey to chain multible quiries
     let query = Product.find()
+
     // Sorting
     if (req.query.sort) {
       let sortBy = req.query.sort.split(',').join()
       query = query.sort(sortBy)
     }
+
     // Limit fields
     if (req.query.fields) {
       let fields = req.query.fields.split(',').join()
@@ -118,19 +131,28 @@ async function GetAllProducts(req, res) {
       // to exclue a field
       query = query.select('-__v -content')
     }
-    // Pagination
-    let pageIndex = +req.query.pageIndex || 1
-    let pageSize = +req.query.pageSize || 10
-    let skippedRecords = (pageIndex - 1) * pageSize
-    query = query.skip(skippedRecords).limit(pageSize)
-    // check length
-    if (req.query.page) {
-      const length = await Product.countDocuments()
-      if (skippedRecords >= length) throw new Error('Page Not Found')
+    
+    // Search
+    if (req.query.search) {
+      const searchText = req.query.search
+      query = query.find({ name: { $regex: searchText, $options: 'i' } })
     }
 
+    // Pagination
+    // Count matching items
+    // Clone the query conditions for counting
+    const countQuery = Product.find(query._conditions)
+    let totalCount = await countQuery.countDocuments()
+    let PageIndex = +req.query.PageIndex || 1
+    let PageSize = +req.query.PageSize || 10
+    let totalPages = Math.ceil(totalCount / PageSize)
+    let skippedRecords = (PageIndex - 1) * PageSize
+    query = query.skip(skippedRecords).limit(PageSize)
+    // check length
+    if (req.query.page && skippedRecords >= totalCount) throw new Error('Page Not Found')
+
     let products = await query
-    res.status(200).json({ message: 'Products', data: products, total: products.length })
+    res.status(200).json({ message: 'Products', data: products, totalCount, totalPages  })
   } catch (err) {
     // console.log(err)
     res.status(404).json({ message: 'No Products Found', data: null, error: err })
