@@ -4,6 +4,7 @@ const Post = require('../modals/posts-modal')
 const Product = require('../modals/products-modal')
 const ProtectedRoute = require('../utils/ProtectedRoute')
 const ErrorHandler = require('../utils/ErrorHandler')
+const mongoose = require('mongoose');
 
 // --------------------------  DIVIDER  posts ---------------------------------------------------------------
 // create
@@ -93,6 +94,41 @@ async function DeletePost(req, res) {
   }
 }
 
+// create buld
+async function CreateBulkPosts(req, res) {
+  // Extract products from request body
+  const posts = req.body
+  // Validate input
+  if (!posts || !Array.isArray(posts) || posts.length === 0)
+    return res.status(400).json({ message: 'Invalid input: posts array is required', data: null })
+  // Start a mongoose session for transaction
+  const session = await mongoose.startSession()
+  session.startTransaction()
+  try {
+    // Bulk create posts with error handling
+    const bulkCreateResults = await Post.create(posts, { session })
+    // Commit the transaction
+    await session.commitTransaction()
+    session.endSession()
+    // Prepare response with created posts
+    res.status(200).json({
+      message: `Successfully created ${bulkCreateResults.length} posts`,
+      data: bulkCreateResults,
+      stats: { total: posts.length, created: bulkCreateResults.length },
+    })
+  } catch (err) {
+    // Rollback the transaction in case of error
+    await session.abortTransaction()
+    session.endSession()
+    // Detailed error handling
+    if (err.name === 'ValidationError') return res.status(422).json({ message: 'Validation Error', data: null, error: err.errors })
+    // Duplicate key or other mongoose errors
+    if (err.code === 11000) return res.status(409).json({ message: 'Duplicate key error', data: null, error: err.message })
+    // Generic server error
+    res.status(500).json({ message: 'Failed to create bulk posts', data: null, error: err.message })
+  }
+}
+
 // --------------------------  DIVIDER  products ------------------------------------------------------------
 // create
 async function CreateProduct(req, res) {
@@ -131,7 +167,7 @@ async function GetAllProducts(req, res) {
       // to exclue a field
       query = query.select('-__v -content')
     }
-    
+
     // Search
     if (req.query.search) {
       const searchText = req.query.search
@@ -152,7 +188,7 @@ async function GetAllProducts(req, res) {
     if (req.query.page && skippedRecords >= totalCount) throw new Error('Page Not Found')
 
     let products = await query
-    res.status(200).json({ message: 'Products', data: products, totalCount, totalPages  })
+    res.status(200).json({ message: 'Products', data: products, totalCount, totalPages })
   } catch (err) {
     // console.log(err)
     res.status(404).json({ message: 'No Products Found', data: null, error: err })
@@ -182,13 +218,50 @@ async function DeleteProduct(req, res) {
   }
 }
 
+// create buld
+async function CreateBulkProducts(req, res) {
+  // Extract products from request body
+  const products = req.body
+  // Validate input
+  if (!products || !Array.isArray(products) || products.length === 0)
+    return res.status(400).json({ message: 'Invalid input: osts array is required', data: null })
+  // Start a mongoose session for transaction
+  const session = await mongoose.startSession()
+  session.startTransaction()
+  try {
+    // Bulk create products with error handling
+    const bulkCreateResults = await Product.create(products, { session })
+    // Commit the transaction
+    await session.commitTransaction()
+    session.endSession()
+    // Prepare response with created products
+    res.status(200).json({
+      message: `Successfully created ${bulkCreateResults.length} products`,
+      data: bulkCreateResults,
+      stats: { total: products.length, created: bulkCreateResults.length },
+    })
+  } catch (err) {
+    // Rollback the transaction in case of error
+    await session.abortTransaction()
+    session.endSession()
+    console.log(err);
+    // Detailed error handling
+    if (err.name === 'ValidationError') return res.status(422).json({ message: 'Validation Error', data: null, error: err.errors })
+    // Duplicate key or other mongoose errors
+    if (err.code === 11000) return res.status(409).json({ message: 'Duplicate key error', data: null, error: err.message })
+    // Generic server error
+    res.status(500).json({ message: 'Failed to create bulk posts', data: null, error: err.message })
+  }
+}
 // --------------------------  DIVIDER  apis ----------------------------------------------------------------
 router.route('/posts').get(GetAllPosts)
 router.route('/post').post(ProtectedRoute, CreatePost)
 router.route('/post/:slug').get(GetPostBySlug).delete(ProtectedRoute, DeletePost)
+router.post('/posts/bulk', CreateBulkPosts)
 
 router.route('/products').get(GetAllProducts)
 router.route('/product').post(ProtectedRoute, CreateProduct)
 router.route('/product/:slug').get(GetProductBySlug).delete(ProtectedRoute, DeleteProduct)
+router.post('/products/bulk', CreateBulkProducts)
 
 module.exports = router

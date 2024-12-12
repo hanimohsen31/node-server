@@ -19,7 +19,11 @@ const postsSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Category required'],
   },
-  image: {
+  thumbnail: {
+    type: String,
+    required: [true, 'Image Link required'],
+  },
+  postImage: {
     type: String,
     required: [true, 'Image Link required'],
   },
