@@ -9,8 +9,8 @@ const sanitize = require('express-mongo-sanitize')
 const xss = require('xss-clean')
 const hpp = require('hpp')
 const dotenv = require('dotenv')
-// const multer = require('multer')
-// const upload = multer({ dest: 'uploads/' }) // update
+const multer = require('multer')
+const upload = multer({ dest: 'uploads/' }) // update
 dotenv.config({ path: './.env' }) // environment variables
 // ---------------------  DIVIDER  restarting app ---------------------------------------
 process.on('uncaughtException', (err) => {
@@ -44,7 +44,7 @@ app.use('/tours', require('./controllers/tours-controller'))
 app.use('/auth', require('./controllers/auth-controller'))
 // app.use('/general', require('./controllers/general-controller'))
 app.use('/market', require('./controllers/market-controller'))
-// app.use('/collage', upload.array('images', 10), require('./controllers/collage-controller'))
+app.use('/collage', upload.array('images', 10), require('./controllers/collage-controller'))
 app.use('/blogging', require('./controllers/blogging-controller'))
 app.use('/scrapper', require('./controllers/scrapper-controller'))
 
