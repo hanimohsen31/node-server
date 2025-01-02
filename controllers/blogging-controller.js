@@ -14,6 +14,17 @@ async function CreateBlog(req, res) {
   }
 }
 
+async function GetAllBlogs(req, res) {
+  let reqQuery = { ...req.query }
+  try {
+    // method 1 for filter
+    let blog = await Blogging.find(reqQuery)
+    res.status(200).json({ message: 'Blog', data: blog })
+  } catch (err) {
+    res.status(418).json({ message: 'No Tours Found', data: null, error: err })
+  }
+}
+
 async function GetInOrderData(req, res) {
   let reqQuery = { ...req.query, isPublished: false || null }
   try {
@@ -40,7 +51,7 @@ async function UpdateIsPublished(req, res) {
   }
 }
 
-router.route('').post(CreateBlog)
+router.route('').post(CreateBlog).post(GetAllBlogs)
 router.route('/order').get(GetInOrderData)
 router.route('/:id').get().patch().delete()
 router.route('/isPublished/:id').patch(UpdateIsPublished)
