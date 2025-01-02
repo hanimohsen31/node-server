@@ -2,8 +2,6 @@ const express = require('express')
 const router = express.Router()
 const ErrorHandler = require('../utils/ErrorHandler')
 const sharp = require('sharp')
-const path = require('path')
-const fs = require('fs')
 // Configure multer for file uploads
 
 // --------------------------  DIVIDER  posts ---------------------------------------------------------------

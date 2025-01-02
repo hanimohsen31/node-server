@@ -10,7 +10,12 @@ const xss = require('xss-clean')
 const hpp = require('hpp')
 const dotenv = require('dotenv')
 const multer = require('multer')
-const upload = multer({ dest: 'uploads/' }) // update
+const path = require('path')
+const fs = require('fs')
+const uploadDir = path.join('/tmp', 'uploads');
+const upload = multer({ dest: uploadDir }) // update
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+
 dotenv.config({ path: './.env' }) // environment variables
 // ---------------------  DIVIDER  restarting app ---------------------------------------
 process.on('uncaughtException', (err) => {
