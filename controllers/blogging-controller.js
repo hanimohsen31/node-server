@@ -51,7 +51,7 @@ async function UpdateIsPublished(req, res) {
   }
 }
 
-router.route('').post(CreateBlog).post(GetAllBlogs)
+router.route('').post(CreateBlog).get(GetAllBlogs)
 router.route('/order').get(GetInOrderData)
 router.route('/:id').get().patch().delete()
 router.route('/isPublished/:id').patch(UpdateIsPublished)
