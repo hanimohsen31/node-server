@@ -20,8 +20,8 @@ async function CreateCollage(req, res) {
     const options = {
       rows: 2,
       cols: 2,
-      width: 250,
-      height: 250,
+      width: 500,
+      height: 500,
       spacing: 0,
       bgColor: { r: 255, g: 255, b: 255, alpha: 1 },
     }
