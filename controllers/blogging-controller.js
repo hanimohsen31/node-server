@@ -26,24 +26,17 @@ async function GetInOrderData(req, res) {
 }
 
 async function UpdateIsPublished(req, res) {
-  const { id } = req.params // Get the ID from the request parameters
-  const { isPublished } = req.body // Get the updated flag value from the request body
-
+  const id = req.params.id
   try {
-    // Update the tour by ID with the new isPublished flag
-    let updatedTour = await Tour.findByIdAndUpdate(
+    let blog = await Blogging.findByIdAndUpdate(
       id,
-      { $set: { isPublished } }, // Set the new value for isPublished
+      { $set: { isPublished: false } }, // Set the new value for isPublished
       { new: true } // Return the updated document
     )
-
-    if (!updatedTour) {
-      return res.status(404).json({ message: 'Tour not found', data: null })
-    }
-
-    res.status(200).json({ message: 'Tour updated successfully', data: updatedTour })
+    if (!blog) return res.status(404).json({ message: 'Blog not found', data: null })
+    res.status(200).json({ message: 'Blog updated successfully', data: blog })
   } catch (err) {
-    res.status(500).json({ message: 'Error updating tour', data: null, error: err })
+    res.status(500).json({ message: 'Error updating blog', data: null, error: err })
   }
 }
 
