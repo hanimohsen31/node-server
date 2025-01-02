@@ -51,8 +51,20 @@ async function UpdateIsPublished(req, res) {
   }
 }
 
+// delete
+async function DeleteBlog(req, res) {
+  const id = req.params.id
+  try {
+    const deletedBlog = await Blogging.findByIdAndDelete(id)
+    if (!deletedBlog) return res.status(404).json({ message: 'Blog not found', data: null })
+    res.status(200).json({ message: 'Blog Deleted', data: deletedBlog })
+  } catch (err) {
+    res.status(500).json({ message: 'Error deleting blog', data: null, error: err })
+  }
+}
+
 router.route('').post(CreateBlog).get(GetAllBlogs)
 router.route('/order').get(GetInOrderData)
-router.route('/:id').get().patch().delete()
+router.route('/:id').delete(DeleteBlog)
 router.route('/isPublished/:id').patch(UpdateIsPublished)
 module.exports = router
