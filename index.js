@@ -52,6 +52,7 @@ app.use('/market', require('./controllers/market-controller'))
 app.use('/collage', upload.array('images', 10), require('./controllers/collage-controller'))
 app.use('/blogging', require('./controllers/blogging-controller'))
 app.use('/scrapper', require('./controllers/scrapper-controller'))
+app.use('/serpapi', require('./controllers/serpapi-controller'))
 
 // ---------------------  DIVIDER  middleware -------------------------------------------
 app.all('*', (req, res, next) => next(ErrorHandler(res, null, 'Route not found', 404, null)))
