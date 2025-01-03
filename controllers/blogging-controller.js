@@ -2,7 +2,8 @@ const express = require('express')
 const router = express.Router()
 const Blogging = require('../modals/blogging-modal')
 const ErrorHandler = require('../utils/ErrorHandler')
-const axios = require('axios');
+const axios = require('axios')
+const { google } = require('googleapis')
 
 // create
 async function CreateBlog(req, res) {
@@ -64,33 +65,26 @@ async function DeleteBlog(req, res) {
   }
 }
 
-async function AddPostToBLog(req, res) {
-  let reqQuery = { ...req.query }
+async function AddPostToBLog() {
+  const apiKey = 'AIzaSyBvpxifRV3moiZTklAgtub5DAArWJjtNzE' // Replace with your actual API key
+  const title = 'TITITITIIITITLE' // Replace with your actual API key
+  const content = 'COCOCOOCOCOCOCOCOCOCNNNNNTETNTNNTNT' // Replace with your actual API key
+  const author = 'AUTUTUTUUTUER' // Replace with your actual API key
+  const apiUrl = 'https://www.googleapis.com/blogger/v3/blogs/8070105920543249955/posts/' // Replace with your API endpoint
+  const headers = { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' }
+  const body = JSON.stringify({ title: title, content: content, author: author })
   try {
-    // method 1 for filter
-    let blog = await Blogging.findOne(reqQuery)
-
-    let payload = {
-      kind: 'blogger#post',
-      blog: { id: '8070105920543249955' },
-      title: blog.postTitle,
-      content: blog.blogPost,
+    let blog = await Blogging.findOne()
+    const response = await fetch(apiUrl, { method: 'POST', headers: headers, body: body })
+    if (!response.ok) {
+      const errorData = await response.json() // Try to parse error response
+      const errorMessage = errorData.message || `HTTP error! status: ${response.status}`
+      throw new Error(errorMessage)
     }
-    
-    // Send post request to Blogger API
-    const response = await axios.post(
-      'https://www.googleapis.com/blogger/v3/blogs/8070105920543249955/posts/',
-      payload,
-      {
-        headers: {
-          Authorization: `Bearer ${'110183634560-skcsgkdaaqkopl5241gb6bvttda1k255.apps.googleusercontent.com'}`,
-        },
-      }
-    );
-
-    res.status(200).json({ message: 'Blog', data: blog })
-  } catch (err) {
-    res.status(418).json({ message: 'No Tours Found', data: null, error: err })
+    const data = await response.json()
+    res.status(200).json({ message: 'Blog', data: data })
+  } catch (error) {
+    res.status(418).json({ message: 'EROOR', data: null, error: err })
   }
 }
 
@@ -99,4 +93,5 @@ router.route('/order').get(GetInOrderData)
 router.route('/:id').delete(DeleteBlog)
 router.route('/isPublished/:id').patch(UpdateIsPublished)
 router.route('/blog').post(AddPostToBLog)
+
 module.exports = router
