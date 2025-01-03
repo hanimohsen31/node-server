@@ -98,5 +98,5 @@ router.route('').post(CreateBlog).get(GetAllBlogs)
 router.route('/order').get(GetInOrderData)
 router.route('/:id').delete(DeleteBlog)
 router.route('/isPublished/:id').patch(UpdateIsPublished)
-router.route('/blog').patch(UpdateIsPublished)
+router.route('/blog').post(AddPostToBLog)
 module.exports = router
