@@ -2,18 +2,47 @@ const express = require('express')
 const router = express.Router()
 const ErrorHandler = require('../utils/ErrorHandler')
 const sharp = require('sharp')
-// Configure multer for file uploads
+const multer = require('multer')
+const path = require('path')
+const fs = require('fs')
+const uploadDir = path.join('/tmp', 'uploads')
+const upload = multer({ dest: uploadDir }) // update
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true })
+upload.array('images', 10)
 
 // --------------------------  DIVIDER  posts ---------------------------------------------------------------
+
+// Function to process the images: convert to JPEG, compress, and resize
+async function ConvertImageToJPEG(req, res) {
+  try {
+    const file = req.files[0]
+    if (!file) return res.status(400).json({ message: 'No file uploaded', data: null })
+    const buffer = await sharp(file.path)
+      .resize(1000, 1000, {
+        fit: sharp.fit.inside,
+        withoutEnlargement: true,
+      })
+      .jpeg({ quality: 90 })
+      .toBuffer()
+    const base64Image = buffer.toString('base64')
+    res.status(200).json({
+      message: 'Image Converted Successfully',
+      data: { image: `data:image/jpeg;base64,${base64Image}` },
+    })
+  } catch (err) {
+    res.status(418).json({
+      message: 'Error Converting Image',
+      data: null,
+      error: err.message,
+    })
+  }
+}
+// -------------------------------- create collage --------------------------------
 async function CreateCollage(req, res) {
   try {
     const files = req.files // Uploaded files
-
     // Validate files
-    if (!files || files.length < 1) {
-      return res.status(400).json({ message: 'No images uploaded', data: null })
-    }
-
+    if (!files || files.length < 1) return res.status(400).json({ message: 'No images uploaded', data: null })
     // Collage options
     const options = {
       rows: 2,
@@ -39,13 +68,11 @@ async function CreateCollage(req, res) {
     })
 
     const compositeOperations = []
-
     // Prepare images for compositing
     for (let i = 0; i < files.length; i++) {
       const file = files[i]
       const x = (i % cols) * (width + spacing)
       const y = Math.floor(i / cols) * (height + spacing)
-
       compositeOperations.push({
         input: await sharp(file.path).resize(width, height).toBuffer(),
         top: y,
@@ -54,17 +81,14 @@ async function CreateCollage(req, res) {
     }
 
     // Generate the collage
-    const resultBuffer = await canvas.composite(compositeOperations).png().toBuffer()
+    const resultBuffer = await canvas.composite(compositeOperations).jpeg().toBuffer()
 
     // Cleanup uploaded files
     // files.forEach((file) => fs.unlinkSync(file.path))
 
-    // Send the resulting collage as a response
     res.status(200).json({
       message: 'Collage Created Successfully',
-      data: {
-        image: `data:image/png;base64,${resultBuffer.toString('base64')}`,
-      },
+      data: { image: `data:image/jpeg;base64,${resultBuffer.toString('base64')}` },
     })
   } catch (err) {
     res.status(418).json({
@@ -75,5 +99,6 @@ async function CreateCollage(req, res) {
   }
 }
 
-router.post('', CreateCollage)
+router.post('/convertOne', upload.array('images', 1), ConvertImageToJPEG)
+router.post('/collage', upload.array('images', 10), CreateCollage)
 module.exports = router

@@ -1,9 +1,6 @@
 const express = require('express')
 const router = express.Router()
 const Blogging = require('../modals/blogging-modal')
-const ErrorHandler = require('../utils/ErrorHandler')
-const axios = require('axios')
-const { google } = require('googleapis')
 
 // create
 async function CreateBlog(req, res) {
