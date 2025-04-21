@@ -6,13 +6,14 @@ const AliExpress = require('../modals/aliexpress-modal')
 async function UpdateProductsBulk(req, res) {
   let body = req.body;
   try {
-    await AliExpress.deleteMany({});
+    await AliExpress.deleteMany();
     let newProducts = await AliExpress.insertMany(body);
     res.status(200).json({ message: 'Products Deleted and Inserted', data: newProducts });
   } catch (err) {
     res.status(418).json({ message: 'Invalid Data', data: null, error: err });
   }
 }
+
 async function GetAllProducts(req, res) {
   try {
     // method 1 for filter

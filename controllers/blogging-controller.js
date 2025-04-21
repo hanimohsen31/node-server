@@ -2,17 +2,7 @@ const express = require('express')
 const router = express.Router()
 const Blogging = require('../modals/blogging-modal')
 
-// create
-async function CreateBlog(req, res) {
-  let body = req.body
-  try {
-    let newBlog = await Blogging.create(body)
-    res.status(200).json({ message: 'Blog Created', data: newBlog })
-  } catch (err) {
-    res.status(418).json({ message: 'Invalid Data', data: null, error: err })
-  }
-}
-
+// Get All Blogs
 async function GetAllBlogs(req, res) {
   let reqQuery = { ...req.query }
   try {
@@ -24,6 +14,7 @@ async function GetAllBlogs(req, res) {
   }
 }
 
+// Get In Order Data
 async function GetInOrderData(req, res) {
   let reqQuery = { ...req.query, isPublished: false || null }
   try {
@@ -35,6 +26,7 @@ async function GetInOrderData(req, res) {
   }
 }
 
+// Update Is Published
 async function UpdateIsPublished(req, res) {
   const id = req.params.id
   try {
@@ -50,7 +42,7 @@ async function UpdateIsPublished(req, res) {
   }
 }
 
-// delete
+// Delete Blog
 async function DeleteBlog(req, res) {
   const id = req.params.id
   try {
@@ -62,33 +54,33 @@ async function DeleteBlog(req, res) {
   }
 }
 
-async function AddPostToBLog() {
-  const apiKey = 'AIzaSyBvpxifRV3moiZTklAgtub5DAArWJjtNzE' // Replace with your actual API key
-  const title = 'TITITITIIITITLE' // Replace with your actual API key
-  const content = 'COCOCOOCOCOCOCOCOCOCNNNNNTETNTNNTNT' // Replace with your actual API key
-  const author = 'AUTUTUTUUTUER' // Replace with your actual API key
-  const apiUrl = 'https://www.googleapis.com/blogger/v3/blogs/8070105920543249955/posts/' // Replace with your API endpoint
-  const headers = { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' }
-  const body = JSON.stringify({ title: title, content: content, author: author })
+// create one
+async function CreateBlog(req, res) {
+  let body = req.body
   try {
-    let blog = await Blogging.findOne()
-    const response = await fetch(apiUrl, { method: 'POST', headers: headers, body: body })
-    if (!response.ok) {
-      const errorData = await response.json() // Try to parse error response
-      const errorMessage = errorData.message || `HTTP error! status: ${response.status}`
-      throw new Error(errorMessage)
-    }
-    const data = await response.json()
-    res.status(200).json({ message: 'Blog', data: data })
-  } catch (error) {
-    res.status(418).json({ message: 'EROOR', data: null, error: err })
+    let newBlog = await Blogging.create(body)
+    res.status(200).json({ message: 'Blog Created', data: newBlog })
+  } catch (err) {
+    res.status(418).json({ message: 'Invalid Data', data: null, error: err })
+  }
+}
+
+// create Bulk
+async function UpdateProductsBulk(req, res) {
+  let body = req.body
+  try {
+    await Blogging.deleteMany()
+    let newProducts = await Blogging.insertMany(body)
+    res.status(200).json({ message: 'Products Deleted and Inserted', data: newProducts })
+  } catch (err) {
+    res.status(418).json({ message: 'Invalid Data', data: null, error: err })
   }
 }
 
 router.route('').post(CreateBlog).get(GetAllBlogs)
 router.route('/order').get(GetInOrderData)
+router.route('/update-bulk').put(UpdateProductsBulk)
 router.route('/:id').delete(DeleteBlog)
 router.route('/isPublished/:id').patch(UpdateIsPublished)
-router.route('/blog').post(AddPostToBLog)
 
 module.exports = router

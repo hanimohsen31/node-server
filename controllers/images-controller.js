@@ -11,7 +11,6 @@ if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true })
 upload.array('images', 10)
 
 // --------------------------  DIVIDER  posts ---------------------------------------------------------------
-
 // Function to process the images: convert to JPEG, compress, and resize
 async function ConvertImageToJPEG(req, res) {
   try {
@@ -37,6 +36,7 @@ async function ConvertImageToJPEG(req, res) {
     })
   }
 }
+
 // -------------------------------- create collage --------------------------------
 async function CreateCollage(req, res) {
   try {
