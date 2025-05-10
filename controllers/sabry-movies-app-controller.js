@@ -19,9 +19,9 @@ async function Login(req, res) {
     success: true,
     message: 'Login successful',
     user: {
-      id: (Math.random() * 1000_000).toFixed(),
+      id: (Math.random() * 1000_000_000).toFixed(),
       username: req.body.username,
-      email: req.body.username + 'gmail.com',
+      email: req.body.username + '@gmail.com',
       createdAt: '2025-04-21T15:35:40.274Z',
     },
   })
