@@ -9,15 +9,20 @@ const crypto = require('crypto')
 const ProtectedRoute = require('../utils/ProtectedRoute')
 
 function createToken(userData) {
-  let payload = {
-    id: userData._id,
-    username: userData?.fullName,
-    role: userData?.role,
-    modules: userData?.modules,
-    subscriptionActive: userData?.subscriptionActive,
+  try{
+    let payload = {
+      id: userData._id,
+      username: userData?.fullName,
+      role: userData?.role,
+      modules: userData?.modules,
+      subscriptionActive: userData?.subscriptionActive,
+    }
+    const token = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: process.env.EXPIRATION })
+    return token
+  }catch(err){
+    console.log("roken func err",err)
+    return null
   }
-  const token = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: process.env.EXPIRATION })
-  return token
 }
 
 // Signup
@@ -35,6 +40,7 @@ async function Signup(req, res) {
       project: body?.project,
     })
     const token = createToken(newUser)
+    console.log('token', token)
     // send cookie
     // res.cookie('jwt', token, { expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), secure: true, httpOnly: true })
     res.status(201).json({ message: 'User Created', token })

@@ -30,6 +30,7 @@ app.use(xss()) // clean html data security
 app.use(hpp({ whitelist: ['duration'] })) // prevent parameter pollution (clear dublicated params fileds)
 app.use(morgan('dev')) // morgan dev lgos in terminal
 app.use(express.static(`${__dirname}/public`)) // serving static path
+app.use(express.static(`${__dirname}/dev-assets`)) // serving static path
 app.use(rateLimit({ max: 10000, windowMs: 60 * 60 * 1000, message: 'Requsets limit exceeded for this ip' })) // 100 request per hour
 
 // ---------------------  DIVIDER  database ---------------------------------------------
@@ -45,10 +46,12 @@ app.use('/auth', require('./controllers/auth-controller'))
 // app.use('/general', require('./controllers/general-controller'))
 app.use('/market', require('./controllers/market-controller'))
 app.use('/images', require('./controllers/images-controller'))
+app.use('/images-assets', require('./controllers/images-assets-controller'))
 app.use('/blogging', require('./controllers/blogging-controller'))
 app.use('/scrapper', require('./controllers/scrapper-controller'))
 app.use('/serpapi', require('./controllers/serpapi-controller'))
 app.use('/aliexpress', require('./controllers/aliexpress-controller'))
+app.use('/sabry-movies-app', require('./controllers/sabry-movies-app-controller'))
 
 // ---------------------  DIVIDER  middleware -------------------------------------------
 app.all('*', (req, res, next) => next(ErrorHandler(res, null, 'Route not found', 404, null)))
@@ -61,5 +64,5 @@ let port = process.env.PORT || 5000
 // // vercel
 // host = "https://node-server-seven-gamma.vercel.app"
 app.listen(port, () => {
-  console.log('Server Started')
+  console.log(`Server Started`)
 })
