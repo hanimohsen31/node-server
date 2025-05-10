@@ -27,6 +27,6 @@ async function Login(req, res) {
   })
 }
 
-router.get('/auth/signup', Signup)
-router.get('/auth/login', Login)
+router.post('/auth/signup', Signup)
+router.post('/auth/login', Login)
 module.exports = router
