@@ -1,0 +1,15 @@
+{
+  "request": {
+    "Id": "openRe7A",
+    "Name": "test 3",
+    "IsPublish": false
+  },
+  "response": {
+    "CorrelationId": "d0ca6117-4cdd-432c-9859-35ca2a0f443c",
+    "Status": true,
+    "ProblemDetails": null,
+    "Data": true,
+    "Metadata": null,
+    "Errors": []
+  }
+}

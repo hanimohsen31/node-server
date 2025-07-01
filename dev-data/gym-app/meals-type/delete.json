@@ -1,0 +1,12 @@
+{
+  "request": "http://localhost:5100/api/v1/MealType/MvbmOeYA",
+  "method": "DELETE",
+  "response": {
+    "CorrelationId": "36c48599-3263-4c04-b26e-41cb15138d3a",
+    "Status": true,
+    "ProblemDetails": null,
+    "Data": false,
+    "Metadata": null,
+    "Errors": []
+  }
+}

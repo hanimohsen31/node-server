@@ -1,0 +1,23 @@
+request :
+
+http://localhost:5100/api/v1/MealCuisines/openRe7A
+
+
+
+response :
+
+
+{
+  "CorrelationId": "670da4bb-903d-46dc-81b5-6cd8aee3674d",
+  "Status": true,
+  "ProblemDetails": null,
+  "Data": {
+    "Id": "openRe7A",
+    "Name": "Snack 3",
+    "Code": "tr-snack 3",
+    "IsPublish": true,
+    "IsInUse": false
+  },
+  "Metadata": null,
+  "Errors": []
+}

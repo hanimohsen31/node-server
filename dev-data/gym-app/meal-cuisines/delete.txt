@@ -1,0 +1,18 @@
+request :
+
+
+curl -X 'DELETE' \
+  'http://localhost:5100/api/v1/MealType/MvbmOeYA' \
+  -H 'accept: */*'
+
+
+response :
+
+{
+  "CorrelationId": "36c48599-3263-4c04-b26e-41cb15138d3a",
+  "Status": true,
+  "ProblemDetails": null,
+  "Data": false,
+  "Metadata": null,
+  "Errors": []
+}

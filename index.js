@@ -22,7 +22,15 @@ process.on('uncaughtException', (err) => {
 const app = express()
 // middleware
 app.use(helmet()) // set security http headers
-app.use(cors()) // allow cors
+// app.use(cors()) // allow cors
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      callback(null, origin) // reflect the request origin
+    },
+    credentials: true,
+  })
+)
 // app.use(express.json()) // body parser
 app.use(express.json({ limit: '3mb' })) // body parser and limit req body to 10 kb
 app.use(sanitize()) // noSql injections security
@@ -52,6 +60,8 @@ app.use('/scrapper', require('./controllers/scrapper-controller'))
 app.use('/serpapi', require('./controllers/serpapi-controller'))
 app.use('/aliexpress', require('./controllers/aliexpress-controller'))
 app.use('/sabry-server', require('./controllers/sabry-server-controller'))
+app.use('/dummy-users', require('./controllers/dummy-users-controller'))
+app.use('/gym-app/api/v1', require('./controllers/gym-app-controller'))
 
 // ---------------------  DIVIDER  middleware -------------------------------------------
 app.all('*', (req, res, next) => next(ErrorHandler(res, null, 'Route not found', 404, null)))

@@ -1,0 +1,110 @@
+[
+  {
+    "Id": "pmbk5ezJ",
+    "Name": "MealType1",
+    "Code": "tr-mealtype1",
+    "Sequence": 10,
+    "Priority": 20,
+    "IsPublish": false,
+    "IsInUse": false
+  },
+  {
+    "Id": "qncj6faK",
+    "Name": "MealType2",
+    "Code": "tr-mealtype2",
+    "Sequence": 20,
+    "Priority": 15,
+    "IsPublish": true,
+    "IsInUse": true
+  },
+  {
+    "Id": "rodk7gbL",
+    "Name": "MealType3",
+    "Code": "tr-mealtype3",
+    "Sequence": 30,
+    "Priority": 10,
+    "IsPublish": true,
+    "IsInUse": false
+  },
+  {
+    "Id": "spel8hcM",
+    "Name": "MealType4",
+    "Code": "tr-mealtype4",
+    "Sequence": 40,
+    "Priority": 5,
+    "IsPublish": false,
+    "IsInUse": true
+  },
+  {
+    "Id": "tqfm9idN",
+    "Name": "MealType5",
+    "Code": "tr-mealtype5",
+    "Sequence": 50,
+    "Priority": 25,
+    "IsPublish": true,
+    "IsInUse": true
+  },
+  {
+    "Id": "urgn0jeO",
+    "Name": "MealType6",
+    "Code": "tr-mealtype6",
+    "Sequence": 60,
+    "Priority": 30,
+    "IsPublish": false,
+    "IsInUse": false
+  },
+  {
+    "Id": "vsho1kfP",
+    "Name": "Breakfast",
+    "Code": "tr-breakfast",
+    "Sequence": 5,
+    "Priority": 100,
+    "IsPublish": true,
+    "IsInUse": true
+  },
+  {
+    "Id": "wtip2lgQ",
+    "Name": "Lunch",
+    "Code": "tr-lunch",
+    "Sequence": 15,
+    "Priority": 90,
+    "IsPublish": true,
+    "IsInUse": false
+  },
+  {
+    "Id": "xujq3mhR",
+    "Name": "Dinner",
+    "Code": "tr-dinner",
+    "Sequence": 25,
+    "Priority": 80,
+    "IsPublish": false,
+    "IsInUse": true
+  },
+  {
+    "Id": "yvkr4niS",
+    "Name": "Snack",
+    "Code": "tr-snack",
+    "Sequence": 35,
+    "Priority": 70,
+    "IsPublish": true,
+    "IsInUse": true
+  },
+  {
+    "Id": "zwls5ojT",
+    "Name": "Dessert",
+    "Code": "tr-dessert",
+    "Sequence": 45,
+    "Priority": 60,
+    "IsPublish": false,
+    "IsInUse": false
+  },
+  {
+    "Id": "axmt6pkU",
+    "Name": "Beverage",
+    "Code": "tr-beverage",
+    "Sequence": 55,
+    "Priority": 50,
+    "IsPublish": true,
+    "IsInUse": true
+  }
+]

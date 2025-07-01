@@ -148,6 +148,7 @@ async function DeleteTour(req, res) {
 }
 
 router.route('').get(ProtectedRoute, GetAllTours).post(PostTour)
+router.route('/all').get(GetAllTours)
 router.route('/top5').get(ProtectedRoute, top5, GetAllTours)
 router.route('/apis-features').get(ProtectedRoute, GetAllToursUsingAPIsFeatures)
 router.route('/tours-stats').get(ProtectedRoute, GetToursStats)

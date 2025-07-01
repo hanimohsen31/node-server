@@ -1,0 +1,14 @@
+request :
+http://localhost:5100/api/v1/MealType/openRe7A/publish
+
+response :
+
+Download
+{
+  "CorrelationId": "f6b7b06c-e065-48f9-aef3-a621e15459d6",
+  "Status": true,
+  "ProblemDetails": null,
+  "Data": true,
+  "Metadata": null,
+  "Errors": []
+}
