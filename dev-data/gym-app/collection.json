@@ -1,0 +1,642 @@
+[
+  {
+    "id": "9qeolaaku0f",
+    "name": "api > Ingredient > {id} > /api/v1/Ingredient/:id",
+    "url": "{{baseUrl}}/api/v1/Ingredient/:id",
+    "method": "PUT",
+    "params": {},
+    "requestBody": {
+      "Id": 93626816,
+      "Name": "incididunt nulla",
+      "IsPublish": true,
+      "GroupIds": [58303913, 2563430],
+      "IngredientSponsers": [
+        { "SponserName": "Ut", "CountryName": "labore irure", "CountryId": 38429727 },
+        { "SponserName": "enim pariatur aliquip esse est", "CountryName": "exercitation", "CountryId": 77664532 }
+      ]
+    },
+    "expectedResponse": {
+      "CorrelationId": "c493598b-4f3e-444c-ab5f-922e9d5d887c",
+      "Status": true,
+      "ProblemDetails": null,
+      "Data": true,
+      "Metadata": null,
+      "Errors": []
+    }
+  },
+  {
+    "id": "e4jr4w9vrwr",
+    "name": "api > Ingredient > {id} > /api/v1/Ingredient/:id",
+    "url": "{{baseUrl}}/api/v1/Ingredient/:id",
+    "method": "DELETE",
+    "params": {},
+    "requestBody": "",
+    "expectedResponse": {
+      "CorrelationId": "53344a3f-5c62-4503-8bd1-7fba0ff75d2e",
+      "Status": true,
+      "ProblemDetails": null,
+      "Data": true,
+      "Metadata": null,
+      "Errors": []
+    }
+  },
+  {
+    "id": "8vt8padpl3x",
+    "name": "api > Ingredient > {id} > /api/v1/Ingredient/:id",
+    "url": "{{baseUrl}}/api/v1/Ingredient/:id",
+    "method": "GET",
+    "params": {},
+    "requestBody": "",
+    "expectedResponse": {
+      "CorrelationId": "231cbee8-e403-45b1-a8b7-e58271aa3bd3",
+      "Status": true,
+      "ProblemDetails": null,
+      "Data": {
+        "Id": 2,
+        "Name": "string",
+        "Code": "tr-string",
+        "Description": "string",
+        "Scalable": true,
+        "DislikesList": true,
+        "Amount": 2,
+        "Energy": 3,
+        "Protein": 4,
+        "Fat": 0,
+        "TotalCarbohydrates": 5,
+        "UnitId": 6,
+        "UnitsDto": { "Name": null, "Short": null, "Code": null, "EquivalentTo": null, "Type": null, "System": null },
+        "SponserCountriesDto": null,
+        "IsPublish": true,
+        "IsInUse": false,
+        "IGroups": [
+          { "Id": 1, "Name": "group1", "Code": "tr-group1", "IsPublish": true, "IsInUse": false, "Children": [] },
+          { "Id": 1, "Name": "group1", "Code": "tr-group1", "IsPublish": true, "IsInUse": false, "Children": [] }
+        ]
+      },
+      "Metadata": null,
+      "Errors": []
+    }
+  },
+  {
+    "id": "6bjwbamb63t",
+    "name": "api > Ingredient > /api/v1/Ingredient",
+    "url": "{{baseUrl}}/api/v1/Ingredient",
+    "method": "POST",
+    "params": {},
+    "requestBody": {
+      "Name": "ad esse",
+      "Description": "et fugiat do ad laborum",
+      "Scalable": true,
+      "DislikesList": false,
+      "Amount": -37061091.590828665,
+      "Energy": -16588160.78721328,
+      "Protein": -26301926.682402104,
+      "Fat": -39715770.72872612,
+      "TotalCarbohydrates": 45781518.831184834,
+      "UnitId": 74723247,
+      "IsPublish": true,
+      "Groups": [-24073886, 39155684],
+      "IngredientSponsers": [
+        { "SponserName": "Excepteur do occaecat nisi", "CountryName": "minim tempor ex", "CountryId": -95515372 },
+        { "SponserName": "n", "CountryName": "eu reprehenderit Excep", "CountryId": 20971607 }
+      ]
+    },
+    "expectedResponse": {
+      "CorrelationId": "a023d338-d5ec-4a23-9ca7-ce237a5a43c0",
+      "Status": true,
+      "ProblemDetails": null,
+      "Data": -1,
+      "Metadata": null,
+      "Errors": []
+    }
+  },
+  {
+    "id": "pumb8p0vyr",
+    "name": "api > Ingredient > /api/v1/Ingredient",
+    "url": "{{baseUrl}}/api/v1/Ingredient?search=qui elit&isPublish=true",
+    "method": "GET",
+    "params": { "search": "qui elit", "isPublish": true },
+    "requestBody": "",
+    "expectedResponse": {
+      "CorrelationId": "3eee4a11-6bf0-4590-8107-775f74f819b9",
+      "Status": true,
+      "ProblemDetails": null,
+      "Data": [
+        {
+          "Id": 1,
+          "Name": "string",
+          "Code": "tr-string",
+          "Description": "string",
+          "Scalable": true,
+          "DislikesList": true,
+          "Amount": 0,
+          "Energy": 0,
+          "Protein": 0,
+          "Fat": 0,
+          "TotalCarbohydrates": 0,
+          "UnitId": 0,
+          "UnitsDto": { "Name": null, "Short": null, "Code": null, "EquivalentTo": null, "Type": null, "System": null },
+          "SponserCountriesDto": [{ "SponserName": "string", "CountryName": "egypt", "CountryId": 0, "IngredientId": 0 }],
+          "IsPublish": true,
+          "IsInUse": false,
+          "IGroups": []
+        },
+        {
+          "Id": 2,
+          "Name": "string",
+          "Code": "tr-string",
+          "Description": "string",
+          "Scalable": true,
+          "DislikesList": true,
+          "Amount": 2,
+          "Energy": 3,
+          "Protein": 4,
+          "Fat": 0,
+          "TotalCarbohydrates": 5,
+          "UnitId": 6,
+          "UnitsDto": { "Name": null, "Short": null, "Code": null, "EquivalentTo": null, "Type": null, "System": null },
+          "SponserCountriesDto": [{ "SponserName": "sponser", "CountryName": "egypt", "CountryId": 0, "IngredientId": 0 }],
+          "IsPublish": true,
+          "IsInUse": false,
+          "IGroups": [{ "Id": 1, "Name": "group1", "Code": "tr-group1", "IsPublish": true, "IsInUse": false, "Children": [] }]
+        }
+      ],
+      "Metadata": { "ResultSet": { "Count": 2, "Limit": 10, "Offset": 0, "TotalPages": 1, "TotalCount": 2 } },
+      "Errors": []
+    }
+  },
+  {
+    "id": "fgis2qxq6ga",
+    "name": "api > IngredientGroups > {id} > /api/v1/IngredientGroups/:id",
+    "url": "{{baseUrl}}/api/v1/IngredientGroups/:id",
+    "method": "PUT",
+    "params": {},
+    "requestBody": { "Id": 10598391, "Name": "adipisicing consectetur occaecat", "IsPublish": false, "GroupIds": [39221259, -42600942] },
+    "expectedResponse": {
+      "CorrelationId": "fa0a3fa7-90e0-4240-9f66-118cb1943e7b",
+      "Status": true,
+      "ProblemDetails": null,
+      "Data": true,
+      "Metadata": null,
+      "Errors": []
+    }
+  },
+  {
+    "id": "uyots0lym5m",
+    "name": "api > IngredientGroups > {id} > /api/v1/IngredientGroups/:id",
+    "url": "{{baseUrl}}/api/v1/IngredientGroups/:id",
+    "method": "DELETE",
+    "params": {},
+    "requestBody": "",
+    "expectedResponse": {
+      "CorrelationId": "cfa3ecaa-a50f-4766-94cf-f89fbb4d3f5f",
+      "Status": true,
+      "ProblemDetails": null,
+      "Data": true,
+      "Metadata": null,
+      "Errors": []
+    }
+  },
+  {
+    "id": "jzgnpivbzxa",
+    "name": "api > IngredientGroups > {id} > /api/v1/IngredientGroups/:id",
+    "url": "{{baseUrl}}/api/v1/IngredientGroups/:id",
+    "method": "GET",
+    "params": {},
+    "requestBody": "",
+    "expectedResponse": {
+      "CorrelationId": "9f8ab30c-a8c5-4a0f-aee6-f084b329a418",
+      "Status": true,
+      "ProblemDetails": null,
+      "Data": { "Id": 1, "Name": "group1", "Code": "tr-group1", "IsPublish": true, "IsInUse": false, "Children": [] },
+      "Metadata": null,
+      "Errors": []
+    }
+  },
+  {
+    "id": "4q6qgh4igfn",
+    "name": "api > IngredientGroups > /api/v1/IngredientGroups",
+    "url": "{{baseUrl}}/api/v1/IngredientGroups",
+    "method": "POST",
+    "params": {},
+    "requestBody": { "Name": "aute consequat sint id", "IsPublish": false, "GroupIds": [-90221454, 50463201] },
+    "expectedResponse": {
+      "CorrelationId": "236cdf16-8886-4185-9232-0707b2c8852e",
+      "Status": true,
+      "ProblemDetails": null,
+      "Data": 2,
+      "Metadata": null,
+      "Errors": []
+    }
+  },
+  {
+    "id": "bvslprbc187",
+    "name": "api > IngredientGroups > /api/v1/IngredientGroups",
+    "url": "{{baseUrl}}/api/v1/IngredientGroups?search=qui elit&isPublish=true",
+    "method": "GET",
+    "params": { "search": "qui elit", "isPublish": true },
+    "requestBody": "",
+    "expectedResponse": {
+      "CorrelationId": "4bbb053d-e856-40a5-a867-0df621f7f761",
+      "Status": true,
+      "ProblemDetails": null,
+      "Data": [
+        { "Id": 1, "Name": "group1", "Code": "tr-group1", "IsPublish": true, "IsInUse": false, "Children": [] },
+        { "Id": 2, "Name": "strin22g", "Code": "tr-strin22g", "IsPublish": true, "IsInUse": false, "Children": [] },
+        { "Id": 3, "Name": "string", "Code": "tr-string", "IsPublish": true, "IsInUse": false, "Children": [] }
+      ],
+      "Metadata": null,
+      "Errors": []
+    }
+  },
+  {
+    "id": "xfd0i90mym",
+    "name": "api > MealCuisines > Add",
+    "url": "{{baseUrl}}/api/v1/MealCuisines",
+    "method": "POST",
+    "params": {},
+    "requestBody": { "Name": "officia amet dolor", "IsPublish": true },
+    "expectedResponse": {
+      "CorrelationId": "41306987-284e-4660-b1e8-1ac2a6951074",
+      "Status": true,
+      "ProblemDetails": null,
+      "Data": "openRe7A",
+      "Metadata": null,
+      "Errors": []
+    }
+  },
+  {
+    "id": "a6iuqvp12o4",
+    "name": "api > MealCuisines > Get All",
+    "url": "{{baseUrl}}/api/v1/MealCuisines?search=qui elit&isPublish=true&pageIndex=60618301&pageSize=60618301",
+    "method": "GET",
+    "params": { "search": "qui elit", "isPublish": true, "pageIndex": "60618301", "pageSize": "60618301" },
+    "requestBody": "",
+    "expectedResponse": {
+      "CorrelationId": "1a422d93-1289-40d2-9c0c-b714a01640a6",
+      "Status": true,
+      "ProblemDetails": null,
+      "Data": [
+        { "Id": "pmbk5ezJ", "Name": "MealType1", "Code": "tr-mealtype1", "Sequence": 10, "Priority": 20, "IsPublish": false, "IsInUse": false }
+      ],
+      "Metadata": { "ResultSet": { "Count": 1, "Limit": 10, "Offset": 0, "TotalPages": 1, "TotalCount": 1 } },
+      "Errors": []
+    }
+  },
+  {
+    "id": "3sddac8vvxc",
+    "name": "api > MealCuisines > Puplish",
+    "url": "{{baseUrl}}/api/v1/MealCuisines/:id/publish",
+    "method": "PUT",
+    "params": {},
+    "requestBody": "",
+    "expectedResponse": {
+      "CorrelationId": "f6b7b06c-e065-48f9-aef3-a621e15459d6",
+      "Status": true,
+      "ProblemDetails": null,
+      "Data": true,
+      "Metadata": null,
+      "Errors": []
+    }
+  },
+  {
+    "id": "s84rfh1j7v",
+    "name": "api > MealCuisines > Delete",
+    "url": "{{baseUrl}}/api/v1/MealCuisines/:id",
+    "method": "DELETE",
+    "params": {},
+    "requestBody": "",
+    "expectedResponse": {
+      "CorrelationId": "36c48599-3263-4c04-b26e-41cb15138d3a",
+      "Status": true,
+      "ProblemDetails": null,
+      "Data": false,
+      "Metadata": null,
+      "Errors": []
+    }
+  },
+  {
+    "id": "1pc718h9zuj",
+    "name": "api > MealCuisines > GetDetails",
+    "url": "{{baseUrl}}/api/v1/MealCuisines/:id",
+    "method": "GET",
+    "params": {},
+    "requestBody": "",
+    "expectedResponse": {
+      "CorrelationId": "670da4bb-903d-46dc-81b5-6cd8aee3674d",
+      "Status": true,
+      "ProblemDetails": null,
+      "Data": { "Id": "openRe7A", "Name": "Snack 3", "Code": "tr-snack 3", "IsPublish": true, "IsInUse": false },
+      "Metadata": null,
+      "Errors": []
+    }
+  },
+  {
+    "id": "6oko8keclxx",
+    "name": "api > MealCuisines > Update",
+    "url": "{{baseUrl}}/api/v1/MealCuisines/update",
+    "method": "PUT",
+    "params": {},
+    "requestBody": { "Id": -63140031, "Name": "dolor ad proident volupt", "IsPublish": true },
+    "expectedResponse": {
+      "CorrelationId": "d0ca6117-4cdd-432c-9859-35ca2a0f443c",
+      "Status": true,
+      "ProblemDetails": null,
+      "Data": true,
+      "Metadata": null,
+      "Errors": []
+    }
+  },
+  {
+    "id": "ypkbw2l3rn",
+    "name": "api > MealType > Add MealType",
+    "url": "{{baseUrl}}/api/v1/MealType",
+    "method": "POST",
+    "params": {},
+    "requestBody": { "Name": "magna Duis in", "Sequence": -65048431, "Priority": -73150490, "IsPublish": true },
+    "expectedResponse": {
+      "CorrelationId": "bd13672f-a6e8-4c67-80f7-9c9a80293f72",
+      "Status": true,
+      "ProblemDetails": null,
+      "Data": "MvbmOeYA",
+      "Metadata": null,
+      "Errors": []
+    }
+  },
+  {
+    "id": "otwrc3ri1b",
+    "name": "api > MealType > Get All Meal Types",
+    "url": "{{baseUrl}}/api/v1/MealType?search=qui elit&isPublish=true&pageIndex=60618301&pageSize=60618301",
+    "method": "GET",
+    "params": { "search": "qui elit", "isPublish": true, "pageIndex": "60618301", "pageSize": "60618301" },
+    "requestBody": "",
+    "expectedResponse": {
+      "CorrelationId": "1a422d93-1289-40d2-9c0c-b714a01640a6",
+      "Status": true,
+      "ProblemDetails": null,
+      "Data": [
+        { "Id": "pmbk5ezJ", "Name": "MealType1", "Code": "tr-mealtype1", "Sequence": 10, "Priority": 20, "IsPublish": false, "IsInUse": false }
+      ],
+      "Metadata": { "ResultSet": { "Count": 1, "Limit": 10, "Offset": 0, "TotalPages": 1, "TotalCount": 1 } },
+      "Errors": []
+    }
+  },
+  {
+    "id": "n3nq1atpd5b",
+    "name": "api > MealType > Update Meal Type",
+    "url": "{{baseUrl}}/api/v1/MealType/update",
+    "method": "PUT",
+    "params": {},
+    "requestBody": { "Id": 86900, "Name": "ipsum exercitation sed", "Sequence": -84296537, "Priority": 17009474, "IsPublish": true },
+    "expectedResponse": {
+      "CorrelationId": "d0ca6117-4cdd-432c-9859-35ca2a0f443c",
+      "Status": true,
+      "ProblemDetails": null,
+      "Data": true,
+      "Metadata": null,
+      "Errors": []
+    }
+  },
+  {
+    "id": "2z9sejfo882",
+    "name": "api > MealType > Puplish Meal Type",
+    "url": "{{baseUrl}}/api/v1/MealType/:id/publish",
+    "method": "PUT",
+    "params": {},
+    "requestBody": "",
+    "expectedResponse": {
+      "CorrelationId": "f6b7b06c-e065-48f9-aef3-a621e15459d6",
+      "Status": true,
+      "ProblemDetails": null,
+      "Data": true,
+      "Metadata": null,
+      "Errors": []
+    }
+  },
+  {
+    "id": "2h7cin6btv2",
+    "name": "api > MealType > Delete Meal Type",
+    "url": "{{baseUrl}}/api/v1/MealType/:id",
+    "method": "DELETE",
+    "params": {},
+    "requestBody": "",
+    "expectedResponse": {
+      "CorrelationId": "36c48599-3263-4c04-b26e-41cb15138d3a",
+      "Status": true,
+      "ProblemDetails": null,
+      "Data": false,
+      "Metadata": null,
+      "Errors": []
+    }
+  },
+  {
+    "id": "rt9xqt54hxg",
+    "name": "api > MealType > GetMealTypeById",
+    "url": "{{baseUrl}}/api/v1/MealType/:id",
+    "method": "GET",
+    "params": {},
+    "requestBody": "",
+    "expectedResponse": {
+      "CorrelationId": "670da4bb-903d-46dc-81b5-6cd8aee3674d",
+      "Status": true,
+      "ProblemDetails": null,
+      "Data": { "Id": "MvbmOeYA", "Name": "Snack 3", "Code": "tr-snack 3", "Sequence": 8, "Priority": 3, "IsPublish": true, "IsInUse": false },
+      "Metadata": null,
+      "Errors": []
+    }
+  },
+  {
+    "id": "2ztncy3vzg",
+    "name": "api > Recipes > Add Recipe",
+    "url": "{{baseUrl}}/api/v1/Recipes",
+    "method": "POST",
+    "params": {},
+    "requestBody": {
+      "Name": "sed nisi dolore sit",
+      "Time": "enim est ut sit",
+      "Description": "cupidatat officia",
+      "IsTreatMeal": false,
+      "RecipeImage": "dolor",
+      "IsPublish": false,
+      "Videos": [{ "VideoUrl": "ad qui aliquip est" }, { "VideoUrl": "sed occaecat tempor" }],
+      "Ingredients": [
+        {
+          "IngredientId": -53509881,
+          "BaseAmount": -58564972.27389017,
+          "MinAmount": 68904730.03921208,
+          "MaxAmount": 40326538.69075671,
+          "RoundTo": 83543136,
+          "SubstituteIngredientIds": [49235427, -15528388]
+        },
+        {
+          "IngredientId": -58783873,
+          "BaseAmount": 74437799.5586769,
+          "MinAmount": -30342970.571656957,
+          "MaxAmount": -14253384.767707005,
+          "RoundTo": 61397325,
+          "SubstituteIngredientIds": [-87672070, 94756726]
+        }
+      ],
+      "PreparationSteps": [
+        { "StepNumber": 27460865, "Instruction": "et deserunt anim" },
+        { "StepNumber": -87996901, "Instruction": "ea ut fugiat et" }
+      ]
+    },
+    "expectedResponse": ""
+  },
+  {
+    "id": "hjgt61e4k3w",
+    "name": "api > Recipes > GetAllRecipes",
+    "url": "{{baseUrl}}/api/v1/Recipes?search=&isPublish=false&ingredients=7&ingredients=8&pageIndex=1&pageSize=10",
+    "method": "GET",
+    "params": { "search": "", "isPublish": false, "ingredients": "8", "pageIndex": "1", "pageSize": "10" },
+    "requestBody": "",
+    "expectedResponse": ""
+  },
+  {
+    "id": "ua4l0omr67",
+    "name": "api > Recipes > Publish Recipe",
+    "url": "{{baseUrl}}/api/v1/Recipes/:id/publish",
+    "method": "PUT",
+    "params": {},
+    "requestBody": "",
+    "expectedResponse": ""
+  },
+  {
+    "id": "ox5yflfczg",
+    "name": "api > Recipes > UnPublish Recipe",
+    "url": "{{baseUrl}}/api/v1/Recipes/:id/UnPublish",
+    "method": "PUT",
+    "params": {},
+    "requestBody": "",
+    "expectedResponse": ""
+  },
+  {
+    "id": "udrjc3hc2d",
+    "name": "api > Recipes > Delete Recipe",
+    "url": "{{baseUrl}}/api/v1/Recipes/:id",
+    "method": "DELETE",
+    "params": {},
+    "requestBody": "",
+    "expectedResponse": ""
+  },
+  {
+    "id": "yp96lh8j9sg",
+    "name": "api > Recipes > GetRecipeDetails",
+    "url": "{{baseUrl}}/api/v1/Recipes/:id/details",
+    "method": "GET",
+    "params": {},
+    "requestBody": "",
+    "expectedResponse": ""
+  },
+  {
+    "id": "aqd1fm0hpmc",
+    "name": "api > Recipes > Update Recipe",
+    "url": "{{baseUrl}}/api/v1/Recipes/update",
+    "method": "PUT",
+    "params": {},
+    "requestBody": {
+      "Id": 15188527,
+      "Name": "esse exercitation cillum voluptate",
+      "Time": "dolore aliquip non Lorem",
+      "Description": "ullamco nulla occaecat",
+      "IsTreatMeal": false,
+      "RecipeImage": "mollit dolore ali",
+      "IsPublish": false,
+      "Videos": [{ "VideoUrl": "dolor" }, { "VideoUrl": "esse voluptate in id" }],
+      "Ingredients": [
+        {
+          "IngredientId": -91977348,
+          "BaseAmount": -95702366.03893352,
+          "MinAmount": -88518290.17833479,
+          "MaxAmount": -69260646.5542569,
+          "RoundTo": -83054506,
+          "SubstituteIngredientIds": [-71439283, -24631742]
+        },
+        {
+          "IngredientId": -86577822,
+          "BaseAmount": -97559126.03047618,
+          "MinAmount": -29091754.931300744,
+          "MaxAmount": -27093294.548437715,
+          "RoundTo": -75247602,
+          "SubstituteIngredientIds": [-901616, 4928252]
+        }
+      ],
+      "PreparationSteps": [
+        { "StepNumber": 53782977, "Instruction": "cupidatat ullamco" },
+        { "StepNumber": -80985918, "Instruction": "dolor ut" }
+      ]
+    },
+    "expectedResponse": ""
+  },
+  {
+    "id": "e11mt4f3cje",
+    "name": "api > Unit > /api/v1/Unit",
+    "url": "{{baseUrl}}/api/v1/Unit?search=qui elit",
+    "method": "GET",
+    "params": { "search": "qui elit" },
+    "requestBody": "",
+    "expectedResponse": {
+      "CorrelationId": "41860750-be32-41b9-aa5f-09ce98979b80",
+      "Status": true,
+      "ProblemDetails": null,
+      "Data": [{ "Name": "test", "Short": "test", "Code": "tr-test", "EquivalentTo": "10", "Type": "type", "System": "test" }],
+      "Metadata": null,
+      "Errors": []
+    }
+  },
+  {
+    "id": "iqbclkf3n0o",
+    "name": "api > Documents > Upload Document",
+    "url": "{{baseUrl}}/api/v1/Documents/upload",
+    "method": "POST",
+    "params": {},
+    "requestBody": { "DocumentType": "1", "FilesEnum": "2" },
+    "expectedResponse": ""
+  },
+  {
+    "id": "txwe1acximg",
+    "name": "api > Documents > Delete Document",
+    "url": "{{baseUrl}}/api/v1/Documents/delete/:id",
+    "method": "DELETE",
+    "params": {},
+    "requestBody": "",
+    "expectedResponse": ""
+  },
+  {
+    "id": "n9grjdz5uzr",
+    "name": "api > Hashids > Encode > Hashids-Encode",
+    "url": "{{baseUrl}}/api/v1/Hashids/Encode/:requestId",
+    "method": "GET",
+    "params": {},
+    "requestBody": "",
+    "expectedResponse": ""
+  },
+  {
+    "id": "szwxgwj4y3g",
+    "name": "api > Hashids > Decode > Hashids-Decode",
+    "url": "{{baseUrl}}/api/v1/Hashids/Decode/:requestId",
+    "method": "GET",
+    "params": {},
+    "requestBody": "",
+    "expectedResponse": ""
+  },
+  {
+    "id": "vkxmsqlpqbs",
+    "name": "api > Lookups > meal-types > get-meal-types",
+    "url": "{{baseUrl}}/api/v1/Lookups/meal-types",
+    "method": "GET",
+    "params": {},
+    "requestBody": "",
+    "expectedResponse": ""
+  },
+  {
+    "id": "nwm8w8k0g6",
+    "name": "api > Lookups > meal-cuisines > get-meal-cuisines",
+    "url": "{{baseUrl}}/api/v1/Lookups/meal-cuisines",
+    "method": "GET",
+    "params": {},
+    "requestBody": "",
+    "expectedResponse": ""
+  }
+]
