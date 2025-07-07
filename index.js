@@ -62,6 +62,7 @@ app.use('/aliexpress', require('./controllers/aliexpress-controller'))
 app.use('/sabry-server', require('./controllers/sabry-server-controller'))
 app.use('/dummy-users', require('./controllers/dummy-users-controller'))
 app.use('/gym-app/api/v1', require('./controllers/gym-app-controller'))
+app.use('/tunneling', require('./controllers/tunneling-controller'))
 
 // ---------------------  DIVIDER  middleware -------------------------------------------
 app.all('*', (req, res, next) => next(ErrorHandler(res, null, 'Route not found', 404, null)))
