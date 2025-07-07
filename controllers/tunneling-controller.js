@@ -3,22 +3,17 @@ const express = require('express')
 const router = express.Router()
 
 // Proxy controller function
-async function ProxyController(req, res) {
+async function AllHTTPMethodsProxyController(req, res) {
   try {
     // Extract the target URL from the request path
     const fullPath = req.originalUrl
-    const prefix = '/tunnling/'
+    const prefix = '/tunneling/'
     const targetUrl = fullPath.substring(fullPath.indexOf(prefix) + prefix.length)
-
-    if (!targetUrl) {
-      return res.status(400).json({ error: 'Target URL is missing' })
-    }
-
+    if (!targetUrl) return res.status(400).json({ error: 'Target URL is missing' })
     // Validate the target URL format
     if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
       return res.status(400).json({ error: 'Invalid target URL format' })
     }
-
     // Forward the request to the .NET server
     const response = await axios({
       method: req.method,
@@ -36,15 +31,15 @@ async function ProxyController(req, res) {
       responseType: 'stream',
       validateStatus: () => true, // Accept all status codes
     })
-
     // Forward response headers
-    res.status(response.status)
+    res.status(response.data.res)
+    res.status(response.data.response)
     Object.entries(response.headers).forEach(([key, value]) => {
       if (key !== 'content-encoding' && key !== 'transfer-encoding') {
         res.set(key, value)
       }
     })
-
+    // console.log('RESPONDED', response.status)
     // Forward the response body
     response.data.pipe(res)
   } catch (error) {
@@ -57,60 +52,5 @@ async function ProxyController(req, res) {
   }
 }
 
-// Handle other HTTP methods (POST, PUT, DELETE, etc.)
-async function AllHTTPMethodsController(req, res) {
-  try {
-    // Extract the target URL from the request path
-    const fullPath = req.originalUrl
-    const prefix = '/tunnling/'
-    const targetUrl = fullPath.substring(fullPath.indexOf(prefix) + prefix.length)
-
-    if (!targetUrl) {
-      return res.status(400).json({ error: 'Target URL is missing' })
-    }
-
-    // Validate the target URL format
-    if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
-      return res.status(400).json({ error: 'Invalid target URL format' })
-    }
-
-    // Forward the request to the .NET server
-    const response = await axios({
-      method: req.method,
-      url: targetUrl,
-      data: req.body,
-      headers: {
-        ...req.headers,
-        'host': new URL(targetUrl).host,
-        'origin': new URL(targetUrl).origin,
-        'accept-encoding': 'identity',
-        'content-length': req.headers['content-length'],
-      },
-      params: req.query,
-      responseType: 'stream',
-      validateStatus: () => true,
-    })
-
-    // Forward response headers
-    res.status(response.status)
-    Object.entries(response.headers).forEach(([key, value]) => {
-      if (key !== 'content-encoding' && key !== 'transfer-encoding') {
-        res.set(key, value)
-      }
-    })
-
-    // Forward the response body
-    response.data.pipe(res)
-  } catch (error) {
-    console.error('Proxy error:', error)
-    res.status(500).json({
-      error: 'Proxy error',
-      message: error.message,
-      details: error.response?.data || null,
-    })
-  }
-}
-
-router.route('/').get(ProxyController)
-router.route('/').post(AllHTTPMethodsController).put(AllHTTPMethodsController).delete(AllHTTPMethodsController)
+router.route('*').all(AllHTTPMethodsProxyController)
 module.exports = router
