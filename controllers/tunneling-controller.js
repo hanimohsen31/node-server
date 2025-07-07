@@ -23,7 +23,6 @@ async function AllHTTPMethodsProxyController(req, res) {
         ...req.headers,
         'host': new URL(targetUrl).host, // Update host header
         'origin': new URL(targetUrl).origin, // Update origin header
-        // Remove headers that shouldn't be forwarded
         'accept-encoding': 'identity',
         'content-length': req.headers['content-length'],
       },
@@ -32,14 +31,11 @@ async function AllHTTPMethodsProxyController(req, res) {
       validateStatus: () => true, // Accept all status codes
     })
     // Forward response headers
-    res.status(response.data.res)
-    res.status(response.data.response)
     Object.entries(response.headers).forEach(([key, value]) => {
       if (key !== 'content-encoding' && key !== 'transfer-encoding') {
         res.set(key, value)
       }
     })
-    // console.log('RESPONDED', response.status)
     // Forward the response body
     response.data.pipe(res)
   } catch (error) {
