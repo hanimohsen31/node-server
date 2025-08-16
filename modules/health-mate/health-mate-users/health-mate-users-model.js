@@ -69,7 +69,7 @@ const userShcema = new mongoose.Schema(
       type: String,
       // enum: ['superAdmin', 'admin', 'moderator', 'user', 'client', 'capten', 'gym'],
       enum: ['gym', 'trainer', 'trainee'],
-      default: 'user',
+      default: 'trainee',
     },
     project: {
       type: String,

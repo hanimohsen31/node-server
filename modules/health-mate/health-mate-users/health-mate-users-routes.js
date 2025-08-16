@@ -84,6 +84,53 @@ async function Login(req, res) {
   }
 }
 
+// Login
+async function CheckAuth(req, res) {
+  try {
+    const authHeader = req.headers.authorization
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return ErrorHandler(res, null, 'Token missing', 401, 'tk1')
+    }
+    const token = authHeader.split(' ')[1]
+    // Verify token
+    let decoded
+    try {
+      decoded = jwt.verify(token, process.env.JWT_KEY)
+    } catch (err) {
+      return ErrorHandler(res, err, 'Invalid or expired token', 401, 'tk2')
+    }
+    // Find user by decoded id
+    const user = await User.findById(decoded.id)
+    if (!user) {
+      return ErrorHandler(res, null, 'User not found', 404, 'tk3')
+    }
+    // Construct the same response as login
+    let userData = {
+      id: user._id,
+      ...user._doc,
+      token: token, // return the same token back
+    }
+    // Remove sensitive fields
+    delete userData.password
+    delete userData._id
+    delete userData.__v
+
+    return res.status(200).json({
+      message: 'Token valid',
+      data: userData,
+    })
+  } catch (err) {
+    ErrorHandler(res, err, 'Token validation failed', 400, 'tk4')
+    // if (err.name === 'JsonWebTokenError') {
+    //   return ErrorHandler(res, err, 'Invalid token', 401, 'tv4')
+    // }
+    // if (err.name === 'TokenExpiredError') {
+    //   return ErrorHandler(res, err, 'Token expired', 401, 'tv5')
+    // }
+    // ErrorHandler(res, err, 'Error validating token', 500, 'tv6')
+  }
+}
+
 // forget password
 async function ForgetPassword(req, res) {
   // find user by email
@@ -165,6 +212,7 @@ router.route('/signup').post(Signup)
 router.route('/login').post(Login)
 // TODO
 router.route('/forget-password').post(ForgetPassword)
+router.route('/check-auth').get(CheckAuth)
 router.route('/reset-password/:token').patch(RestPassword)
 router.route('/update-password').patch(ProtectedRoute, UpdatePassword)
 module.exports = router
