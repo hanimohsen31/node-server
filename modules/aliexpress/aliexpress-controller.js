@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const AliExpress = require('../modals/aliexpress-modal')
+const AliExpress = require('./aliexpress-modal')
 
 // create
 async function UpdateProductsBulk(req, res) {

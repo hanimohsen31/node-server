@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const ErrorHandler = require('../utils/ErrorHandler')
+const ErrorHandler = require('../../utils/ErrorHandler')
 const sharp = require('sharp')
 const multer = require('multer')
 const path = require('path')

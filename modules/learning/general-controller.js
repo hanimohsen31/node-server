@@ -1,19 +1,13 @@
 const express = require('express')
 const router = express.Router()
-const Tour = require('../modals/tours-modal')
-const APIsFeatures = require('../utils/APIsFeatures')
-const ProtectedRoute = require('../utils/ProtectedRoute')
-const RestrictTo = require('../utils/RestrictTo')
-const ErrorHandler = require('../utils/ErrorHandler')
-
-function top5(req, res, next) {
-  req.query.pageCount = 5
-  req.query.sort = '-price'
-  next()
-}
+const Tour = require('../tours/tours-modal')
+const APIsFeatures = require('../../utils/APIsFeatures')
+const ProtectedRoute = require('../../utils/ProtectedRoute')
+const RestrictTo = require('../../utils/RestrictTo')
+const ErrorHandler = require('../../utils/ErrorHandler')
 
 // get all
-async function GetAllTours(req, res) {
+async function GetAllPosts(req, res) {
   // console.log(req.query)
   let reqQuery = { ...req.query }
   let excluded = ['pageNumber', 'pageCount', 'sort', 'fields']
@@ -60,49 +54,8 @@ async function GetAllTours(req, res) {
   }
 }
 
-async function GetAllToursUsingAPIsFeatures(req, res) {
-  try {
-    const features = new APIsFeatures(Tour.find(), req.query).filter().sort().fields().paging()
-    const tours = await features.query
-    res.status(200).json({ message: 'Tours', data: tours, length: tours.length })
-  } catch (err) {
-    res.status(418).json({ message: 'No Tours Found', data: null, error: err })
-  }
-}
-
-async function GetToursStats(req, res) {
-  try {
-    const stats = await Tour.aggregate([
-      {
-        $match: { ratingAvrage: { $gte: 4.5 } },
-      },
-      {
-        $group: {
-          // this will get all documents in one group
-          // _id: null,
-          // also you can use field
-          _id: '$difficulty',
-          toursNum: { $sum: 1 }, // add 1 for each document to the counter
-          numRating: { $sum: '$ratingQuantity' },
-          avgRating: { $avg: '$ratingAvrage' },
-          avgPrice: { $avg: '$price' },
-          minPrice: { $min: '$price' },
-          maxPrice: { $max: '$price' },
-        },
-      },
-      {
-        // only able to sort by props in $group
-        $sort: { avgPrice: 1 }, // 1 for acc
-      },
-    ])
-    res.status(200).json({ message: 'Tours', data: stats })
-  } catch (err) {
-    res.status(418).json({ message: 'Error in aggregate', data: null, error: err })
-  }
-}
-
 // get by id
-async function GetToursById(req, res) {
+async function GetPostById(req, res) {
   let id = req.params.id
   try {
     let tour = await Tour.findById(id)
@@ -114,7 +67,7 @@ async function GetToursById(req, res) {
 }
 
 // create
-async function PostTour(req, res) {
+async function PostPost(req, res) {
   let body = req.body
   try {
     let newTour = await Tour.create(body)
@@ -125,7 +78,7 @@ async function PostTour(req, res) {
 }
 
 // update
-async function PatchTour(req, res) {
+async function PatchPost(req, res) {
   let id = req.params.id
   let data = req.body
   try {
@@ -137,7 +90,7 @@ async function PatchTour(req, res) {
 }
 
 // delete
-async function DeleteTour(req, res) {
+async function DeletePost(req, res) {
   let id = req.params.id
   try {
     let tour = await Tour.findByIdAndDelete(id)
@@ -148,9 +101,5 @@ async function DeleteTour(req, res) {
 }
 
 router.route('').get(ProtectedRoute, GetAllTours).post(PostTour)
-router.route('/all').get(GetAllTours)
-router.route('/top5').get(ProtectedRoute, top5, GetAllTours)
-router.route('/apis-features').get(ProtectedRoute, GetAllToursUsingAPIsFeatures)
-router.route('/tours-stats').get(ProtectedRoute, GetToursStats)
 router.route('/:id').get(ProtectedRoute, GetToursById).patch(ProtectedRoute, RestrictTo('admin'), PatchTour).delete(ProtectedRoute, RestrictTo('admin'), DeleteTour)
 module.exports = router

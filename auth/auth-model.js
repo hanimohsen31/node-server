@@ -1,8 +1,9 @@
 const mongoose = require('mongoose')
 const validator = require('validator')
 const bcryptjs = require('bcryptjs')
+const AuthDB = mongoose.createConnection(process.env.MONGO_CONNECT_URI + 'identity', {})
 
-const userScema = new mongoose.Schema(
+const userShcema = new mongoose.Schema(
   {
     username: {
       type: String,
@@ -23,11 +24,8 @@ const userScema = new mongoose.Schema(
       unique: true,
       trim: true,
     },
-    image: {
-      type: String,
-      default: 'public/images/user.webp',
-    },
-    // password
+    image: String,
+    // ---------------------- password ------------------------------
     password: {
       type: String,
       required: [true, 'Password required'],
@@ -46,7 +44,10 @@ const userScema = new mongoose.Schema(
       },
       select: false,
     },
-    // Subscription
+    passwordChangedAt: Date,
+    passwordResetToken: String,
+    PasswordResetExpiration: Date,
+    // ---------------------- Subscription --------------------------
     subscriptionStartDate: Date,
     subscriptionEndDate: Date,
     subscriptionActive: {
@@ -56,28 +57,26 @@ const userScema = new mongoose.Schema(
     subscriptionPlan: {
       type: String,
       enum: {
-        values: ['plan1', 'plan2', 'plan3'],
+        values: ['plan1', 'plan2', 'plan3', 'plan4'],
         message: 'Plan wrong',
       },
       default: 'plan1',
     },
-    passwordChangedAt: Date,
-    role: {
-      type: String,
-      enum: ['user', 'moderator', 'admin'],
-      default: 'user',
-    },
-    passwordResetToken: String,
-    PasswordResetExpiration: Date,
     activeAccount: {
       type: Boolean,
       default: true,
       select: false,
     },
     modules: Array,
+    // ---------------------- password ------------------------------
+    role: {
+      type: String,
+      enum: ['superAdmin', 'admin', 'moderator', 'user', 'client', 'capten', 'gym'],
+      default: 'user',
+    },
     project: {
       type: String,
-      enum: ['general', 'onix', 'omra'],
+      enum: ['general', 'onix', 'omra', 'health'],
     },
   },
   {
@@ -87,38 +86,36 @@ const userScema = new mongoose.Schema(
 )
 
 // document middleware
-userScema.pre('save', async function (next) {
+userShcema.pre('save', async function (next) {
   if (!this.isModified('password')) return next()
   this.password = await bcryptjs.hash(this.password, 12)
   this.confirmPassword = null
   next()
 })
 
-userScema.pre('save', async function (next) {
+userShcema.pre('save', async function (next) {
   if (!this.isModified('password') || this.isNew) return next()
   this.passwordChangedAt = Date.now() - 1000
   next()
 })
 
-userScema.pre('save', async function (next) {
+userShcema.pre('save', async function (next) {
   this.modules = ['default']
   next()
 })
 
 // schema methods
-userScema.methods.correctPassword = async function (bodyPass, mongoPass) {
+userShcema.methods.correctPassword = async function (bodyPass, mongoPass) {
   return await bcryptjs.compare(bodyPass, mongoPass)
 }
 
-userScema.methods.changePasswordAfterCreatingToken = function (jwtTimeStamp) {
-  // console.log(this.passwordChangedAt)
+userShcema.methods.changePasswordAfterCreatingToken = function (jwtTimeStamp) {
   if (this.passwordChangedAt) {
     const changeTime = parseInt(this.passwordChangedAt.getTime() / 1000, 10)
-    // console.log(jwtTimeStamp, changeTime)
     return jwtTimeStamp < changeTime
   }
   return false
 }
 
-const User = mongoose.model('User', userScema)
+const User = AuthDB.model('User', userShcema)
 module.exports = User

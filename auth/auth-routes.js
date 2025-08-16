@@ -1,15 +1,14 @@
-const express = require('express')
-const router = express.Router()
-const User = require('../modals/users-modal')
-// const APIsFeatures = require('../utils/APIsFeatures')
-const ErrorHandler = require('../utils/ErrorHandler')
-const SendEmail = require('../utils/SendEmail')
-const jwt = require('jsonwebtoken')
 const crypto = require('crypto')
-const ProtectedRoute = require('../utils/ProtectedRoute')
+const express = require('express')
+const jwt = require('jsonwebtoken')
+const User = require('./auth-model')
+const SendEmail = require('../utils/SendEmail')
+const ErrorHandler = require('../utils/ErrorHandler')
+const ProtectedRoute = require('./ProtectedRoute')
+const router = express.Router()
 
 function createToken(userData) {
-  try{
+  try {
     let payload = {
       id: userData._id,
       username: userData?.fullName,
@@ -19,8 +18,8 @@ function createToken(userData) {
     }
     const token = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: process.env.EXPIRATION })
     return token
-  }catch(err){
-    console.log("roken func err",err)
+  } catch (err) {
+    console.log('roken func err', err)
     return null
   }
 }

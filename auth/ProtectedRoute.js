@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
-const ErrorHandler = require('./ErrorHandler')
-const User = require('../modals/users-modal')
+const ErrorHandler = require('../utils/ErrorHandler')
+const User = require('./auth-model')
 
 async function ProtectedRoute(req, res, next) {
   let token = ''

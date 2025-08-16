@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const Blogging = require('../modals/blogging-modal')
+const Blogging = require('./blogging-modal')
 
 // Get All Blogs
 async function GetAllBlogs(req, res) {

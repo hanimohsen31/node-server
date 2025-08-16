@@ -1,15 +1,15 @@
-const express = require('express')
-const cors = require('cors')
-const morgan = require('morgan')
-const mongoose = require('mongoose')
+// const { swaggerUi, swaggerSpec } = require('./modules/swagger/swagger')
 const ErrorHandler = require('./utils/ErrorHandler')
-const rateLimit = require('express-rate-limit')
-const helmet = require('helmet')
 const sanitize = require('express-mongo-sanitize')
+const rateLimit = require('express-rate-limit')
+const express = require('express')
+const mongoose = require('mongoose')
+const helmet = require('helmet')
 const xss = require('xss-clean')
-const hpp = require('hpp')
+const morgan = require('morgan')
 const dotenv = require('dotenv')
-
+const cors = require('cors')
+const hpp = require('hpp')
 dotenv.config({ path: './.env' }) // environment variables
 // ---------------------  DIVIDER  restarting app ---------------------------------------
 process.on('uncaughtException', (err) => {
@@ -22,16 +22,7 @@ process.on('uncaughtException', (err) => {
 const app = express()
 // middleware
 app.use(helmet()) // set security http headers
-// app.use(cors()) // allow cors
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      callback(null, origin) // reflect the request origin
-    },
-    credentials: true,
-  })
-)
-// app.use(express.json()) // body parser
+app.use(cors({ origin: '*' })) // allow cors
 app.use(express.json({ limit: '3mb' })) // body parser and limit req body to 10 kb
 app.use(sanitize()) // noSql injections security
 app.use(xss()) // clean html data security
@@ -42,27 +33,13 @@ app.use(express.static(`${__dirname}/dev-assets`)) // serving static path
 app.use(rateLimit({ max: 10000, windowMs: 60 * 60 * 1000, message: 'Requsets limit exceeded for this ip' })) // 100 request per hour
 
 // ---------------------  DIVIDER  database ---------------------------------------------
-const DB = process.env.MONGO_CONNECT_URI + process.env.COLLECTION
+const DB = process.env.MONGO_CONNECT_URI
 mongoose.connect(DB, {}).then((con) => console.log('Mongo Connected'))
 
 // ---------------------  DIVIDER  routes -----------------------------------------------
-app.use('/', require('./controllers/root-controller'))
-app.use('/first', require('./controllers/first-controller'))
-app.use('/html-view', require('./controllers/html-view-controller'))
-app.use('/tours', require('./controllers/tours-controller'))
-app.use('/auth', require('./controllers/auth-controller'))
-// app.use('/general', require('./controllers/general-controller'))
-app.use('/market', require('./controllers/market-controller'))
-app.use('/images', require('./controllers/images-controller'))
-app.use('/images-assets', require('./controllers/images-assets-controller'))
-app.use('/blogging', require('./controllers/blogging-controller'))
-app.use('/scrapper', require('./controllers/scrapper-controller'))
-app.use('/serpapi', require('./controllers/serpapi-controller'))
-app.use('/aliexpress', require('./controllers/aliexpress-controller'))
-app.use('/sabry-server', require('./controllers/sabry-server-controller'))
-app.use('/dummy-users', require('./controllers/dummy-users-controller'))
-app.use('/gym-app/api/v1', require('./controllers/gym-app-controller'))
-app.use('/tunneling', require('./controllers/tunneling-controller'))
+app.use('/', require('./modules/root/root-controller'))
+// app.use('/auth', require('./auth/auth-routes'))
+app.use('/health-mate', require('./modules/health-mate/index'))
 
 // ---------------------  DIVIDER  middleware -------------------------------------------
 app.all('*', (req, res, next) => next(ErrorHandler(res, null, 'Route not found', 404, null)))
