@@ -115,7 +115,7 @@ async function CreateDayDietItem(req, res) {
     dayDiet.meals.forEach((meal) => {
       if (meal.foodId) {
         dayDiet.totalCalories += meal.foodId.calories * meal.quantity
-        dayDiet.totalCarbs += meal.foodId.carbohydrates * meal.quantity
+        dayDiet.totalCarbohydrate += meal.foodId.carbohydrates * meal.quantity
         dayDiet.totalFat += meal.foodId.fat * meal.quantity
         dayDiet.totalProtein += meal.foodId.protein * meal.quantity
       }
@@ -152,7 +152,7 @@ async function UpdateDayDietItem(req, res) {
       meal.items.forEach((item) => {
         if (item.foodId) {
           dayDiet.totalCalories += item.foodId.calories * item.quantity
-          dayDiet.totalCarbs += item.foodId.carbohydrates * item.quantity
+          dayDiet.totalCarbohydrate += item.foodId.carbohydrates * item.quantity
           dayDiet.totalFat += item.foodId.fat * item.quantity
           dayDiet.totalProtein += item.foodId.protein * item.quantity
         }
