@@ -13,22 +13,24 @@ const foodListSchema = new mongoose.Schema(
       required: [true, 'Tour name required'],
       trim: true,
     },
+
     calories: {
       type: Number,
       required: [true, 'Calories required'],
     },
-    carbohydrates: {
+    carbs: {
       type: Number,
       required: [true, 'Carbohydrates required'],
     },
-    fat: {
+    fats: {
       type: Number,
       required: [true, 'Fat required'],
     },
-    protein: {
+    proteins: {
       type: Number,
       required: [true, 'Protein required'],
     },
+
     serve: {
       type: Number,
       required: [true, 'Serve required'],
@@ -50,20 +52,8 @@ const foodListSchema = new mongoose.Schema(
         delete ret.__v
       },
     },
-    toObject: {
-      virtuals: true,
-      transform: function (doc, ret) {
-        delete ret._id
-        delete ret.__v
-      },
-    },
   }
 )
-
-// Virtual property `id` → returns `_id` as string
-foodListSchema.virtual('id').get(function () {
-  return this._id.toString()
-})
 
 const FoodList = HealthMateDB.model('FoodList', foodListSchema)
 module.exports = FoodList

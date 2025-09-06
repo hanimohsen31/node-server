@@ -1,9 +1,9 @@
 const express = require('express')
 const router = express.Router()
 const FoodList = require('./food-list-model')
-const ProtectedRoute = require('../../../auth/ProtectedRoute')
 const ErrorHandler = require('../../../utils/ErrorHandler')
 
+// --------------------------  DIVIDER  functions -------------------------------------------------
 // Get all food items
 async function GetAllFoodLists(req, res) {
   try {
@@ -69,21 +69,18 @@ async function DeleteFoodItem(req, res) {
 // Create multiple food items (bulk insert)
 async function CreateBulkFoodItems(req, res) {
   try {
-    const foodItems = req.body // Expecting an array of food objects
-
+    const foodItems = req.body
     if (!Array.isArray(foodItems) || foodItems.length === 0) {
       return ErrorHandler(res, null, 'Food items array is required', 400, 'fl5')
     }
-
     const newFoodItems = await FoodList.insertMany(foodItems, { ordered: false })
-    // ordered: false → continue inserting even if some fail
-
     res.status(201).json({ message: 'Food items created successfully', data: newFoodItems })
   } catch (err) {
     ErrorHandler(res, err, 'Failed to create food items', 500, 'fl5')
   }
 }
 
+// --------------------------  DIVIDER  routers ---------------------------------------------------
 router.route('').get(GetAllFoodLists).post(CreateFoodItem)
 router.route('/:id').get(GetFoodListById).put(UpdateFoodItem).delete(DeleteFoodItem)
 router.route('/bulk').post(CreateBulkFoodItems)

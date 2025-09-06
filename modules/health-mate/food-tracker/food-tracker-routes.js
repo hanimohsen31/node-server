@@ -4,76 +4,7 @@ const Tracker = require('./food-tracker-model')
 const ErrorHandler = require('../../../utils/ErrorHandler')
 const jwt = require('jsonwebtoken')
 
-function authMiddleware(req, res, next) {
-  const authHeader = req.headers.authorization
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return ErrorHandler(res, null, 'No token provided', 401, 'auth1')
-  }
-  const token = authHeader.split(' ')[1]
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_KEY)
-    req.user = decoded // attach decoded payload to request
-    next() // move on to the next middleware/route handler
-  } catch (err) {
-    return ErrorHandler(res, err, 'Invalid token', 401, 'auth2')
-  }
-}
-
-async function GetUserTrackedItem(req, res) {
-  // comes from auth middleware
-  const userId = req.user.id
-
-  try {
-    const trackedItems = await Tracker.find({ userId }).populate('foodId').lean()
-    const sum = {
-      calories: 0,
-      carbohydrates: 0,
-      fat: 0,
-      protein: 0,
-    }
-
-    trackedItems.forEach((item) => {
-      item.id = item._id
-      delete item.userId
-      delete item._id
-      delete item.createdAt
-      delete item.updatedAt
-      delete item.__v
-      item.foodItem = {
-        id: item.foodId._id,
-        nameEn: item.foodId.nameEn,
-        nameAr: item.foodId.nameAr,
-        calories: item.foodId.calories,
-        carbohydrates: item.foodId.carbohydrates,
-        fat: item.foodId.fat,
-        protein: item.foodId.protein,
-        serve: item.foodId.serve,
-        unit: item.foodId.unit,
-      }
-      sum.calories += (item.foodId?.calories || 0) * item.quantity
-      sum.carbohydrates += (item.foodId?.carbohydrates || 0) * item.quantity
-      sum.fat += (item.foodId?.fat || 0) * item.quantity
-      sum.protein += (item.foodId?.protein || 0) * item.quantity
-      delete item.foodId
-    })
-
-    res.status(201).json({
-      message: 'Success',
-      data: {
-        items: trackedItems,
-        total: {
-          calories: +sum.calories.toFixed(2),
-          carbohydrates: +sum.carbohydrates.toFixed(2),
-          fat: +sum.fat.toFixed(2),
-          protein: +sum.protein.toFixed(2),
-        },
-      },
-    })
-  } catch (err) {
-    ErrorHandler(res, err, 'Failed to get items', 500, 't1')
-  }
-}
-
+// --------------------------  DIVIDER  functions -------------------------------------------------
 async function CreateTrackedItem(req, res) {
   // comes from auth middleware
   const userId = req.user.id
@@ -165,6 +96,80 @@ async function DeleteAllTrackedItems(req, res) {
   }
 }
 
+// --------------------------  DIVIDER  helpers ---------------------------------------------------
+function authMiddleware(req, res, next) {
+  const authHeader = req.headers.authorization
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return ErrorHandler(res, null, 'No token provided', 401, 'auth1')
+  }
+  const token = authHeader.split(' ')[1]
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_KEY)
+    req.user = decoded // attach decoded payload to request
+    next() // move on to the next middleware/route handler
+  } catch (err) {
+    return ErrorHandler(res, err, 'Invalid token', 401, 'auth2')
+  }
+}
+
+async function GetUserTrackedItem(req, res) {
+  // comes from auth middleware
+  const userId = req.user.id
+
+  try {
+    const trackedItems = await Tracker.find({ userId }).populate('foodId').lean()
+    const sum = {
+      calories: 0,
+      carbs: 0,
+      fats: 0,
+      proteins: 0,
+    }
+
+    trackedItems.forEach((item) => {
+      item.id = item._id
+      delete item.userId
+      delete item._id
+      delete item.createdAt
+      delete item.updatedAt
+      delete item.__v
+      item.foodItem = {
+        id: item.foodId._id,
+        nameEn: item.foodId.nameEn,
+        nameAr: item.foodId.nameAr,
+        calories: item.foodId.calories,
+        carbs: item.foodId.carbs,
+        fats: item.foodId.fats,
+        proteins: item.foodId.proteins,
+        serve: item.foodId.serve,
+        unit: item.foodId.unit,
+      }
+      sum.calories += (item.foodId?.calories || 0) * (item.quantity / item.foodItem.serve)
+      sum.carbs += (item.foodId?.carbs || 0) * (item.quantity / item.foodItem.serve)
+      sum.fats += (item.foodId?.fats || 0) * (item.quantity / item.foodItem.serve)
+      sum.proteins += (item.foodId?.proteins || 0) * (item.quantity / item.foodItem.serve)
+      delete item.foodId
+    })
+    
+    console.log(sum)
+    
+    res.status(201).json({
+      message: 'Success',
+      data: {
+        items: trackedItems,
+        total: {
+          calories: +sum.calories.toFixed(2),
+          carbohydrates: +sum.carbs.toFixed(2),
+          fat: +sum.fats.toFixed(2),
+          protein: +sum.proteins.toFixed(2),
+        },
+      },
+    })
+  } catch (err) {
+    ErrorHandler(res, err, 'Failed to get items', 500, 't1')
+  }
+}
+
+// --------------------------  DIVIDER  routers ---------------------------------------------------
 router.route('').get(authMiddleware, GetUserTrackedItem).post(authMiddleware, CreateTrackedItem)
 router.route('/clear').delete(authMiddleware, DeleteAllTrackedItems)
 router.route('/:id').put(authMiddleware, UpdateTrackedItem).delete(authMiddleware, DeleteTrackedItem)
