@@ -77,7 +77,7 @@ async function CreateDayDietItem(req, res) {
       .lean()
     res.status(201).json({ message: 'success', data: fromateDayDiet(responseData) })
   } catch (err) {
-    console.log(err)
+    // console.log(err)
     ErrorHandler(res, err, 'Failed', 500, 'cddi3')
   }
 }
@@ -147,7 +147,7 @@ function authMiddleware(req, res, next) {
   try {
     const decoded = jwt.verify(token, process.env.JWT_KEY)
     req.user = decoded // attach decoded payload to request
-    console.log(res.user)
+    // console.log(res.user)
     next() // move on to the next middleware/route handler
   } catch (err) {
     return ErrorHandler(res, err, 'Invalid token', 401, 'auth2')
@@ -169,7 +169,7 @@ function fromateDayDiet(dayDietItem) {
       return a
     })
   }
-  console.log(dayDietItem.meals)
+  // console.log(dayDietItem.meals)
 
   dayDietItem.meals = dayDietItem.meals.map((meal) => {
     return {

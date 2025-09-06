@@ -50,7 +50,7 @@ async function GetAllMeals(req, res) {
       },
     })
   } catch (err) {
-    console.log(err)
+    // console.log(err)
     ErrorHandler(res, err, 'Failed to retrieve food lists', 500, 'flg1')
   }
 }

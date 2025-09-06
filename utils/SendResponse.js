@@ -1,6 +1,6 @@
 export function SendResponse(req, res, responseObject) {
-  console.log('params', req.params)
-  console.log('payload', req.body)
+  // console.log('params', req.params)
+  // console.log('payload', req.body)
 
   try {
     res.status(200).json(responseObject)

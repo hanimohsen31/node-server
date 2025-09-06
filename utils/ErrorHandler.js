@@ -9,7 +9,7 @@ class AppError extends Error {
 }
 
 function ErrorHandler(res, err, message, statusCode, errorCode) {
-  console.log(err)
+  // console.log(err)
   res.status(statusCode).json({
     status: statusCode,
     message: message,

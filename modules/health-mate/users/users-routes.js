@@ -16,10 +16,10 @@ function createToken(userData) {
       subscriptionActive: userData?.subscriptionActive || false,
     }
     const token = jwt.sign(payload, process.env.JWT_KEY, { expiresIn: process.env.EXPIRATION })
-    console.log(token)
+    // console.log(token)
     return token
   } catch (err) {
-    console.log('roken func err', err)
+    // console.log('roken func err', err)
     return null
   }
 }
@@ -27,7 +27,7 @@ function createToken(userData) {
 // Signup
 async function Signup(req, res) {
   let body = req.body
-  console.log('body', body)
+  // console.log('body', body)
   try {
     let newUser = await User.create({
       username: body.username,
@@ -46,7 +46,7 @@ async function Signup(req, res) {
       role: body.role,
     })
     const token = createToken(newUser)
-    console.log('token', token)
+    // console.log('token', token)
     // send cookie
     // res.cookie('jwt', token, { expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), secure: true, httpOnly: true })
     res.status(201).json({ message: 'User Created', data: { token, user: newUser } })

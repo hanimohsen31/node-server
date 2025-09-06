@@ -59,7 +59,7 @@ async function DeleteTrackedItem(req, res) {
 
   try {
     const { id } = req.params // tracker entry ID
-    console.log(id)
+    // console.log(id)
     const deletedEntry = await Tracker.findOneAndDelete({ _id: id, userId })
 
     if (!deletedEntry) {
@@ -150,7 +150,7 @@ async function GetUserTrackedItem(req, res) {
       delete item.foodId
     })
     
-    console.log(sum)
+    // console.log(sum)
     
     res.status(201).json({
       message: 'Success',
