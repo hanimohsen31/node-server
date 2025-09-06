@@ -158,7 +158,7 @@ async function GetUserTrackedItem(req, res) {
         items: trackedItems,
         total: {
           calories: +sum.calories.toFixed(2),
-          carbohydrates: +sum.carbs.toFixed(2),
+          carbs: +sum.carbs.toFixed(2),
           fat: +sum.fats.toFixed(2),
           protein: +sum.proteins.toFixed(2),
         },
