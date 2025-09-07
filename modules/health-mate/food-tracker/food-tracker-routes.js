@@ -160,7 +160,7 @@ async function GetUserTrackedItem(req, res) {
           calories: +sum.calories.toFixed(2),
           carbs: +sum.carbs.toFixed(2),
           fat: +sum.fats.toFixed(2),
-          protein: +sum.proteins.toFixed(2),
+          proteins: +sum.proteins.toFixed(2),
         },
       },
     })
