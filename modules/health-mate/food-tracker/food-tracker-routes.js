@@ -96,6 +96,43 @@ async function DeleteAllTrackedItems(req, res) {
   }
 }
 
+async function BulkItemsInsertion(req, res) {
+  const token = req.headers.authorization?.split(' ')[1] // Bearer <token>
+  let decoded = ''
+  try {
+    decoded = await jwt.verify(token, process.env.JWT_KEY)
+    req.user = decoded
+  } catch (err) {
+    return ErrorHandler(res, err, 'Invalid token', 401, 'add1')
+  }
+
+  try {
+    const items = req.body // expecting array of { id, quantity }
+
+    if (!Array.isArray(items) || !items.length) {
+      return ErrorHandler(res, null, 'No items provided', 400, 'add0')
+    }
+
+    // Map items into tracker documents
+    const docsToInsert = items.map((item) => ({
+      foodId: item.id,
+      quantity: item.quantity,
+      userId: decoded.id, // link to the logged-in user
+      mealType: item.mealType || null, // optional if you want
+    }))
+
+    // Insert all at once
+    const inserted = await Tracker.insertMany(docsToInsert)
+
+    res.status(201).json({
+      message: 'Tracker entries added successfully',
+      data: inserted,
+    })
+  } catch (err) {
+    ErrorHandler(res, err, 'Failed to add tracker entries', 500, 'add2')
+  }
+}
+
 // --------------------------  DIVIDER  helpers ---------------------------------------------------
 function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization
@@ -149,9 +186,9 @@ async function GetUserTrackedItem(req, res) {
       sum.proteins += (item.foodId?.proteins || 0) * (item.quantity / item.foodItem.serve)
       delete item.foodId
     })
-    
+
     // console.log(sum)
-    
+
     res.status(201).json({
       message: 'Success',
       data: {
@@ -171,6 +208,7 @@ async function GetUserTrackedItem(req, res) {
 
 // --------------------------  DIVIDER  routers ---------------------------------------------------
 router.route('').get(authMiddleware, GetUserTrackedItem).post(authMiddleware, CreateTrackedItem)
+router.route('/bulk-insertion').post(authMiddleware, BulkItemsInsertion)
 router.route('/clear').delete(authMiddleware, DeleteAllTrackedItems)
 router.route('/:id').put(authMiddleware, UpdateTrackedItem).delete(authMiddleware, DeleteTrackedItem)
 module.exports = router
