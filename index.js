@@ -40,6 +40,7 @@ mongoose.connect(DB, {}).then((con) => console.log('Mongo Connected'))
 app.use('/', require('./modules/root/root-controller'))
 // app.use('/auth', require('./auth/auth-routes'))
 app.use('/health-mate', require('./modules/health-mate/index'))
+app.use('/cypress', require('./modules/cypress/cypress-routes'))
 
 // ---------------------  DIVIDER  middleware -------------------------------------------
 app.all('*', (req, res, next) => next(ErrorHandler(res, null, 'Route not found', 404, null)))
