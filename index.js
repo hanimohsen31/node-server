@@ -40,7 +40,7 @@ mongoose.connect(DB, {}).then((con) => console.log('Mongo Connected'))
 app.use('/', require('./modules/root/root-controller'))
 // app.use('/auth', require('./auth/auth-routes'))
 app.use('/health-mate', require('./modules/health-mate/index'))
-app.use('/cypress', require('./modules/cypress/cypress-routes'))
+// app.use('/cypress', require('./modules/cypress/cypress-routes'))
 app.use('/katana-summury', require('./modules/katana-summury/katana-summury-routes'))
 
 // ---------------------  DIVIDER  middleware -------------------------------------------
