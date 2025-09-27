@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const Post = require('./posts-modal')
 const Product = require('./products-modal')
-const ProtectedRoute = require('../../utils/ProtectedRoute')
+const ProtectedRoute = require('../users/ProtectedRoute')
 const ErrorHandler = require('../../utils/ErrorHandler')
 const mongoose = require('mongoose');
 
