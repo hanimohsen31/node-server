@@ -42,6 +42,7 @@ app.use('/', require('./modules/root/root-controller'))
 app.use('/health-mate', require('./modules/health-mate/index'))
 // app.use('/cypress', require('./modules/cypress/cypress-routes'))
 app.use('/katana-summury', require('./modules/katana-summury/katana-summury-routes'))
+app.use('/katana-tracker', require('./modules/katana-tracker/katana-tracker-routes'))
 app.use('/market', require('./modules/market/market-routes'))
 
 // ---------------------  DIVIDER  middleware -------------------------------------------
