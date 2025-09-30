@@ -19,8 +19,8 @@ async function SavePipelineRunDate(req, res) {
         envName = 'comium'
       }
     }
-    // const { date, branch, version, environement, commit } = req.body
-    await KatanaTracker.create({ ...req.body })
+
+    await KatanaTracker.create({ ...req.body, branch, envName })
     res.status(201).json({ message: 'success' })
   } catch (err) {
     res.status(500).json({ error: 'Failed to save record' })
