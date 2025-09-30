@@ -11,11 +11,11 @@ async function SavePipelineRunDate(req, res) {
     let { branch, envName } = req.body
 
     if (branch && !envName) {
-      if (branch.includes('main') || branch.includes('test')) {
+      if (branch == 'main' || branch == 'env/test') {
         envName = 'test'
-      } else if (branch.includes('prod')) {
+      } else if (branch == 'env/prod') {
         envName = 'prod'
-      } else if (branch.includes('comium')) {
+      } else if (branch == 'env/comium') {
         envName = 'comium'
       }
     }
