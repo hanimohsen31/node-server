@@ -31,9 +31,10 @@ async function SavePipelineRunDate(req, res) {
 // get
 async function GetLastPipelineRun(req, res) {
   try {
-    const { envName } = req.query
+    let { envName } = req.query
+    console.log(envName)
 
-    const record = await KatanaTracker.findOne({
+    let record = await KatanaTracker.findOne({
       envName: { $regex: envName || '', $options: 'i' },
     }).sort({ createdAt: -1 })
 
@@ -48,11 +49,10 @@ async function GetLastPipelineRun(req, res) {
 
     res.status(200).json({ message: 'success', data: record })
   } catch (err) {
-    // console.log(err)
+    console.log(err)
     return res.status(500).json({ error: 'Failed to fetch record' })
   }
 }
 // --------------------------  DIVIDER  routers ---------------------------------------------------
 router.route('').get(GetLastPipelineRun).post(SavePipelineRunDate)
-
 module.exports = router
