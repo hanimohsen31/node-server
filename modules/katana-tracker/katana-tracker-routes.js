@@ -20,6 +20,8 @@ async function SavePipelineRunDate(req, res) {
       }
     }
 
+    if (!envName || !['test', 'prod', 'comium'].includes(envName)) envName = 'test'
+
     await KatanaTracker.create({ ...req.body, branch, envName })
     res.status(201).json({ message: 'success' })
   } catch (err) {
