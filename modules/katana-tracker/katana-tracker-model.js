@@ -21,4 +21,5 @@ const genericSchema = new mongoose.Schema(
 )
 
 const KatanaTracker = mainDB.model('katanaTracker', genericSchema)
+// genericSchema.index({ '$**': 'text' })
 module.exports = KatanaTracker
