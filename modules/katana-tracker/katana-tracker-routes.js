@@ -8,7 +8,7 @@ const KatanaTracker = require('./katana-tracker-model.js')
 // create
 async function SavePipelineRunDate(req, res) {
   try {
-    const { branch, envName } = req.body
+    let { branch, envName } = req.body
 
     if (branch && !envName) {
       if (branch.includes('main') || branch.includes('test')) {
