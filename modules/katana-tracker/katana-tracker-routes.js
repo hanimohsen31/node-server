@@ -35,7 +35,7 @@ async function SavePipelineRunDate(req, res) {
     if (!envName) envName = 'test'
 
     // rest of records
-    const recordEnv = envName.includes('test') ? 'test' : 'prod' // 'test' || 'prod'
+    const recordEnv = envName.toLowerCase().includes('test'.toLowerCase()) ? 'test' : 'prod' // 'test' || 'prod'
     const recordSource = message.toLowerCase().includes('firebase'.toLowerCase()) ? 'firebase' : 'github' // 'github' || 'firebase'
     // create record
     await KatanaTracker.create({ ...req.body, branch, envName, recordSource, recordEnv })
