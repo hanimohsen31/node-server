@@ -1,15 +1,25 @@
 const express = require('express')
 const router = express.Router()
 const KatanaTracker = require('./katana-tracker-model.js')
+// export enum EnvironmentsNames {
+//   Dev = "dev",
+//   Test = "test",
+//   FirebaseTest = "firebaseTest",
+//   FirebaseProd = "firebaseProd",
+//   Comium = "comium",
+//   Prod = "prod",
+// }
 
 // --------------------------  DIVIDER  functions -------------------------------------------------
 // search will be with "envName"
 // environement => test, prod
 // create
 async function SavePipelineRunDate(req, res) {
-  try {
-    let { branch, envName } = req.body
+  console.log('body:', req.body)
 
+  try {
+    let { branch, envName, message } = req.body
+    // github action
     if (branch && !envName) {
       if (branch == 'main' || branch == 'env/test') {
         envName = 'test'
@@ -19,11 +29,17 @@ async function SavePipelineRunDate(req, res) {
         envName = 'comium'
       }
     }
+    // manual firebase deploy
+    // if (!branch && message.includes('firebase')) {
+    // }
+    if (!envName) envName = 'test'
 
-    if (!envName || !['test', 'prod', 'comium'].includes(envName)) envName = 'test'
-
-    await KatanaTracker.create({ ...req.body, branch, envName })
-    res.status(201).json({ message: 'success' })
+    // rest of records
+    const recordEnv = envName.includes('test') ? 'test' : 'prod' // 'test' || 'prod'
+    const recordSource = message.toLowerCase().includes('firebase'.toLowerCase()) ? 'firebase' : 'github' // 'github' || 'firebase'
+    // create record
+    await KatanaTracker.create({ ...req.body, branch, envName, recordSource, recordEnv })
+    res.status(201).json({ message: 'success', envName, recordSource, recordEnv })
   } catch (err) {
     res.status(500).json({ error: 'Failed to save record' })
   }
@@ -55,6 +71,8 @@ async function GetLastPipelineRun(req, res) {
     return res.status(500).json({ error: 'Failed to fetch record' })
   }
 }
+
 // --------------------------  DIVIDER  routers ---------------------------------------------------
-router.route('').get(GetLastPipelineRun).post(SavePipelineRunDate)
+router.route('').get(GetLastPipelineRun).post(SavePipelineRunDate).put(SavePipelineRunDate)
+// router.route('').put(SavePipelineRunDate)
 module.exports = router
