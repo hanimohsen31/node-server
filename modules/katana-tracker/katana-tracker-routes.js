@@ -62,7 +62,7 @@ async function GetLastPipelineRun(req, res) {
     }
 
     if (!record) {
-      return res.status(404).json({ message: 'No record found', data: null })
+      return res.status(404).json({ message: 'No record found', data: "" })
     }
 
     res.status(200).json({ message: 'success', data: record })
