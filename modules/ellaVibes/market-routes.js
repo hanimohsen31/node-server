@@ -19,6 +19,41 @@ async function CreatePost(req, res) {
   }
 }
 
+// update
+async function UpdatePost(req, res) {
+  const postId = req.params.id // assuming you're sending /posts/:id
+  const body = req.body
+
+  try {
+    // Optional: generate slug if name is updated
+    if (body.name) {
+      body.slug = body.slug || body.name.toLowerCase().replace(/\s+/g, '-') // simple slug
+    }
+
+    // { new: true } returns the updated document
+    const updatedPost = await Post.findByIdAndUpdate(postId, body, {
+      new: true,
+      runValidators: true, // makes schema validations run
+      context: 'query', // needed for some validators like unique
+    })
+
+    if (!updatedPost) {
+      return res.status(404).json({ message: 'Post not found', data: null })
+    }
+
+    res.status(200).json({ message: 'Post Updated', data: updatedPost })
+  } catch (err) {
+    console.log(err)
+
+    // handle duplicate key error (unique fields)
+    if (err.code === 11000) {
+      return res.status(409).json({ message: 'Duplicate field value', error: err.keyValue })
+    }
+
+    res.status(400).json({ message: 'Invalid Data', error: err })
+  }
+}
+
 // get all
 async function GetAllPosts(req, res) {
   let reqQuery = { ...req.query }
@@ -33,6 +68,14 @@ async function GetAllPosts(req, res) {
     if (req.query.sort) {
       let sortBy = req.query.sort.split(',').join()
       query = query.sort(sortBy)
+    }
+
+    // ✅ Sorting (latest first by default)
+    if (req.query.sort) {
+      const sortBy = req.query.sort.split(',').join()
+      query = query.sort(sortBy)
+    } else {
+      query = query.sort({ updatedAt: -1 }) // default: latest first
     }
 
     // Limit fields
@@ -157,6 +200,8 @@ async function GetAllProducts(req, res) {
     if (req.query.sort) {
       let sortBy = req.query.sort.split(',').join()
       query = query.sort(sortBy)
+    } else {
+      query = query.sort({ updatedAt: -1 }) // default: latest first
     }
 
     // Limit fields
@@ -219,7 +264,7 @@ async function DeleteProduct(req, res) {
   }
 }
 
-// create buld
+// create bulk
 async function CreateBulkProducts(req, res) {
   // Extract products from request body
   const products = req.body
@@ -257,6 +302,7 @@ async function CreateBulkProducts(req, res) {
 // --------------------------  DIVIDER  apis ----------------------------------------------------------------
 router.route('/posts').get(GetAllPosts).post(ProtectedRoute, CreatePost)
 router.post('/posts/bulk', CreateBulkPosts)
+router.route('/posts/edit/:id').put(ProtectedRoute, UpdatePost)
 router.route('/posts/:slug').get(GetPostBySlug).delete(ProtectedRoute, DeletePost)
 
 router.route('/products').get(GetAllProducts).post(ProtectedRoute, CreateProduct)
