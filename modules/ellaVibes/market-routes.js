@@ -4,7 +4,7 @@ const Post = require('./posts-modal')
 const Product = require('./products-modal')
 const ProtectedRoute = require('../users/ProtectedRoute')
 const ErrorHandler = require('../../utils/ErrorHandler')
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 
 // --------------------------  DIVIDER  posts ---------------------------------------------------------------
 // create
@@ -14,6 +14,7 @@ async function CreatePost(req, res) {
     let newPost = await Post.create(body)
     res.status(200).json({ message: 'Post Added', data: newPost })
   } catch (err) {
+    console.log(err)
     res.status(418).json({ message: 'Invalid Data', data: null, error: err })
   }
 }
@@ -244,7 +245,7 @@ async function CreateBulkProducts(req, res) {
     // Rollback the transaction in case of error
     await session.abortTransaction()
     session.endSession()
-    console.log(err);
+    console.log(err)
     // Detailed error handling
     if (err.name === 'ValidationError') return res.status(422).json({ message: 'Validation Error', data: null, error: err.errors })
     // Duplicate key or other mongoose errors
@@ -254,14 +255,12 @@ async function CreateBulkProducts(req, res) {
   }
 }
 // --------------------------  DIVIDER  apis ----------------------------------------------------------------
-router.route('/posts').get(GetAllPosts)
-router.route('/post').post(ProtectedRoute, CreatePost)
-router.route('/post/:slug').get(GetPostBySlug).delete(ProtectedRoute, DeletePost)
+router.route('/posts').get(GetAllPosts).post(ProtectedRoute, CreatePost)
 router.post('/posts/bulk', CreateBulkPosts)
+router.route('/posts/:slug').get(GetPostBySlug).delete(ProtectedRoute, DeletePost)
 
-router.route('/products').get(GetAllProducts)
-router.route('/product').post(ProtectedRoute, CreateProduct)
-router.route('/product/:slug').get(GetProductBySlug).delete(ProtectedRoute, DeleteProduct)
+router.route('/products').get(GetAllProducts).post(ProtectedRoute, CreateProduct)
 router.post('/products/bulk', CreateBulkProducts)
+router.route('/products/:slug').get(GetProductBySlug).delete(ProtectedRoute, DeleteProduct)
 
 module.exports = router

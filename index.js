@@ -38,12 +38,12 @@ mongoose.connect(DB, {}).then((con) => console.log('Mongo Connected'))
 
 // ---------------------  DIVIDER  routes -----------------------------------------------
 app.use('/', require('./modules/root/root-controller'))
-// app.use('/auth', require('./auth/auth-routes'))
+app.use('/auth', require('./modules/users/auth-routes'))
 app.use('/health-mate', require('./modules/health-mate/index'))
 // app.use('/cypress', require('./modules/cypress/cypress-routes'))
 app.use('/katana-summury', require('./modules/katana-summury/katana-summury-routes'))
 app.use('/katana-tracker', require('./modules/katana-tracker/katana-tracker-routes'))
-app.use('/market', require('./modules/market/market-routes'))
+app.use('/ellaVibes', require('./modules/ellaVibes/market-routes'))
 
 // ---------------------  DIVIDER  middleware -------------------------------------------
 app.all('*', (req, res, next) => next(ErrorHandler(res, null, 'Route not found', 404, null)))

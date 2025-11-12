@@ -1,10 +1,10 @@
 const mongoose = require('mongoose')
 const slugify = require('slugify')
 
-const productSchema = new mongoose.Schema({
+const postsSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, 'Product name required'],
+    required: [true, 'Post name required'],
     maxLengh: [500, 'Name Max Length 500 chars'],
     minLengh: [5, 'Name Min Length 5 chars'],
     unique: true,
@@ -19,36 +19,42 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Category required'],
   },
-  image: {
-    type: String,
-    required: [true, 'Image Link required'],
-  },
-  link: {
-    type: String,
-    required: [true, 'Link of Product required'],
-  },
-  brand: {
-    type: String,
-    required: [true, 'Brand required'],
-  },
   description: {
     type: String,
     trim: true,
     required: [true, 'Description required'],
   },
-  price: {
-    type: Number,
-    required: [true, 'Price required'],
+  image: {
+    type: String,
+    required: [true, 'Image Link required'],
   },
+
+
+  content: {
+    type: String,
+    required: [true, 'Content required'],
+  },
+  contentHeaderImage: {
+    type: String,
+    required: [true, 'Image Link required'],
+  },
+  publishedDate: {
+    type: Date,
+    default: Date.now(),
+  },
+  author: {
+    type: String,
+    trim: true,
+  },
+  tags: [String],
 })
 
-// mongoose middleware types => document,query,aggregate,model
 // 1- document middleware
 // this will only work on create .save() || .create() and will not work on update
-productSchema.pre('save', function (next) {
+postsSchema.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true })
   next()
 })
 
-const Product = mongoose.model('Product', productSchema)
-module.exports = Product
+const Post = mongoose.model('Post', postsSchema)
+module.exports = Post

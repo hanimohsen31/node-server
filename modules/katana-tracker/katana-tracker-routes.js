@@ -35,13 +35,14 @@ async function SavePipelineRunDate(req, res) {
     if (!envName) envName = 'test'
 
     // rest of records
-    const recordEnv = envName.toLowerCase().includes('test'.toLowerCase()) ? 'test' : 'prod' // 'test' || 'prod'
-    const recordSource = message.toLowerCase().includes('firebase'.toLowerCase()) ? 'firebase' : 'github' // 'github' || 'firebase'
+    const recordEnv = envName.toLowerCase().includes('test') ? 'test' : 'prod' // 'test' || 'prod'
+    const recordSource = (message || '').toLowerCase().includes('firebase') ? 'firebase' : 'github' // 'github' || 'firebase'
     // create record
     await KatanaTracker.create({ ...req.body, branch, envName, recordSource, recordEnv })
     res.status(201).json({ message: 'success', envName, recordSource, recordEnv })
   } catch (err) {
-    res.status(500).json({ error: 'Failed to save record' })
+    console.log(err)
+    res.status(500).json({ message: 'Failed to save record', error: err })
   }
 }
 
@@ -62,7 +63,7 @@ async function GetLastPipelineRun(req, res) {
     }
 
     if (!record) {
-      return res.status(404).json({ message: 'No record found', data: "" })
+      return res.status(404).json({ message: 'No record found', data: '' })
     }
 
     res.status(200).json({ message: 'success', data: record })
