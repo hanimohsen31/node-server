@@ -43,6 +43,8 @@ app.use('/health-mate', require('./modules/health-mate/index'))
 // app.use('/cypress', require('./modules/cypress/cypress-routes'))
 app.use('/katana-summury', require('./modules/katana-summury/katana-summury-routes'))
 app.use('/katana-tracker', require('./modules/katana-tracker/katana-tracker-routes'))
+app.use('/katana-tests', require('./modules/katana-tests/date-response'))
+app.use('/kd-server/api/dashboards/export', require('./modules/katana-tests/katana-screenshot'))
 app.use('/ellaVibes', require('./modules/ellaVibes/market-routes'))
 
 // ---------------------  DIVIDER  middleware -------------------------------------------
