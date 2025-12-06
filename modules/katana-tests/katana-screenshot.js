@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const puppeteer = require('puppeteer')
-const { PDFDocument } = require('pdf-lib');
+const { PDFDocument } = require('pdf-lib')
 
 // ---------------- DIVIDER files path --------------------------------------------------
 // const fs = require('fs');
@@ -14,161 +14,152 @@ const { PDFDocument } = require('pdf-lib');
 
 // ---------------- DIVIDER helper fucntions --------------------------------------------
 function stopper(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 // [1] open browser and navigate
-async function openBrowserAndNavigate(baseUrl, dashboardId, pageWidth, pageHeight) {
+async function openBrowser(baseUrl, viewportWidth, viewportHeight, zoomLevel) {
   // console.log("[1] starting scrapping", baseUrl)
   if (!baseUrl) return res.status(400).send('baseUrl required')
   const browser = await puppeteer.launch({
-    headless: true,             // <--- SHOW UI
-    defaultViewport: null,       // <--- Let it use your real screen size
+    headless: true, // <--- SHOW UI
+    defaultViewport: null, // <--- Let it use your real screen size
     args: [
-      '--start-maximized',       // <--- Open in full window
+      '--start-maximized', // <--- Open in full window
       '--no-sandbox',
       '--disable-setuid-sandbox',
     ],
-    devtools: false               // <--- Open Chrome DevTools
+    devtools: false, // <--- Open Chrome DevTools
   })
   // console.log("[2] browser done", browser)
   const page = await browser.newPage()
-  await page.setViewport({ width: pageWidth, height: pageHeight }) // macbook-16
+  await page.setViewport({ width: +viewportWidth, height: +viewportHeight, deviceScaleFactor: +zoomLevel, isMobile: false }) // macbook-16
   // console.log("[3] page done", page)
-
-  // ******** LOGIN ********
-  // console.log("[4] start login", dashboardId)
-  await page.goto(`${baseUrl}/auth/login`, { waitUntil: "networkidle0" });
-  await page.type('form.w-100 > :nth-child(1) > .p-inputtext', 'master@katana.com');
-  await page.type('.p-password > .p-inputtext', 'P@ssw0rd');
-  await page.click('#checkbox');
-  // Attach intercept BEFORE clicking login
-  const loginResp = page.waitForResponse(resp =>
-    resp.url().includes("/login") && [200, 204, 304].includes(resp.status())
-  );
-  // Click the actual login button
-  await page.click("button[type='submit']");
-  // Wait for the login API to finish
-  await loginResp;
-
-  // ******** CLICK TOGGLER ********
-  // console.log("[5] start toggler")
-  await page.waitForSelector(".toggler", { visible: true });
-  await page.evaluate(() => document.querySelector(".toggler").click());
-
-  // ******** NAVIGATE TO DASHBOARD ********
-  // console.log("[6] start dashboard")
-  const dashboardApiUrl = `/kd-server/api/dashboards/${dashboardId}`;
-  const dashboardResPromise = page.waitForResponse(resp => {
-    const urlMatches = resp.url().includes(dashboardApiUrl);
-    const goodStatus = [200, 304].includes(resp.status());
-    return urlMatches && goodStatus;
-  });
-  await page.goto(`${baseUrl}/dashboard/${dashboardId}`, { waitUntil: "networkidle0" });
-  await dashboardResPromise;
-  await stopper(2000); // wait 2 seconds = 2_000
   return { browser, page }
 }
 
-/**
- * // TODO:
- * [1] make element containerSelector => height: fit-content;
- * [2] make element navbarSelector => display: none;
- * [3] make element buttonsGroup => visibility: hidden;
- * [4] need to wait dashboardSelector
- * [5] need to wait 
- */
+// [1] open browser and navigate
+async function loginAndNavigate(page, baseUrl, dashboardId) {
+  // ******** LOGIN ********
+  console.log('[4] start login', dashboardId)
+  await page.goto(`${baseUrl}/auth/login`, { waitUntil: 'networkidle0' })
+  await page.type('form.w-100 > :nth-child(1) > .p-inputtext', 'master@katana.com')
+  await page.type('.p-password > .p-inputtext', 'P@ssw0rd')
+  await page.click('#checkbox')
+  // Attach intercept BEFORE clicking login
+  const loginResp = page.waitForResponse((resp) => resp.url().includes('/login') && [200, 204, 304].includes(resp.status()))
+  // Click the actual login button
+  await page.click("button[type='submit']")
+  // Wait for the login API to finish
+  await loginResp
+
+  // ******** CLICK TOGGLER ********
+  // console.log("[5] start toggler")
+  await page.waitForSelector('.toggler', { visible: true })
+  await page.evaluate(() => document.querySelector('.toggler').click())
+
+  // ******** NAVIGATE TO DASHBOARD ********
+  // console.log("[6] start dashboard")
+  const dashboardApiUrl = `/kd-server/api/dashboards/${dashboardId}`
+  const dashboardResPromise = page.waitForResponse((resp) => {
+    const urlMatches = resp.url().includes(dashboardApiUrl)
+    const goodStatus = [200, 304].includes(resp.status())
+    return urlMatches && goodStatus
+  })
+  await page.goto(`${baseUrl}/dashboard/${dashboardId}`, { waitUntil: 'networkidle0' })
+  await dashboardResPromise
+  await stopper(500) // wait 2 seconds = 2_000
+}
 
 // [2] take screenshot
-async function pngScreenShot(browser, page, pageWidth, pageHeight) {
-  // console.log("[7] start png screenshot")
-  const navbarSelector = 'nav'
-  const containerSelector = '.router-content'
-  const dashboardSelector = 'app-dashboard-details'
-  const buttonsGroup = '.top-section .buttons-group'
-  await page.setViewport({ width: pageWidth, height: pageHeight });
-  await page.waitForSelector(dashboardSelector, { visible: true });
-  stopper(1000); // wait 2 seconds = 2_000
+async function pngScreenShot(page, styles, dashboardSelector, viewportWidth, viewportHeight, zoomLevel) {
+  console.log('[7] start png screenshot')
+  await page.setViewport({ width: +viewportWidth, height: +viewportHeight, deviceScaleFactor: +zoomLevel, isMobile: false }) // macbook-16
+  await page.waitForSelector(dashboardSelector, { visible: true })
+  stopper(500) // wait 2 seconds = 2_000
 
   // Apply CSS tweaks to prepare for screenshot
   const contentHeight = await page.evaluate(
-    (navbarSel, containerSel, dashboardSel, buttonsSel) => {
+    (passsedStyles, dashboardSel) => {
       // Remove ALL overflow restrictions from everything
-      const style = document.createElement('style');
-      style.textContent = `
-        *:not(gridster-item):not(.app-dashboard-widget){
-          overflow: visible !important;
-          max-height: none !important;
+      const style = document.createElement('style')
+      style.textContent = passsedStyles
+      document.head.appendChild(style)
+      document.body.offsetHeight // Force layout recalculation
+
+      // Run it before taking the screenshot
+      document.querySelectorAll('*').forEach((el) => {
+        if (!el.closest('gridster-item')) {
+          el.style.overflow = 'visible'
+          el.style.maxHeight = 'none'
         }
-        html, body {
-          overflow: visible !important;
-          max-height: none !important;
-        }
-        ${navbarSel} {
-          display: none !important;
-        }
-        ${containerSel} {
-          height: fit-content !important;
-          overflow: visible !important;
-          max-height: none !important;
-        }
-        .top-section{
-          padding-top: 30px!important;
-        }
-        ${buttonsSel} {
-          visibility: hidden !important;
-        }
-        .dashboard-widgets-grid {
-          padding-bottom: 30px !important;
-        }
-      `;
-      document.head.appendChild(style);
-      document.body.offsetHeight; // Force layout recalculation
-      return Math.max(
+      })
+      document.body.offsetHeight // Force layout recalculation
+
+      // Get the element height
+      const elm1 = document.querySelector(dashboardSel)?.scrollHeight || 0
+      const elm2 = document.querySelector('.router-content')?.scrollHeight || 0
+      const elm3 = document.querySelector('app-dashboard-details')?.scrollHeight || 0
+
+      const docHeight = Math.max(
         document.body.scrollHeight,
         document.body.offsetHeight,
         document.documentElement.clientHeight,
         document.documentElement.scrollHeight,
-        document.documentElement.offsetHeight
-      );
+        document.documentElement.offsetHeight,
+        document.documentElement.offsetHeight,
+        elm1,
+        elm2,
+        elm3
+      )
+
+      document.documentElement.style.height = docHeight + 'px'
+      document.body.style.height = docHeight + 'px'
+      
+      return docHeight
     },
-    navbarSelector,
-    containerSelector,
-    dashboardSelector,
-    buttonsGroup
-  );
+    styles,
+    dashboardSelector
+  )
 
-  // console.log(`[7] Content height detected: ${contentHeight}px`);
-
+  console.log(`[7] Content height detected: ${contentHeight}px`)
   // Scroll through the entire page to force rendering
   await page.evaluate(async (totalHeight) => {
     await new Promise((resolve) => {
-      let scrolled = 0;
-      const distance = 500; // Scroll 500px at a time
+      let scrolled = 0
+      const distance = 500 // Scroll 500px at a time
       const timer = setInterval(() => {
-        window.scrollBy(0, distance);
-        scrolled += distance;
-        if (scrolled >= totalHeight) {
-          clearInterval(timer);
-          window.scrollTo(0, 0); // Scroll back to top
-          resolve();
+        window.scrollBy(0, distance)
+        scrolled += distance
+        console.log('scrolling', scrolled)
+        if (scrolled > totalHeight) {
+          clearInterval(timer)
+          window.scrollTo(0, 0) // Scroll back to top
+          resolve()
         }
-      }, 100);
-    });
-  }, contentHeight);
+      }, 100)
+    })
+  }, contentHeight)
+
+  try {
+    await page.evaluate(async () => {
+      if (document.fonts && document.fonts.ready) await document.fonts.ready
+    })
+  } catch (err) {
+    console.warn('Fonts did not fully load before screenshot:', err)
+  }
 
   // Wait a bit for everything to settle
-  stopper(1000); // wait 5 seconds = 5_000
-
+  stopper(2000) // wait 5 seconds = 5_000
+  
   // Take screenshot of the specific element or full page
-  const element = await page.$(dashboardSelector);
-  const pngBuffer = await element.screenshot({ type: 'png' });
+  const element = await page.$(dashboardSelector)
+  const pngBuffer = await element.screenshot({ type: 'png' })
   return pngBuffer
-
 }
 
 // [3] convert to pdf
-async function pdfScreenShot(pngBuffer, pageWidth, pageHeight) {
+async function pdfScreenShot(pngBuffer) {
   const pdfDoc = await PDFDocument.create()
   const pngImage = await pdfDoc.embedPng(pngBuffer)
   const { width, height } = pngImage.size()
@@ -183,15 +174,41 @@ async function pdfScreenShot(pngBuffer, pageWidth, pageHeight) {
 
 // ---------------- DIVIDER main function -----------------------------------------------
 async function GetScreenShot(req, res) {
-  const dashboardId = req.query.dashboardId
-  const exportType = req.query.exportType
+  const dashboardId = req.body.dashboardId
+  const exportType = req.body.exportType || 'png'
+  const screenWidth = +req.body.screenWidth || 1920
+  const screenHeight = +req.body.screenHeight || 1080
+  const viewportWidth = +req.body.viewportWidth || 1920
+  const viewportHeight = +req.body.viewportHeight || 1080
+  const zoomLevel = +req.body.zoomLevel || 1
+  const dashboardSelector = req.body.dashboardSelector || 'app-dashboard-details'
+  const styles =
+    req.body.styles ||
+    `
+      nav {
+        display: none !important;
+      }
+      .top-section{
+        padding-top: 30px!important;
+      }
+      .top-section .buttons-group {
+        visibility: hidden !important;
+      }
+      .dashboard-widgets-grid {
+        padding-bottom: 30px !important;
+      }
+    `
+
+  // console.log(req.body.styles)
+  // const token = req.headers.authorization?.split(' ')[1]
+  // if (!token) return res.status(401).send('Unauthorized')
+
   const baseUrl = req.headers.origin
-  const pageWidth = req.query.pageWidth || 1920
-  const pageHeight = req.query.pageHeight || 1200
   try {
-    const { browser, page } = await openBrowserAndNavigate(baseUrl, dashboardId, pageWidth, pageHeight)
-    const pngBuffer = await pngScreenShot(browser, page, pageWidth, pageHeight)
-    const pdfBytes = await pdfScreenShot(pngBuffer, pageWidth, pageHeight)
+    const { browser, page } = await openBrowser(baseUrl, viewportWidth, viewportHeight, zoomLevel)
+    await loginAndNavigate(page, baseUrl, dashboardId)
+    const pngBuffer = await pngScreenShot(page, styles, dashboardSelector, viewportWidth, viewportHeight, zoomLevel)
+    const pdfBytes = await pdfScreenShot(pngBuffer)
     // ******** SEND TO CLIENT ********
     if (exportType === 'png') {
       await browser.close()
@@ -200,11 +217,10 @@ async function GetScreenShot(req, res) {
       res.send(pngBuffer)
     } else {
       await browser.close()
-      res.setHeader("Content-Type", "application/pdf")
-      res.setHeader("Content-Disposition", "attachment; filename=dashboard.pdf")
+      res.setHeader('Content-Type', 'application/pdf')
+      res.setHeader('Content-Disposition', 'attachment; filename=dashboard.pdf')
       res.send(Buffer.from(pdfBytes))
     }
-
   } catch (err) {
     console.error(err)
     res.status(500).send('Error generating screenshot')
@@ -212,5 +228,5 @@ async function GetScreenShot(req, res) {
 }
 
 // --------------------------  DIVIDER  routers -----------------------------------------
-router.route('/:id').get(GetScreenShot)
+router.route('/:id').post(GetScreenShot)
 module.exports = router
