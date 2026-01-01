@@ -94,9 +94,7 @@ bot.onText(/\/help/, (msg) => {
 })
 
 function isLocalhost() {
-  const isVercel = !!process.env.VERCEL
-  const isLocal = !isVercel
-  return isLocal
+  return false
 }
 
 // Endpoint to receive messages from Telegram bot
