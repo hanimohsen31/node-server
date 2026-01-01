@@ -29,8 +29,12 @@ bot.on('message', async (msg) => {
 
     if (urlMatch) {
       const url = urlMatch[0]
-      let data = await scrapeMarketplaceData(url)
-      // const data = { url }
+      let data = {}
+      if (isLocalhost()) {
+        data = await scrapeMarketplaceData(url)
+      } else {
+        data = { url }
+      }
       finalResult = { ...finalResult, ...data }
     }
 
@@ -85,11 +89,11 @@ bot.onText(/\/help/, (msg) => {
   bot.sendMessage(chatId, 'Just send me any text message and I will forward it to the Express server for processing.')
 })
 
-// function isLocalhost() {
-//   const isVercel = !!process.env.VERCEL
-//   const isLocal = !isVercel
-//   return isLocal
-// }
+function isLocalhost() {
+  const isVercel = !!process.env.VERCEL
+  const isLocal = !isVercel
+  return isLocal
+}
 
 // Endpoint to receive messages from Telegram bot
 async function SendMessage(req, res) {
