@@ -11,6 +11,7 @@ const dotenv = require('dotenv')
 const cors = require('cors')
 const hpp = require('hpp')
 dotenv.config({ path: './.env' }) // environment variables
+
 // ---------------------  DIVIDER  restarting app ---------------------------------------
 process.on('uncaughtException', (err) => {
   console.log('uncaughtException error', err)
@@ -46,6 +47,7 @@ app.use('/katana-tracker', require('./modules/katana-tracker/katana-tracker-rout
 app.use('/katana-tests', require('./modules/katana-tests/date-response'))
 app.use('/kd-server/api/dashboards/export', require('./modules/katana-tests/katana-screenshot'))
 app.use('/ellaVibes', require('./modules/ellaVibes/market-routes'))
+app.use('/telegram', require('./modules/telegram/telegram-bot-routes'))
 
 // ---------------------  DIVIDER  middleware -------------------------------------------
 app.all('*', (req, res, next) => next(ErrorHandler(res, null, 'Route not found', 404, null)))
