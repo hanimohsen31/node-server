@@ -3,16 +3,15 @@ const router = express.Router()
 const AmaraBot = require('./telegram-bot-model')
 const TelegramBot = require('node-telegram-bot-api')
 const BOT_TOKEN = process.env.TELEGRAM_TOKEN
-// const bot = new TelegramBot(BOT_TOKEN, { polling: true, webHook: true })
-const bot = isLocalhost() ? new TelegramBot(BOT_TOKEN, { polling: true }) : new TelegramBot(BOT_TOKEN, { webHook: true })
+const bot = new TelegramBot(BOT_TOKEN, { polling: true })
+// const bot = isLocalhost() ? new TelegramBot(BOT_TOKEN, { polling: true }) : new TelegramBot(BOT_TOKEN, { webHook: true })
+// Set webhook once (locally or in deploy script)
+// bot.setWebHook(`https://node-server-seven-gamma.vercel.app/telegram/bot`)
 const { scrapeMarketplaceData } = require('../scrapper/marketplace')
 const categoriesEnum = ['cars', 'gym', 'mems', 'courses', 'jobs', 'other']
 const categoryKeyboard = {
   reply_markup: { inline_keyboard: categoriesEnum.map((cat) => [{ text: cat.toUpperCase(), callback_data: `cat:${cat}` }]) },
 }
-
-// Set webhook once (locally or in deploy script)
-bot.setWebHook(`https://node-server-seven-gamma.vercel.app/telegram/bot`)
 
 // Handle all incoming messages
 bot.on('message', async (msg) => {
@@ -34,11 +33,7 @@ bot.on('message', async (msg) => {
     if (urlMatch) {
       const url = urlMatch[0]
       let data = {}
-      if (isLocalhost()) {
-        data = await scrapeMarketplaceData(url)
-      } else {
-        data = { url }
-      }
+      data = await scrapeMarketplaceData(url)
       finalResult = { ...finalResult, ...data }
     }
 
@@ -93,10 +88,6 @@ bot.onText(/\/help/, (msg) => {
   bot.sendMessage(chatId, 'Just send me any text message and I will forward it to the Express server for processing.')
 })
 
-function isLocalhost() {
-  return false
-}
-
 // Endpoint to receive messages from Telegram bot
 async function SendMessage(req, res) {
   const { chatId, message, username } = req.body
@@ -108,9 +99,9 @@ async function SendMessage(req, res) {
 }
 
 // --------------------------  DIVIDER  routers -----------------------------------------
-// router.route('/message').post(SendMessage)
-router.route('/bot').post((req, res) => {
-  bot.processUpdate(req.body)
-  res.sendStatus(200)
-})
+router.route('/message').post(SendMessage)
+// router.route('/bot').post((req, res) => {
+//   bot.processUpdate(req.body)
+//   res.sendStatus(200)
+// })
 module.exports = router
