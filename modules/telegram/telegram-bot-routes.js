@@ -11,8 +11,10 @@ const categoryKeyboard = {
   reply_markup: { inline_keyboard: categoriesEnum.map((cat) => [{ text: cat.toUpperCase(), callback_data: `cat:${cat}` }]) },
 }
 
-// Set webhook once (locally or in deploy script)
-bot.setWebHook(`https://${process.env.VERCEL_URL}/api/bot`)
+if (isLocalhost()) {
+  // Set webhook once (locally or in deploy script)
+  bot.setWebHook(`https://node-server-seven-gamma.vercel.app/api/telegram/bot`)
+}
 
 // Handle all incoming messages
 bot.on('message', async (msg) => {
