@@ -3,12 +3,16 @@ const router = express.Router()
 const AmaraBot = require('./telegram-bot-model')
 const TelegramBot = require('node-telegram-bot-api')
 const BOT_TOKEN = process.env.TELEGRAM_TOKEN
-const bot = new TelegramBot(BOT_TOKEN, { polling: true })
+// const bot = new TelegramBot(BOT_TOKEN, { polling: true, webHook: true })
+const bot = isLocalhost() ? new TelegramBot(BOT_TOKEN, { polling: true }) : new TelegramBot(BOT_TOKEN, { webHook: true })
 const { scrapeMarketplaceData } = require('../scrapper/marketplace')
 const categoriesEnum = ['cars', 'gym', 'mems', 'courses', 'jobs', 'other']
 const categoryKeyboard = {
   reply_markup: { inline_keyboard: categoriesEnum.map((cat) => [{ text: cat.toUpperCase(), callback_data: `cat:${cat}` }]) },
 }
+
+// Set webhook once (locally or in deploy script)
+bot.setWebHook(`https://${process.env.VERCEL_URL}/api/bot`)
 
 // Handle all incoming messages
 bot.on('message', async (msg) => {
@@ -24,7 +28,7 @@ bot.on('message', async (msg) => {
   }
 
   try {
-    let finalResult = { username, chatId, messageText, category, status: 'pending' }
+    let finalResult = { username, chatId, messageText, message_id: msg.message_id, category, status: 'pending' }
     let responseMessage = `Message received.`
 
     if (urlMatch) {
@@ -62,7 +66,7 @@ bot.on('callback_query', async (query) => {
   console.log(data)
   const category = data.split(':')[1]
   const updated = await AmaraBot.findOneAndUpdate(
-    { chatId, status: 'pending' }, // filter
+    { chatId, message_id: query.message.message_id, status: 'pending' }, // filter
     { category, status: 'saved' }, // update
     { new: true } // optional: return updated doc
   )
@@ -106,5 +110,9 @@ async function SendMessage(req, res) {
 }
 
 // --------------------------  DIVIDER  routers -----------------------------------------
-router.route('/message').post(SendMessage)
+// router.route('/message').post(SendMessage)
+router.route('/bot').post((req, res) => {
+  bot.processUpdate(req.body)
+  res.sendStatus(200)
+})
 module.exports = router
