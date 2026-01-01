@@ -85,11 +85,11 @@ bot.onText(/\/help/, (msg) => {
   bot.sendMessage(chatId, 'Just send me any text message and I will forward it to the Express server for processing.')
 })
 
-function isLocalhost() {
-  const isVercel = !!process.env.VERCEL
-  const isLocal = !isVercel
-  return isLocal
-}
+// function isLocalhost() {
+//   const isVercel = !!process.env.VERCEL
+//   const isLocal = !isVercel
+//   return isLocal
+// }
 
 // Endpoint to receive messages from Telegram bot
 async function SendMessage(req, res) {
