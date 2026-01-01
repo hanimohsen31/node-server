@@ -12,7 +12,7 @@ const categoryKeyboard = {
 }
 
 // Set webhook once (locally or in deploy script)
-bot.setWebHook(`https://node-server-seven-gamma.vercel.app/api/telegram/bot`)
+bot.setWebHook(`https://node-server-seven-gamma.vercel.app/telegram/bot`)
 
 // Handle all incoming messages
 bot.on('message', async (msg) => {
