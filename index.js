@@ -1,4 +1,3 @@
-// const { swaggerUi, swaggerSpec } = require('./modules/swagger/swagger')
 const ErrorHandler = require('./utils/ErrorHandler')
 const sanitize = require('express-mongo-sanitize')
 const rateLimit = require('express-rate-limit')
@@ -8,13 +7,21 @@ const helmet = require('helmet')
 const xss = require('xss-clean')
 const morgan = require('morgan')
 const dotenv = require('dotenv')
+const compression = require('compression');
 const cors = require('cors')
 const hpp = require('hpp')
 dotenv.config({ path: './.env' }) // environment variables
+const notifier = require('node-notifier')
+const { exec } = require('child_process')
 
 // ---------------------  DIVIDER  restarting app ---------------------------------------
 process.on('uncaughtException', (err) => {
   console.log('uncaughtException error', err)
+  process.exit(1)
+})
+
+process.on('unhandledRejection', (err) => {
+  console.error('unhandledRejection:', err)
   process.exit(1)
 })
 
@@ -24,7 +31,7 @@ const app = express()
 // middleware
 app.use(helmet()) // set security http headers
 app.use(cors({ origin: '*' })) // allow cors
-app.use(express.json({ limit: '3mb' })) // body parser and limit req body to 10 kb
+// app.use(express.json({ limit: '3mb' })) // body parser and limit req body to 10 kb
 app.use(sanitize()) // noSql injections security
 app.use(xss()) // clean html data security
 app.use(hpp({ whitelist: ['duration'] })) // prevent parameter pollution (clear dublicated params fileds)
@@ -32,33 +39,62 @@ app.use(morgan('dev')) // morgan dev lgos in terminal
 app.use(express.static(`${__dirname}/public`)) // serving static path
 app.use(express.static(`${__dirname}/dev-assets`)) // serving static path
 app.use(rateLimit({ max: 10000, windowMs: 60 * 60 * 1000, message: 'Requsets limit exceeded for this ip' })) // 100 request per hour
+app.use(compression());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // parse form data
+
+// ---------------------  DIVIDER  set NODE_ENV ---------------------------------------------
+/*
+ * run each time after windows installation this command
+ * set NODE_ENV=production
+ * or Linux / macOS
+ * NODE_ENV=production node app.js
+ */
+const isDev = process.env.NODE_ENV !== 'production'
+console.log(isDev ? "🧪 Development" : "🌐 Production", "Env");
 
 // ---------------------  DIVIDER  database ---------------------------------------------
-const DB = process.env.MONGO_CONNECT_URI
-mongoose.connect(DB, {}).then((con) => console.log('Mongo Connected'))
+let DB = isDev ? process.env.LOCAL_MONGO_CONNECT_URI : process.env.SERVER_MONGO_CONNECT_URI
+process.env.MONGO_CONNECT_URI = DB
+mongoose.connect(DB, {}).then((con) => console.log('📊 Mongo Connected On:', DB))
 
 // ---------------------  DIVIDER  routes -----------------------------------------------
-app.use('/', require('./modules/root/root-controller'))
-app.use('/auth', require('./modules/users/auth-routes'))
-app.use('/health-mate', require('./modules/health-mate/index'))
-// app.use('/cypress', require('./modules/cypress/cypress-routes'))
-app.use('/katana-summury', require('./modules/katana-summury/katana-summury-routes'))
-app.use('/katana-tracker', require('./modules/katana-tracker/katana-tracker-routes'))
-app.use('/katana-tests', require('./modules/katana-tests/date-response'))
-app.use('/kd-server/api/dashboards/export', require('./modules/katana-tests/katana-screenshot'))
-app.use('/ellaVibes', require('./modules/ellaVibes/market-routes'))
-app.use('/telegram', require('./modules/telegram/telegram-bot-routes'))
-
-// ---------------------  DIVIDER  middleware -------------------------------------------
+app.all('/', (req, res, next) => next(res.status(200).json({ message: 'Server Works' })))
+app.use('/auth', require('./modules/auth/auth-routes'))
+app.use('/ella-vibes', require('./modules/ella-vibes/market-routes'))
+app.use('/fba-automation', require('./modules/fba-automation/index'))
+app.use('/markdown', require('./modules/markdown/markdown-routes'))
+app.use('/dummy-data', require('./modules/learning/dummy-data'))
 app.all('*', (req, res, next) => next(ErrorHandler(res, null, 'Route not found', 404, null)))
+
+// ---------------------  DIVIDER  funcitons to run on start --------------------------------------
+function openMarkdownServer() {
+  // const start = process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'start' : 'xdg-open'
+  // exec(`${start} ${process.env.LOCAL_PORT}/markdown`)
+  console.log("📚 Start Markdown Viewer On:", `${process.env.LOCAL_PORT}/markdown`);
+}
+
+function startNotification() {
+  let repeatinTimeInMinutes = 15
+  setInterval(() => {
+    notifier.notify({
+      title: 'Hey Honey!',
+      message: 'Stand up, drink water, move a bit.',
+      wait: false,
+      sound: true,
+      // icon: 'C:\\path\\to\\icon.png', // absolute path
+      // sound: 'Ping', // or 'C:\\sounds\\my-sound.wav'
+    })
+  }, 60 * 1000 * repeatinTimeInMinutes)
+}
 
 // ---------------------  DIVIDER  export app -------------------------------------------
 // Start the server
-// server : http://127.0.0.1:5000
-let port = process.env.PORT || 5000
-// let host = "127.0.0.1";
-// // vercel
-// host = "https://node-server-seven-gamma.vercel.app"
-app.listen(port, () => {
-  console.log(`Server Started`)
+app.listen(process.env.PORT || 5000, () => {
+  console.log(`🚀 Server Started`)
+  /* By Default this will not work on vercil but just in case it is being hosted on any vbs server */
+  if (isDev) {
+    openMarkdownServer()
+    startNotification()
+  }
 })

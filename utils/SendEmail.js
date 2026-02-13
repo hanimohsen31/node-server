@@ -3,14 +3,12 @@ const Nodemailer = require('nodemailer')
 const { MailtrapTransport } = require('mailtrap')
 async function SendEmail(options) {
   const TOKEN = '4a682a2856618ff6f0fc742890226f8f'
-
   const transport = Nodemailer.createTransport(
     MailtrapTransport({
       token: TOKEN,
       testInboxId: 3148035,
     })
   )
-
   await transport
     .sendMail({
       from: {
