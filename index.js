@@ -13,6 +13,7 @@ const hpp = require('hpp')
 dotenv.config({ path: './.env' }) // environment variables
 const notifier = require('node-notifier')
 const { exec } = require('child_process')
+const fs = require('fs')
 
 // ---------------------  DIVIDER  restarting app ---------------------------------------
 process.on('uncaughtException', (err) => {
@@ -31,7 +32,8 @@ const app = express()
 // middleware
 app.use(helmet()) // set security http headers
 app.use(cors({ origin: '*' })) // allow cors
-// app.use(express.json({ limit: '3mb' })) // body parser and limit req body to 10 kb
+app.use(express.json({ limit: '3mb' })) // body parser and limit req body to 10 kb
+app.use(express.urlencoded({ extended: true })); // parse form data
 app.use(sanitize()) // noSql injections security
 app.use(xss()) // clean html data security
 app.use(hpp({ whitelist: ['duration'] })) // prevent parameter pollution (clear dublicated params fileds)
@@ -40,8 +42,6 @@ app.use(express.static(`${__dirname}/public`)) // serving static path
 app.use(express.static(`${__dirname}/dev-assets`)) // serving static path
 app.use(rateLimit({ max: 10000, windowMs: 60 * 60 * 1000, message: 'Requsets limit exceeded for this ip' })) // 100 request per hour
 app.use(compression());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true })); // parse form data
 
 // ---------------------  DIVIDER  set NODE_ENV ---------------------------------------------
 /*
@@ -75,24 +75,62 @@ function openMarkdownServer() {
 }
 
 function startNotification() {
-  let repeatinTimeInMinutes = 15
-  setInterval(() => {
-    notifier.notify({
-      title: 'Hey Honey!',
-      message: 'Stand up, drink water, move a bit.',
-      wait: false,
-      sound: true,
-      // icon: 'C:\\path\\to\\icon.png', // absolute path
-      // sound: 'Ping', // or 'C:\\sounds\\my-sound.wav'
-    })
-  }, 60 * 1000 * repeatinTimeInMinutes)
+  let doaa = fs.readFileSync("./public/Doaa.json", "utf-8");
+  doaa = JSON.parse(doaa);
+
+  // flatten categories
+  doaa = Object.entries(doaa).flatMap(([key, arr]) =>
+    arr.map(item => ({ ...item, zikrCategory: key.replace(/_/g, " "), }))
+  );
+
+  const used = new Set();
+  function getRandomDoaa() {
+    if (used.size === doaa.length) used.clear();
+    let i;
+    do {
+      i = Math.floor(Math.random() * doaa.length);
+    } while (used.has(i));
+    used.add(i);
+    return doaa[i];
+  }
+
+  const defaultNotification = {
+    title: "Hey Honey!",
+    message: "Stand up, drink water, move a bit.",
+    wait: false,
+    sound: true
+  };
+
+  const triggerNotification = (minutes, getNotification, isRtl = false) => {
+    setInterval(() => {
+      let notification = typeof getNotification === "function" ? getNotification() : defaultNotification;
+      // if (isRtl) notification = { ...notification, title: "\u200F" + notification.title, message: "\u200F" + notification.message };
+      notifier.notify(notification);
+    }, 60 * 1000 * minutes);
+  };
+
+  // Water reminder every 60 minutes
+  triggerNotification(60);
+
+  // Doaa reminder
+  triggerNotification(
+    10,
+    () => {
+      const randomDoaa = getRandomDoaa();
+      return { title: randomDoaa?.zikrCategory || "Doaa", message: randomDoaa?.zikr, wait: true, sound: false };
+    },
+    true
+  );
 }
 
 // ---------------------  DIVIDER  export app -------------------------------------------
 // Start the server
 app.listen(process.env.PORT || 5000, () => {
   console.log(`🚀 Server Started`)
-  /* By Default this will not work on vercil but just in case it is being hosted on any vbs server */
+  /* 
+   * By Default this will not work on vercil 
+   * but just in case it is being hosted on any vbs server 
+   */
   if (isDev) {
     openMarkdownServer()
     startNotification()
