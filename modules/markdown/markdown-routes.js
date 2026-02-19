@@ -6,7 +6,11 @@ const path = require('path')
 const hljs = require('highlight.js')
 const MarkdownIt = require('markdown-it')
 // const { exec } = require('child_process')
-const baseRoute = 'markdown'
+const baseRoute = 'markdown' // this for routing in node
+const htmlPageTitle = {
+  overAll: 'Overall',
+  fileViwer: 'File Viewer',
+}
 
 const md = new MarkdownIt({
   html: true,
@@ -22,45 +26,204 @@ const md = new MarkdownIt({
   },
 })
 
+// async function readFiles(folderPath = process.env.MARKDOWN_DIR_PATH) {
+//   try {
+//     const ROOT_DIR = path.isAbsolute(folderPath)
+//       ? folderPath
+//       : path.join(__dirname, folderPath)
+//     const files = fs
+//       .readdirSync(ROOT_DIR, { withFileTypes: true, })
+//       .filter((entry) => entry.isFile() && entry.name.endsWith('.md'))
+//       .map((entry) => entry.name)
+//       .filter((file) => file !== 'overall.md')
+//       .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+//     return { files, ROOT_DIR }
+//   } catch (err) {
+//     return { files: [], ROOT_DIR }
+//   }
+// }
+
+// Updated readFiles function (keeping the tree structure)
 async function readFiles(folderPath = process.env.MARKDOWN_DIR_PATH) {
   try {
-    // const ROOT_DIR = path.join(__dirname, folderPath)
     const ROOT_DIR = path.isAbsolute(folderPath)
       ? folderPath
       : path.join(__dirname, folderPath)
-    const files = fs
-      .readdirSync(ROOT_DIR, { withFileTypes: true, })
-      .filter((entry) => entry.isFile() && entry.name.endsWith('.md'))
-      .map((entry) => entry.name)
-      .filter((file) => file !== 'overall.md')
-      .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
-    return { files, ROOT_DIR }
+
+    // Recursive function to build tree structure
+    function buildTree(currentPath) {
+      const items = fs.readdirSync(currentPath, { withFileTypes: true })
+      const result = {
+        name: path.basename(currentPath),
+        path: currentPath,
+        type: 'directory',
+        children: []
+      }
+
+      // Separate directories and files
+      const directories = items.filter(item => item.isDirectory())
+      const files = items.filter(item =>
+        item.isFile() &&
+        item.name.endsWith('.md') &&
+        item.name !== 'overall.md'
+      )
+
+      // Add files to current directory
+      result.children.push(
+        ...files
+          .map(file => ({
+            name: file.name,
+            path: path.join(currentPath, file.name),
+            type: 'file'
+          }))
+          .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))
+      )
+
+      // Recursively process subdirectories
+      for (const dir of directories.sort((a, b) =>
+        a.name.localeCompare(b.name, undefined, { numeric: true })
+      )) {
+        const subDirPath = path.join(currentPath, dir.name)
+        const subDirTree = buildTree(subDirPath)
+        result.children.push(subDirTree)
+      }
+
+      return result
+    }
+
+    // Build the complete tree structure
+    const fileTree = buildTree(ROOT_DIR)
+
+    // Also maintain the flat list of all files for backward compatibility
+    const allFiles = []
+
+    function collectFiles(node) {
+      if (node.type === 'file') {
+        allFiles.push({
+          name: node.name,
+          path: node.path,
+          relativePath: path.relative(ROOT_DIR, node.path)
+        })
+      } else if (node.type === 'directory') {
+        node.children.forEach(child => collectFiles(child))
+      }
+    }
+
+    collectFiles(fileTree)
+
+    return {
+      files: allFiles.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true })),
+      fileTree, // Tree structure with all folders and files
+      ROOT_DIR
+    }
+
   } catch (err) {
-    return { files: [], ROOT_DIR }
+    return {
+      files: [],
+      fileTree: {
+        name: 'error',
+        path: '',
+        type: 'directory',
+        children: []
+      },
+      ROOT_DIR
+    }
   }
 }
 
+
 // ----------------  DIVIDER  apis ----------------------------------------------------------------
-// Home – list markdown files
+// Home – list markdown files with folder tree structure
 async function GetMarkdownList(req, res) {
-  const { files, ROOT_DIR } = await readFiles(req.params.folderPath)
-  let list = files.map((file) => `<li><a href="/${baseRoute}/view/${encodeURIComponent(file)}">${file}</a></li>`).join('')
-  list += `<li><a href="/${baseRoute}/view/overall">Overall (Live)</a></li>`
+  const { fileTree, ROOT_DIR, files } = await readFiles(req.params.folderPath)
+  
+  // Function to recursively build HTML tree
+  function buildTreeHTML(node, level = 0) {
+    if (node.type === 'file') {
+      const relativePath = path.relative(ROOT_DIR, node.path)
+      return `<li class="file-item" style="margin-left: ${level * 20}px">
+        <a href="/${baseRoute}/view/${encodeURIComponent(relativePath)}">${node.name}</a>
+      </li>`
+    } else {
+      // Directory node
+      let html = `<li class="directory-item" style="margin-left: ${level * 20}px">
+        <details ${level === 0 ? 'open' : ''}>
+          <summary class="directory-summary">
+            <span class="folder-icon">📁</span> ${node.name}
+          </summary>
+          <ul class="directory-children">
+      `
+      // Sort children to show directories first, then files
+      const sortedChildren = [...node.children].sort((a, b) => {
+        if (a.type !== b.type) return a.type === 'directory' ? -1 : 1 // Directories first
+        return a.name.localeCompare(b.name, undefined, { numeric: true })
+      })
+      sortedChildren.forEach(child => html += buildTreeHTML(child, level + 1))
+      html += `</ul></details></li>`
+      return html
+    }
+  }
+
+  // Build the tree HTML starting from root's children (skip the root node itself)
+  let treeHTML = ''
+  if (fileTree.children && fileTree.children.length > 0) {
+    const sortedRootChildren = [...fileTree.children].sort((a, b) => {
+      if (a.type !== b.type) return a.type === 'directory' ? -1 : 1 // Directories first
+      return a.name.localeCompare(b.name, undefined, { numeric: true })
+    })
+    treeHTML = sortedRootChildren.map(child => buildTreeHTML(child, 0)).join('')
+  }
+
+  // Also create flat list view option (can be toggled with CSS)
+  let flatList = files.map((file) =>
+    `<li><a href="/${baseRoute}/view/${encodeURIComponent(file.relativePath)}">${file.relativePath || file.name}</a></li>`
+  ).join('')
+
   let htmlContent = `
-  <div class='markdown-list-container'>
-    <h1>Markdown Files</h1>
-    ${files.length === 0 ? '<p>No markdown files found.</p>' : `<ul>${list}</ul>`}
-    <!-- <button id="createOverallBtn" class="btn btn-primary mt-3">Create Overall File</button> -->
-  </div>`
-  let hmtlTemplate = CreateBaseHtml('File Viewer', htmlContent)
-  res.send(hmtlTemplate)
+    <div class='markdown-list-container'>
+      <h1>Markdown Files</h1>
+      <div class="view-toggle mb-3">
+        <button class="btn btn-sm btn-outline-primary active" onclick="showTreeView()">Tree View</button>
+        <button class="btn btn-sm btn-outline-primary" onclick="showFlatView()">Flat View</button>
+      </div>
+      <div id="treeView" class="tree-view">
+        ${files.length === 0
+        ? '<p>No markdown files found.</p>'
+        : `<ul class="tree-list">${treeHTML}</ul>`
+      }
+      </div>
+      <div id="flatView" class="flat-view" style="display: none;">
+        ${files.length === 0
+        ? '<p>No markdown files found.</p>'
+        : `<ul class="flat-list">${flatList}</ul>`
+      }
+      </div>
+    </div>
+  `
+
+  let htmlTemplate = CreateBaseHtml(htmlPageTitle.fileViwer, htmlContent)
+  res.send(htmlTemplate)
 }
+// /* Plain one single folder */
+// async function GetMarkdownList(req, res) {
+//   const { files, ROOT_DIR } = await readFiles(req.params.folderPath)
+//   let list = files.map((file) => `<li><a href="/${baseRoute}/view/${encodeURIComponent(file)}">${file}</a></li>`).join('')
+//   list += `<li><a href="/${baseRoute}/view/overall">Overall (Live)</a></li>`
+//   let htmlContent = `
+//   <div class='markdown-list-container'>
+//     <h1>Markdown Files</h1>
+//     ${files.length === 0 ? '<p>No markdown files found.</p>' : `<ul>${list}</ul>`}
+//     <!-- <button id="createOverallBtn" class="btn btn-primary mt-3">Create Overall File</button> -->
+//   </div>`
+//   let hmtlTemplate = CreateBaseHtml(htmlPageTitle.fileViwer, htmlContent)
+//   res.send(hmtlTemplate)
+// }
 
 // View markdown file
 async function GetMarkdownFile(req, res) {
   const { files, ROOT_DIR } = await readFiles(req.params.folderPath)
   const fileName = req.params.file
-  if (fileName.toLowerCase() === 'overall') {
+  if (fileName.toLowerCase() === htmlPageTitle.overAll.toLowerCase()) {
     // Read and parse all files
     let contentHeaders = files
       .map((file) => `<a class="btn btn-primary flex-grow-1 text-center" style='text-decoration: none;' href="#${encodeURIComponent(file)}">${file.split('.')[0]}</a>`)
@@ -76,7 +239,7 @@ async function GetMarkdownFile(req, res) {
       .join('<hr />')
 
     let htmlContent = `<div class='markdown-body mx-auto bg-white text-black' dir="auto">${contentHeaders}${allContent}</div>`
-    let hmtlTemplate = CreateBaseHtml('OverAll', htmlContent)
+    let hmtlTemplate = CreateBaseHtml(htmlPageTitle.overAll, htmlContent)
 
     res.send(hmtlTemplate)
   } else {
@@ -102,9 +265,22 @@ async function CreateOverall(req, res) {
   res.send({ success: true, message: `overall.md created!`, file: 'overall.md' })
 }
 
+async function SetMarkdownPath(req, res) {
+  const { path: newPath } = req.body
+  if (!newPath) return res.status(400).send({ success: false, message: 'Path is required' })
+  try {
+    process.env.MARKDOWN_DIR_PATH = newPath
+    console.log("MARKDOWN_DIR_PATH Updated");
+    res.send({ success: true, message: `Markdown directory path updated to ${newPath}` })
+  } catch (err) {
+    res.status(500).send({ success: false, message: 'Error updating path' })
+  }
+}
+
 // ----------------  DIVIDER  routes -----------------------------------
 router.route('/').get(GetMarkdownList)
 router.route('/view/:file').get(GetMarkdownFile)
+router.route('/set-path').put(SetMarkdownPath)
 // router.route('/create-overall').post(CreateOverall)
 module.exports = router
 
@@ -170,6 +346,77 @@ const globalSyles = `
     }
     #goTopBtn:hover {
       background: #0b5ed7;
+    }
+  </style>
+  <style>
+    .tree-list, .directory-children {
+      list-style: none;
+      padding-left: 0;
+    }
+    
+    .directory-item {
+      margin: 4px 0;
+    }
+    
+    .directory-summary {
+      cursor: pointer;
+      padding: 4px 8px;
+      background-color: #f5f5f5;
+      border-radius: 4px;
+      display: inline-block;
+      min-width: 200px;
+    }
+    
+    .directory-summary:hover {
+      background-color: #e9e9e9;
+    }
+    
+    .folder-icon {
+      margin-right: 5px;
+    }
+    
+    .file-item {
+      margin: 2px 0;
+      padding: 2px 8px;
+    }
+    
+    .file-item a {
+      text-decoration: none;
+      color: #0366d6;
+    }
+    
+    .file-item a:hover {
+      text-decoration: underline;
+    }
+    
+    .directory-children {
+      margin-top: 5px;
+    }
+    
+    .view-toggle {
+      margin-bottom: 20px;
+    }
+    
+    .view-toggle .btn {
+      margin-right: 5px;
+    }
+    
+    .flat-list {
+      list-style: none;
+      padding-left: 0;
+    }
+    
+    .flat-list li {
+      padding: 2px 0;
+    }
+    
+    .flat-list a {
+      text-decoration: none;
+      color: #0366d6;
+    }
+    
+    .flat-list a:hover {
+      text-decoration: underline;
     }
   </style>
 `
@@ -249,6 +496,44 @@ const globalScripts = `
       })
     }
   </script>
+
+  <script>
+    const setPathBtn = document.getElementById('setPathBtn')
+    if(setPathBtn) {
+      setPathBtn.addEventListener('click', () => {
+        const setPathBtnInput = document.getElementById('setPathBtnInput')
+        fetch('${baseRoute}/set-path', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            path: setPathBtnInput.value,
+          })
+        })
+          .then(res => res.json())
+          .then(data => console.log(data))
+          .then(data => window.location.reload())
+          .catch(err => console.error(err));
+      })
+    }
+  </script>
+
+  <script>
+    function showTreeView() {
+      document.getElementById('treeView').style.display = 'block';
+      document.getElementById('flatView').style.display = 'none';
+      document.querySelectorAll('.view-toggle .btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelector('.view-toggle .btn:first-child').classList.add('active');
+    }
+    
+    function showFlatView() {
+      document.getElementById('treeView').style.display = 'none';
+      document.getElementById('flatView').style.display = 'block';
+      document.querySelectorAll('.view-toggle .btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelector('.view-toggle .btn:last-child').classList.add('active');
+    }
+  </script>
 `
 
 const navbar = (fileName = '') => `
@@ -266,6 +551,18 @@ const navbar = (fileName = '') => `
   </nav>
 `
 
+const htmlInputForBase = () => `
+  <div class="container d-flex flex-column gap-3 pt-3">
+    <div class="w-100">
+      <label for="setPathBtnInput">Password</label>
+      <input type="text" class="form-control" id="setPathBtnInput" placeholder="Directory Path" value="${process.env.MARKDOWN_DIR_PATH}">
+    </div>
+    <div class="d-flex justify-content-end">
+      <button type="submit" class="btn btn-primary mb-3" id="setPathBtn" >SUBMIT</button>
+    </div>
+  </div>
+`
+
 function CreateBaseHtml(pageTitle = '', content = '', scripts = '') {
   return `
   <!doctype html>
@@ -278,6 +575,7 @@ function CreateBaseHtml(pageTitle = '', content = '', scripts = '') {
   </head>
   <body>
       ${navbar(pageTitle)}
+      ${pageTitle.toLowerCase() === htmlPageTitle.fileViwer.toLowerCase() ? htmlInputForBase() : ""}
       <div class="container py-3">${content}</div>
       <button id="goTopBtn" aria-label="Go to top">↑</button>
       ${globalScripts}
