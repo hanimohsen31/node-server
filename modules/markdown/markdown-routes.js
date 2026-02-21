@@ -26,22 +26,22 @@ const md = new MarkdownIt({
   },
 })
 
-// async function readFiles(folderPath = process.env.MARKDOWN_DIR_PATH) {
-//   try {
-//     const ROOT_DIR = path.isAbsolute(folderPath)
-//       ? folderPath
-//       : path.join(__dirname, folderPath)
-//     const files = fs
-//       .readdirSync(ROOT_DIR, { withFileTypes: true, })
-//       .filter((entry) => entry.isFile() && entry.name.endsWith('.md'))
-//       .map((entry) => entry.name)
-//       .filter((file) => file !== 'overall.md')
-//       .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
-//     return { files, ROOT_DIR }
-//   } catch (err) {
-//     return { files: [], ROOT_DIR }
-//   }
-// }
+async function readSingleDirFiles(folderPath = process.env.MARKDOWN_DIR_PATH) {
+  try {
+    const ROOT_DIR = path.isAbsolute(folderPath)
+      ? folderPath
+      : path.join(__dirname, folderPath)
+    const files = fs
+      .readdirSync(ROOT_DIR, { withFileTypes: true, })
+      .filter((entry) => entry.isFile() && entry.name.endsWith('.md'))
+      .map((entry) => entry.name)
+      .filter((file) => file !== 'overall.md')
+      .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+    return { files, ROOT_DIR }
+  } catch (err) {
+    return { files: [], ROOT_DIR }
+  }
+}
 
 // Updated readFiles function (keeping the tree structure)
 async function readFiles(folderPath = process.env.MARKDOWN_DIR_PATH) {
@@ -136,7 +136,7 @@ async function readFiles(folderPath = process.env.MARKDOWN_DIR_PATH) {
 // Home – list markdown files with folder tree structure
 async function GetMarkdownList(req, res) {
   const { fileTree, ROOT_DIR, files } = await readFiles(req.params.folderPath)
-  
+
   // Function to recursively build HTML tree
   function buildTreeHTML(node, level = 0) {
     if (node.type === 'file') {
@@ -188,15 +188,15 @@ async function GetMarkdownList(req, res) {
       </div>
       <div id="treeView" class="tree-view">
         ${files.length === 0
-        ? '<p>No markdown files found.</p>'
-        : `<ul class="tree-list">${treeHTML}</ul>`
-      }
+      ? '<p>No markdown files found.</p>'
+      : `<ul class="tree-list">${treeHTML}</ul>`
+    }
       </div>
       <div id="flatView" class="flat-view" style="display: none;">
         ${files.length === 0
-        ? '<p>No markdown files found.</p>'
-        : `<ul class="flat-list">${flatList}</ul>`
-      }
+      ? '<p>No markdown files found.</p>'
+      : `<ul class="flat-list">${flatList}</ul>`
+    }
       </div>
     </div>
   `
@@ -204,6 +204,7 @@ async function GetMarkdownList(req, res) {
   let htmlTemplate = CreateBaseHtml(htmlPageTitle.fileViwer, htmlContent)
   res.send(htmlTemplate)
 }
+
 // /* Plain one single folder */
 // async function GetMarkdownList(req, res) {
 //   const { files, ROOT_DIR } = await readFiles(req.params.folderPath)
@@ -294,6 +295,7 @@ const highlight = {
 }
 
 const globalSyles = `
+  <!--  
   <link
     href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap"
     rel="stylesheet"
@@ -307,6 +309,12 @@ const globalSyles = `
   />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css">
   <link rel="stylesheet" href="${highlight.dark}">
+  -->
+  <style> ${fs.readFileSync(path.join(__dirname, '../../public/assets', 'fonts.css'))} </style>
+  <style> ${fs.readFileSync(path.join(__dirname, '../../public/assets', 'bootstrap.min.css'))} </style>
+  <style> ${fs.readFileSync(path.join(__dirname, '../../public/assets', 'github-markdown.min.css'))} </style>
+  <style> ${fs.readFileSync(path.join(__dirname, '../../public/assets', 'vs2015.min.css'))} </style>
+
   <style>
   *{
     box-sizing: border-box;
@@ -422,6 +430,7 @@ const globalSyles = `
 `
 
 const globalScripts = ` 
+  <!--  
   <script
     src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"
     integrity="sha512-7Pi/otdlbbCR+LnW+F7PwFcSDJOuUJB3OxtEHbg4vSMvzvJjde4Po1v4BR9Gdc9aXNUNFVUY+SK51wWT8WF0Gg=="
@@ -429,6 +438,11 @@ const globalScripts = `
     referrerpolicy="no-referrer"
   ></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+  -->
+
+  <script> ${fs.readFileSync(path.join(__dirname, '../../public/assets', 'bootstrap.bundle.min.js'))} </script>
+  <script> ${fs.readFileSync(path.join(__dirname, '../../public/assets', 'highlight.min.js'))} </script>
+
   <script>
     function startsWithArabic(text) {
       if (!text) return false;
@@ -536,14 +550,19 @@ const globalScripts = `
   </script>
 `
 
+
+
 const navbar = (fileName = '') => `
   <nav class="navbar navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid">
       <a class="navbar-brand" href="/${baseRoute}">Home</a>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
+        ${fileName !== htmlPageTitle.fileViwer ?
+    `<li class="nav-item"><a class="nav-link" href="#" onclick="history.back()">Back</a></li>` :
+    ''}
           <li class="nav-item">
-            <a class="nav-link" href="#">${fileName.split('.')[0].toUpperCase()}</a>
+            <a class="nav-link" href="#">${fileName.split('.')[0].toUpperCase().split('\\').at(-1)}</a>
           </li>
         </ul>
       </div>

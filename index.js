@@ -92,14 +92,23 @@ if (isDev) {
 
 // ---------------------  DIVIDER  database ---------------------------------------------
 async function connectWithRetry(uri, retries = 3, delay = 2000) {
+  // ✅ Guard: never connect twice
+  if (mongoose.connection.readyState === 1) {
+    console.log("⚡ Mongoose already connected, skipping.")
+    return true
+  }
   for (let i = 1; i <= retries; i++) {
     try {
       await mongoose.connect(uri, {});
+      // 2. Handle post-connection errors (This fixes the unhandledRejection)
+      mongoose.connection.on('error', (err) => {
+        console.error('🚨 Mongoose connection error:', err);
+      });
       process.env.MONGO_CONNECT_URI = uri
       console.log("📊 Mongo Connected On:", uri);
       return true;
     } catch (err) {
-      console.error(`❌ Mongo connect failed (${i}/${retries})`);
+      console.error(`❌ Mongo connect failed (${i}/${retries}):`, err.message)
       if (i === retries) return false;
       await new Promise(r => setTimeout(r, delay));
     }
@@ -112,10 +121,12 @@ async function initDatabase() {
       await new Promise(resolve => {
         exec('net start MongoDB', (err, stdout) => {
           if (err) {
-            console.log('MongoDB service may already be running or not installed.');
-            return resolve();
+            if (err) console.log('ℹ️ MongoDB service check (may already be running).');
+            else console.log('✅ MongoDB service start command issued.');
+            // Wait a bit for service to initialize if it was just started
+            setTimeout(resolve, 3000);
           }
-          console.log('stdout', stdout);
+          // console.log('stdout', stdout);
           setTimeout(resolve, 3000); // allow DB to fully boot
         });
       });
@@ -142,7 +153,7 @@ async function initDatabase() {
 
 // ---------------------  DIVIDER  routes -----------------------------------------------
 function applyRoutes() {
-  app.all('/', (req, res, next) => next(res.status(200).json({ message: 'Server Works' })))
+  app.all('/', (req, res) => res.status(200).json({ message: 'Server Works' }))
   app.use('/auth', require('./modules/auth/auth-routes'))
   app.use('/ella-vibes', require('./modules/ella-vibes/market-routes'))
   app.use('/fba-automation', require('./modules/fba-automation/index'))
@@ -218,7 +229,9 @@ function startNotification() {
 // Start the server
 app.listen(process.env.PORT || 5000, async () => {
   console.log(`🚀 Server Started`)
+  // await new Promise(r => setTimeout(r, 5_000));
   await initDatabase()
+  // await new Promise(r => setTimeout(r, 5_000));
   applyRoutes()
   /* 
    * By Default this will not work on vercil 
