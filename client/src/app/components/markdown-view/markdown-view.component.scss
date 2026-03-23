@@ -1,0 +1,109 @@
+:host {
+  // width: 100%;
+}
+
+::ng-deep .safeHtml-container {
+  margin: auto;
+  height: calc(100vh - 70px);
+  overflow-y: auto;
+  padding: 20px 12.5vw;
+  unicode-bidi: plaintext;
+  direction: auto;
+  background-color: #fff !important;
+  margin-left: auto;
+  margin-right: auto;
+  color: #000;
+  *:not(img) {
+    unicode-bidi: plaintext;
+    direction: auto;
+    width: 100%;
+  }
+  table {
+    th,
+    tr,
+    td {
+      background-color: transparent !important;
+    }
+  }
+  blockquote {
+    color: #3d1e24 !important;
+  }
+
+  .hljs {
+    padding: 15px;
+    border-radius: 10px;
+  }
+}
+
+::ng-deep .safeHtml-container > * {
+  unicode-bidi: plaintext;
+  direction: auto;
+}
+
+/* --------------------------  DIVIDER  markdown ---------------------------------------- */
+#goTopBtn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 50%;
+  background: #0d6efd;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 1000;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  transition: all 0.3s ease;
+  &:hover {
+    background: #0b5ed7;
+  }
+}
+
+::ng-deep #mini-map {
+  position: fixed;
+  right: 20px;
+  top: 80px;
+  z-index: 9999;
+  height: fit-content;
+  max-height: calc(100vh - 140px);
+  .items-container {
+    display: none;
+  }
+  .spans-container {
+    max-height: calc(50vh);
+    overflow: hidden;
+    text-align: end;
+    direction: rtl;
+    div {
+      height: 5px;
+      background-color: crimson;
+      margin-bottom: 5px;
+      opacity: 0.7;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+  }
+  &:hover {
+    border: 1px solid #ccc;
+    background: rgba(255, 255, 255, 0.9);
+    overflow-y: auto;
+    border-radius: 10px;
+    .items-container {
+      display: flex;
+      width: 200px;
+      flex-direction: column;
+      div {
+        padding: 5px;
+        &:hover {
+          background-color: #ddd;
+          border-radius: 5px;
+        }
+      }
+    }
+    .spans-container {
+      display: none;
+    }
+  }
+}

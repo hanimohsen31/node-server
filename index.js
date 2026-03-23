@@ -14,6 +14,7 @@ dotenv.config({ path: './.env' }) // environment variables
 const notifier = require('node-notifier')
 const { exec } = require('child_process')
 const fs = require('fs')
+const path = require('path')
 
 // ---------------------  DIVIDER  set NODE_ENV ---------------------------------------------
 /*
@@ -33,7 +34,7 @@ process.on('uncaughtException', (err) => {
 
 process.on('unhandledRejection', (err) => {
   console.error('unhandledRejection:', err)
-  process.exit(1)
+  // process.exit(1)
 })
 
 // ---------------------  DIVIDER  adding app -------------------------------------------
@@ -53,38 +54,39 @@ app.use(rateLimit({ max: 10000, windowMs: 60 * 60 * 1000, message: 'Requsets lim
 app.use(compression());
 if (isDev) {
   app.use(
-    helmet.contentSecurityPolicy({
-      directives: {
-        defaultSrc: ["'self'"],
-        scriptSrc: [
-          "'self'",
-          "https://cdnjs.cloudflare.com",
-          "'unsafe-inline'",
-        ],
-        scriptSrcAttr: ["'unsafe-inline'"],
-
-        styleSrc: [
-          "'self'",
-          "https://cdnjs.cloudflare.com",
-          "https://fonts.googleapis.com",
-          "'unsafe-inline'",
-        ],
-        fontSrc: [
-          "'self'",
-          "https://fonts.gstatic.com"
-        ],
-        connectSrc: [
-          "'self'",
-          "https://cdnjs.cloudflare.com"
-        ],
-        imgSrc: [
-          "'self'",
-          "data:",
-          "https:"
-        ],
-        objectSrc: ["'none'"]
-      }
-    })
+    // helmet.contentSecurityPolicy({
+    //   directives: {
+    //     defaultSrc: ["'self'"],
+    //     scriptSrc: [
+    //       "'self'",
+    //       'unsafe-eval',
+    //       "https://cdnjs.cloudflare.com",
+    //       "'unsafe-inline'",
+    //     ],
+    //     scriptSrcAttr: ["'unsafe-inline'"],
+    //     styleSrc: [
+    //       "'self'",
+    //       "https://cdnjs.cloudflare.com",
+    //       "https://fonts.googleapis.com",
+    //       "'unsafe-inline'",
+    //     ],
+    //     fontSrc: [
+    //       "'self'",
+    //       "https://fonts.gstatic.com"
+    //     ],
+    //     connectSrc: [
+    //       "'self'",
+    //       "https://cdnjs.cloudflare.com"
+    //     ],
+    //     imgSrc: [
+    //       "'self'",
+    //       "data:",
+    //       "https:"
+    //     ],
+    //     objectSrc: ["'none'"]
+    //   }
+    // }),
+    helmet({ contentSecurityPolicy: false })
   );
 } else {
   app.use(helmet()) // set security http headers
@@ -157,7 +159,7 @@ function applyRoutes() {
   app.use('/auth', require('./modules/auth/auth-routes'))
   app.use('/ella-vibes', require('./modules/ella-vibes/market-routes'))
   app.use('/fba-automation', require('./modules/fba-automation/index'))
-  app.use('/markdown', require('./modules/markdown/markdown-routes'))
+  app.use('/markdown', require('./modules/markdown/index'))
   app.use('/ai', require('./modules/ai/index'))
   app.all('*', (req, res, next) => next(ErrorHandler(res, null, 'Route not found', 404, null)))
 }
@@ -166,7 +168,19 @@ function applyRoutes() {
 function openMarkdownServer() {
   // const start = process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'start' : 'xdg-open'
   // exec(`${start} ${process.env.LOCAL_PORT}/markdown`)
-  console.log("📚 Start Markdown Viewer On:", `${process.env.LOCAL_PORT}/markdown`);
+  console.log("📚 Start Markdown Viewer V1 On:", `${process.env.LOCAL_PORT}/markdown`);
+  console.log("📚 Start Markdown Viewer V2 On:", `http://localhost:5000/`);
+  // Serve Angular app (both dev & prod)
+  const angularPath = path.join(__dirname, 'client', 'dist', 'client-markdown', 'browser');
+  app.use(express.static(angularPath));
+  // 3. Catch-all for Angular routing (skip APIs)
+  app.get('*', (req, res, next) => {
+    const apiPrefixes = ['/auth', '/markdown', '/ella-vibes', '/fba-automation', '/ai'];
+    if (apiPrefixes.some(prefix => req.originalUrl.startsWith(prefix))) {
+      return next(); // let API route handle it
+    }
+    res.sendFile(path.join(angularPath, 'index.html'));
+  });
 }
 
 function startNotification() {
@@ -227,6 +241,7 @@ function startNotification() {
 
 // ---------------------  DIVIDER  export app -------------------------------------------
 // Start the server
+openMarkdownServer()
 app.listen(process.env.PORT || 5000, async () => {
   console.log(`🚀 Server Started`)
   // await new Promise(r => setTimeout(r, 5_000));
@@ -238,7 +253,7 @@ app.listen(process.env.PORT || 5000, async () => {
    * but just in case it is being hosted on any vbs server 
    */
   if (isDev) {
-    openMarkdownServer()
+    // openMarkdownServer()
     startNotification()
   }
 })

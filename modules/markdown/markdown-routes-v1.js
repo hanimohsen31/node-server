@@ -550,8 +550,6 @@ const globalScripts = `
   </script>
 `
 
-
-
 const navbar = (fileName = '') => `
   <nav class="navbar navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid">

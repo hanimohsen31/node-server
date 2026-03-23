@@ -1,0 +1,7 @@
+<div
+  #contentContainer
+  class="safeHtml-container markdown-body"
+  [innerHTML]="safeHtml"
+  [style.width]="'calc(100vw - ' + (isSidebarOpen ? '250px' : '0px') + ')'"
+></div>
+<!-- <button id="goTopBtn" [style.display]="isVisible ? 'block' : 'none'" (click)="scrollToTop()">↑</button> -->

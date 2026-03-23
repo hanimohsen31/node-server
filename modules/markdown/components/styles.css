@@ -1,0 +1,152 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: space-between;
+  margin: 0;
+}
+
+.wrapper {
+  display: flex;
+}
+
+/* --------------------------  DIVIDER  siderbar ---------------------------------------- */
+.sidebar-filler {
+  width: 275px;
+  height: 100vh;
+}
+
+.markdown-list-container {
+  width: 275px;
+  /* background: crimson; */
+  color: white;
+  position: fixed;
+  left: 0;
+  height: 100vh;
+  overflow: auto;
+  overflow-x: hidden;
+}
+
+.sidebar li {
+}
+
+/* --------------------------  DIVIDER  markdown ---------------------------------------- */
+.markdown-body {
+  unicode-bidi: plaintext;
+  direction: auto;
+  background-color: #fff !important;
+  margin-left: auto;
+  margin-right: auto;
+  color: #000;
+}
+
+.markdown-body > * {
+  unicode-bidi: plaintext;
+  direction: auto;
+}
+
+.markdown-body table th,
+.markdown-body table tr,
+.markdown-body table td {
+  background-color: transparent !important;
+}
+
+.markdown-body blockquote {
+  color: #3d1e24 !important;
+}
+
+#goTopBtn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 50%;
+  background: #0d6efd;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  display: none;
+  z-index: 1000;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  transition: all 0.3s ease;
+}
+
+#goTopBtn:hover {
+  background: #0b5ed7;
+}
+
+.tree-list,
+.directory-children {
+  list-style: none;
+  padding-left: 0;
+}
+
+.directory-item {
+  margin: 4px 0;
+}
+
+.directory-summary {
+  cursor: pointer;
+  padding: 4px 8px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  display: inline-block;
+  min-width: 200px;
+}
+
+.directory-summary:hover {
+  background-color: #e9e9e9;
+}
+
+.folder-icon {
+  margin-right: 5px;
+}
+
+.file-item {
+  margin: 2px 0;
+  padding: 2px 8px;
+}
+
+.file-item a {
+  text-decoration: none;
+  color: #0366d6;
+}
+
+.file-item a:hover {
+  text-decoration: underline;
+}
+
+.directory-children {
+  margin-top: 5px;
+}
+
+.view-toggle {
+  margin-bottom: 20px;
+}
+
+.view-toggle .btn {
+  margin-right: 5px;
+}
+
+.flat-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.flat-list li {
+  padding: 2px 0;
+}
+
+.flat-list a {
+  text-decoration: none;
+  color: #0366d6;
+}
+
+.flat-list a:hover {
+  text-decoration: underline;
+}

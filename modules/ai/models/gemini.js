@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const ErrorHandler = require('../../utils/ErrorHandler')
+const ErrorHandler = require('../../../utils/ErrorHandler')
 const { GoogleGenAI } = require("@google/genai");
 const API_KEY = 'AIzaSyDauiMlfEQHG-9xopSNtFUM_9W6zrUtuAM'
 const ai = new GoogleGenAI({ apiKey: API_KEY });

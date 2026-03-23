@@ -1,11 +1,11 @@
 const express = require('express')
 const router = express.Router()
 
-router.use('/gemini', require('./gemini'))
-router.use('/cerebras', require('./cerebras'))
-router.use('/groq', require('./groq'))
-router.use('/mistral', require('./mistral'))
-router.use('/zai', require('./zai'))
-router.use('/claude', require('./claude'))
+router.use('/gemini', require('./models/gemini'))
+router.use('/cerebras', require('./models/cerebras'))
+router.use('/groq', require('./models/groq'))
+router.use('/mistral', require('./models/mistral'))
+router.use('/zai', require('./models/zai'))
+router.use('/claude', require('./models/claude'))
 
 module.exports = router

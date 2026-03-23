@@ -1,0 +1,47 @@
+aside {
+  position: relative;
+  width: 250px;
+  height: 100vh;
+  background: #1e293b;
+  color: white;
+  transition: width 0.3s ease;
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  &.closed {
+    width: 0;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    li {
+      cursor: pointer;
+      .tree-node {
+        padding: 0;
+      }
+      .directory-node {
+        padding: 5px;
+        padding-left: 10px;
+        display: flex;
+        gap: 5px;
+      }
+      .file-node {
+        padding: 5px;
+        padding-left: 20px;
+        display: flex;
+        gap: 5px;
+        &:hover {
+          background-color: rgba(106, 106, 230,0.7);
+        }
+        &.active {
+          background-color: rgb(106, 106, 230);
+        }
+      }
+      a {
+        color: white;
+        text-decoration: none;
+      }
+    }
+  }
+}

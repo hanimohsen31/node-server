@@ -1,0 +1,52 @@
+<aside [class.closed]="!isOpen">
+  <div
+    class="logo d-flex align-items-center justify-content-center w-100 pt-3 fw-bold"
+    style="font-size: 18px"
+  >
+    Markdown Files
+  </div>
+  @if (tree && tree.children && tree.children.length) {
+    <ul class="tree-root">
+      @for (node of tree.children; track $index) {
+        <ng-template
+          [ngTemplateOutlet]="recursiveTemplate"
+          [ngTemplateOutletContext]="{ $implicit: node }"
+        ></ng-template>
+      }
+    </ul>
+  } @else {
+    <p class="empty">No markdown files found.</p>
+  }
+</aside>
+
+<!-- Recursive Template -->
+<ng-template #recursiveTemplate let-node>
+  <li class="tree-node">
+    @if (isDirectory(node)) {
+      <div class="node directory directory-node" (click)="toggle(node)">
+        <span class="icon">{{ node.expanded ? '📂' : '📁' }}</span>
+        <span>{{ node.name }}</span>
+      </div>
+    } @else {
+      <div
+        class="node file file-node hover-item"
+        [class.active]="currentActiveFile?.name === node.name"
+        (click)="onFileClick(node)"
+      >
+        <span class="icon">📄</span>
+        <span>{{ node.name }}</span>
+      </div>
+    }
+    <!-- Children -->
+    @if (node.children && node.expanded) {
+      <ul>
+        @for (child of node.children; track $index) {
+          <ng-template
+            [ngTemplateOutlet]="recursiveTemplate"
+            [ngTemplateOutletContext]="{ $implicit: child }"
+          ></ng-template>
+        }
+      </ul>
+    }
+  </li>
+</ng-template>

@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const ErrorHandler = require('../../utils/ErrorHandler')
+const ErrorHandler = require('../../../utils/ErrorHandler')
 
 async function AskZAI(req, res) {
     let { role, content } = req.body;
