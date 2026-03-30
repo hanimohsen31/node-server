@@ -10,6 +10,7 @@ export class StoreService {
   currentViewedMarkdown$ = new BehaviorSubject('');
   currentSelectedFile$ = new BehaviorSubject<any>(null);
   sidebarToggled$ = new BehaviorSubject<boolean>(false);
+  miniMapView$ = new BehaviorSubject<boolean>(false);
 
   constructor(private httpClient: HttpClient) {
     let savedValue = localStorage.getItem('markdownSidebar');
@@ -28,6 +29,11 @@ export class StoreService {
     if (savedFile) {
       this.currentSelectedFile$.next(JSON.parse(savedFile));
     }
+
+    let savedMiniMap = localStorage.getItem('markdownMiniMap');
+    if (savedMiniMap) {
+      this.miniMapView$.next(JSON.parse(savedMiniMap));
+    }
   }
 
   updateCurrentViewedMarkdown(markdown: string) {
@@ -43,6 +49,12 @@ export class StoreService {
     let currentValue = this.sidebarToggled$.getValue();
     this.sidebarToggled$.next(!currentValue);
     localStorage.setItem('markdownSidebar', `${!currentValue}`);
+  }
+
+  toggleMiniMap() {
+    let currentValue = this.miniMapView$.getValue();
+    this.miniMapView$.next(!currentValue);
+    localStorage.setItem('markdownMiniMap', `${!currentValue}`);
   }
 
   // responnse json

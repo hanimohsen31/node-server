@@ -2,8 +2,9 @@ aside {
   position: relative;
   width: 250px;
   height: 100vh;
-  background: #1e293b;
-  color: white;
+  // color: white;
+  // background: #1e293b;
+  background-color: #e9ecf1;
   transition: width 0.3s ease;
   overflow-x: hidden;
   overflow-y: auto;
@@ -21,21 +22,29 @@ aside {
         padding: 0;
       }
       .directory-node {
-        padding: 5px;
-        padding-left: 10px;
         display: flex;
         gap: 5px;
       }
       .file-node {
-        padding: 5px;
-        padding-left: 20px;
         display: flex;
         gap: 5px;
+      }
+      .node {
+        padding: 5px;
+        padding-left: 20px;
         &:hover {
-          background-color: rgba(106, 106, 230,0.7);
+          background-color: rgba(106, 106, 230, 0.7);
+          color: #fff;
+          img {
+            filter: invert(0);
+          }
         }
         &.active {
           background-color: rgb(106, 106, 230);
+          color: #fff;
+          img {
+            filter: invert(0);
+          }
         }
       }
       a {
@@ -43,5 +52,16 @@ aside {
         text-decoration: none;
       }
     }
+  }
+
+  img {
+    filter: invert(0.7);
+  }
+
+  .text-trim {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    width: 80%;
+    overflow: hidden;
   }
 }

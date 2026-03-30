@@ -1,7 +1,63 @@
-<div
-  #contentContainer
-  class="safeHtml-container markdown-body"
-  [innerHTML]="safeHtml"
-  [style.width]="'calc(100vw - ' + (isSidebarOpen ? '250px' : '0px') + ')'"
-></div>
-<!-- <button id="goTopBtn" [style.display]="isVisible ? 'block' : 'none'" (click)="scrollToTop()">↑</button> -->
+<div class="d-flex">
+  <div
+    #contentContainer
+    class="safeHtml-container markdown-body mx-auto"
+    [class.all-collapsed]="!isMiniMapOpen && !isSidebarOpen"
+    [class.default]="!isMiniMapOpen"
+    [class.fixed]="isMiniMapOpen"
+    [innerHTML]="safeHtml"
+    [style.width]="'calc(100vw - ' + (isSidebarOpen ? '250px' : '0px') + ')'"
+  ></div>
+
+  @if (miniMapItems.length) {
+    <div id="mini-map" [class.default]="!isMiniMapOpen" [class.fixed]="isMiniMapOpen">
+      <span class="mini-map-toggler fw-bold" (click)="toggleMiniMap()">
+        @if (isMiniMapOpen) {
+          Content
+        } @else {
+          Expand
+        }
+      </span>
+      <div class="items" [class.default]="!isMiniMapOpen" [class.fixed]="isMiniMapOpen">
+        @if (!isMiniMapOpen) {
+          <div class="items-container default">
+            @for (item of miniMapItems; track $index) {
+              <div
+                class="mini-item"
+                [style.fontWeight]="getFontWeight(item)"
+                [style.fontSize]="getFontSize(item)"
+                [title]="getCleanTitle(item)"
+                (click)="scrollTo(item)"
+              >
+                {{ getDisplayTitle(item) }}
+              </div>
+            }
+          </div>
+          <div class="spans-container">
+            @for (item of miniMapItems; track $index) {
+              <div class="mini-span" [style.width]="getSpanWidth(item)"></div>
+            }
+          </div>
+        } @else {
+          <div class="items-container fixed">
+            @for (item of miniMapItems; track $index) {
+              <div
+                class="mini-item"
+                [style.fontWeight]="getFontWeight(item)"
+                [style.fontSize]="getFontSize(item)"
+                [title]="getCleanTitle(item)"
+                (click)="scrollTo(item)"
+              >
+                {{ getDisplayTitle(item) }}
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <button id="goTopBtn" [style.display]="isVisible ? 'block' : 'none'" (click)="scrollToTop()">
+    ↑
+  </button>
+</div>

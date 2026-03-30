@@ -1,6 +1,6 @@
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { StoreService } from './../store.service';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-navbar',
@@ -10,14 +10,23 @@ import { Component, OnInit } from '@angular/core';
 })
 export class NavbarComponent implements OnInit {
   isSidebarOpen: boolean = true;
-  constructor(private storeService: StoreService) {}
+  breadCrumbs: string[] = [];
+
+  constructor(private storeService: StoreService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
-   this.storeService.sidebarToggled$.subscribe({
-     next: (res: boolean) => {
-       this.isSidebarOpen = res;
-     },
-   })
+    this.storeService.sidebarToggled$.subscribe({
+      next: (res: boolean) => {
+        this.isSidebarOpen = res;
+        this.cdr.detectChanges();
+      },
+    });
+    this.storeService.currentSelectedFile$.subscribe({
+      next: (res: any) => {
+        this.breadCrumbs = res.path.split('D:\\Projects\\Markdown')[1].slice(1).split('\\');
+        this.cdr.detectChanges();
+      },
+    });
   }
 
   toggleSidebar() {

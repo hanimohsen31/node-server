@@ -24,22 +24,30 @@
   <li class="tree-node">
     @if (isDirectory(node)) {
       <div class="node directory directory-node" (click)="toggle(node)">
-        <span class="icon">{{ node.expanded ? '📂' : '📁' }}</span>
-        <span>{{ node.name }}</span>
+        <span class="icon">
+          @if (node.expanded) {
+            <img src="assets/images/folder_open.svg" alt="" />
+          } @else {
+            <img src="assets/images/folder.svg" alt="" />
+          }
+        </span>
+        <span class="text-trim">{{ node.name }}</span>
       </div>
     } @else {
       <div
-        class="node file file-node hover-item"
+        class="node file file-node hover-item "
         [class.active]="currentActiveFile?.name === node.name"
         (click)="onFileClick(node)"
       >
-        <span class="icon">📄</span>
-        <span>{{ node.name }}</span>
+        <span class="icon">
+          <img src="assets/images/docs.svg" alt="" />
+        </span>
+        <span class="text-trim">{{ node.name }}</span>
       </div>
     }
     <!-- Children -->
     @if (node.children && node.expanded) {
-      <ul>
+      <ul class="ms-3">
         @for (child of node.children; track $index) {
           <ng-template
             [ngTemplateOutlet]="recursiveTemplate"
