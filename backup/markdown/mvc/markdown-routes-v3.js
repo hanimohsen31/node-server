@@ -4,7 +4,7 @@ const router = express.Router()
 const fs = require('fs')
 const hljs = require('highlight.js')
 const MarkdownIt = require('markdown-it')
-const { readFilesRecursive } = require('./reading-dir')
+const { readFilesRecursive } = require('./utils/reading-dir')
 const md = new MarkdownIt({
   html: true,
   linkify: true,
@@ -48,7 +48,7 @@ async function GetMarkdownList(req, res) {
 async function GetMarkdownFile(req, res) {
   const fileName = req.body.name
   const filePath = req.body.path
-  if (!fileName || !fileName.endsWith('.md') || !fs.existsSync(filePath)) return res.status(400).send('File not found')
+  if (!fileName.endsWith('.md') || !fs.existsSync(filePath)) return res.status(400).send('File not found')
   const markdown = fs.readFileSync(filePath, 'utf-8')
   let htmlContent = md.render(markdown)
   res.status(200).send(htmlContent)
