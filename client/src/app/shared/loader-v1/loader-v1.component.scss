@@ -1,0 +1,54 @@
+.spinner-container {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  .spin-dot-spin {
+    width: 32.5px;
+    height: 32.5px;
+    position: relative;
+    animation: rotate 1.2s linear infinite;
+    i {
+      width: 8px;
+      height: 8px;
+      background: #1677ff;
+      border-radius: 50%;
+      position: absolute;
+      animation: pulse 1s infinite ease-in-out alternate;
+      &:nth-child(1) {
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      &:nth-child(2) {
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+      &:nth-child(3) {
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      &:nth-child(4) {
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+    }
+  }
+}
+
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  100% {
+    opacity: 0.3;
+  }
+}

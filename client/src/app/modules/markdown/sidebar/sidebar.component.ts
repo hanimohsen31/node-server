@@ -1,7 +1,9 @@
 import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { StoreService } from '../store.service';
+import { MarkdownService } from '../markdown.service';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { LoaderService } from '../../../shared/services/loader.service';
+import { finalize } from 'rxjs/internal/operators/finalize';
 
 interface FileNode {
   name: string;
@@ -25,7 +27,8 @@ export class SidebarComponent implements OnInit {
   private storageKey = 'sidebar-expanded';
 
   constructor(
-    private storeService: StoreService,
+    private storeService: MarkdownService,
+    private laoderService: LoaderService,
     private cdr: ChangeDetectorRef,
   ) {}
 
@@ -42,32 +45,39 @@ export class SidebarComponent implements OnInit {
 
     this.storeService.currentSelectedFile$
       .subscribe({
-        next: (res: any) => {
-          this.onFileClick(res);
-        },
+        next: (res: any) => this.onFileClick(res),
       })
       .unsubscribe();
   }
 
   getMarkdownList() {
-    this.storeService.getMarkDownFilesList().subscribe({
-      next: (res: any) => {
-        this.tree = res.tree;
-        this.restoreExpandedState();
-        this.cdr.detectChanges();
-      },
-    });
+    this.laoderService.startLoading();
+    this.storeService
+      .getMarkDownFilesList()
+      .pipe(finalize(() => this.laoderService.endLoading()))
+      .subscribe({
+        next: (res: any) => {
+          this.tree = res.tree;
+          this.restoreExpandedState();
+          this.cdr.detectChanges();
+        },
+      });
   }
 
   onFileClick(node: FileNode) {
-    this.storeService.getMarkDownFile(node).subscribe({
-      next: (res: any) => {
-        this.currentActiveFile = node;
-        this.storeService.updateCurrentViewedMarkdown(res);
-        this.storeService.updateCurrentSelectedFile(node);
-        this.cdr.detectChanges();
-      },
-    });
+    if (!node) return;
+    this.laoderService.startLoading();
+    this.storeService
+      .getMarkDownFile(node)
+      .pipe(finalize(() => this.laoderService.endLoading()))
+      .subscribe({
+        next: (res: any) => {
+          this.currentActiveFile = node;
+          this.storeService.updateCurrentViewedMarkdown(res);
+          this.storeService.updateCurrentSelectedFile(node);
+          this.cdr.detectChanges();
+        },
+      });
   }
 
   // ------------------------  DIVIDER  toggling sidebar elements ---------------------------------

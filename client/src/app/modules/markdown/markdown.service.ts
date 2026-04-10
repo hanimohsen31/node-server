@@ -1,12 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, signal } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
-export class StoreService {
+export class MarkdownService {
   currentViewedMarkdown$ = new BehaviorSubject('');
   currentSelectedFile$ = new BehaviorSubject<any>(null);
   sidebarToggled$ = new BehaviorSubject<boolean>(false);

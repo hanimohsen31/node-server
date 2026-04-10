@@ -1,5 +1,5 @@
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { StoreService } from './../store.service';
+import { MarkdownService } from '../markdown.service';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 
 @Component({
@@ -12,7 +12,7 @@ export class NavbarComponent implements OnInit {
   isSidebarOpen: boolean = true;
   breadCrumbs: string[] = [];
 
-  constructor(private storeService: StoreService, private cdr: ChangeDetectorRef) {}
+  constructor(private storeService: MarkdownService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     this.storeService.sidebarToggled$.subscribe({
@@ -23,7 +23,7 @@ export class NavbarComponent implements OnInit {
     });
     this.storeService.currentSelectedFile$.subscribe({
       next: (res: any) => {
-        this.breadCrumbs = res.path.split('D:\\Projects\\Markdown')[1].slice(1).split('\\');
+        this.breadCrumbs = res?.path?.split('D:\\Projects\\Markdown')?.[1].slice(1)?.split('\\');
         this.cdr.detectChanges();
       },
     });

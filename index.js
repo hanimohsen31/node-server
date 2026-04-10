@@ -93,6 +93,7 @@ async function initRoutes() {
   app.use('/markdown/v3', (await import('./modules/markdown/markdown-routes-v3.js')).default);
   app.use('/markdown-fronend', (await import('./modules/markdown/markdown-frontend.js')).default);
   app.use('/ai', (await import('./modules/ai/index.js')).default);
+  app.use('/newsletter', (await import('./modules/newsletter/newsletter-router.js')).default);
   app.all('*', (req, res, next) => next(ErrorHandler(res, null, 'Route not found', 404, null)));
 }
 

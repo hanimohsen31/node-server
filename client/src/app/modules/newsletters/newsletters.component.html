@@ -1,0 +1,49 @@
+<div class="module-content newsletter">
+<nav class="nl-nav">
+  @for (section of newsletters; track section.source) {
+  <a [href]="'#' + section.source">
+    {{ getIcon(section.source) }} {{ section.source }}
+    <span class="nav-count">{{ section.count }}</span>
+  </a>
+  }
+</nav>
+@for (section of newsletters; track section.source) {
+<section [id]="section.source" class="nl-section">
+  <h2>{{ getIcon(section.source) }} {{ section.source }} <span class="section-count">{{ section.count }} items</span>
+  </h2>
+  <div class="cards">
+    @for (item of section.items; track $index) {
+    <a class="card" [href]="getUrl(item)" target="_blank" rel="noopener noreferrer">
+      @if (getImage(item)) {
+      <div class="card-img">
+        <img [src]="getImage(item)" alt="" loading="lazy" />
+      </div>
+      }
+      <div class="card-body">
+        <div class="card-title">{{ getTitle(item) }}</div>
+        <div class="card-meta">
+          @if (getDate(item)) {<span>{{ getDate(item) }}</span>}
+          @if (getMeta(item)) {<span>{{ getMeta(item) }}</span>}
+          @if (item.type) {<span class="badge">{{ item.type }}</span>}
+          @if (item.points != null) {<span>▲ {{ item.points }}</span>}
+          @if (item.stars != null) {<span>★ {{ item.stars }}</span>}
+          @if (item.views) {<span>{{ item.views }}</span>}
+          @if (item.starsToday) {<span>{{ item.starsToday }}</span>}
+        </div>
+        @if (getDescription(item)) {
+        <div class="card-desc">{{ getDescription(item) }}</div>
+        }
+        @if (getStats(item).length) {
+        <div class="card-stats">
+          @for (stat of getStats(item); track stat.key) {
+          <span>{{ stat.value }} {{ stat.key }}</span>
+          }
+        </div>
+        }
+      </div>
+    </a>
+    }
+  </div>
+</section>
+}
+</div>

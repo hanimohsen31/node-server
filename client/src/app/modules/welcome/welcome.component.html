@@ -1,0 +1,16 @@
+<div class="container">
+  <div class="card">
+    <div class="row">
+      <div class="col col-sm-12 col-md-6">
+        <div class="links-group">
+          @for (link of links; track $index) {
+          <a class="py-2" [routerLink]="link">{{ link }}</a>
+          }
+        </div>
+      </div>
+      <div class="col col-sm-12 col-md-6">
+        <img src="assets/images/png/welcome.png" alt="" />
+      </div>
+    </div>
+  </div>
+</div>
