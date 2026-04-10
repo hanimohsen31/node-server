@@ -198,7 +198,7 @@ function generateHTML(data) {
     .card-img { aspect-ratio: 16/9; overflow: hidden; background: #111; }
     .card-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .card-body { padding: 12px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
-    .card-title { font-size: 14px; font-weight: 600; line-height: 1.4; color: #f0f0f0;
+    .card-title { font-size: 18px; font-weight: 600; line-height: 1.4; color: #f0f0f0;
                   display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
     .card-meta { font-size: 11px; color: #666; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
     .card-desc { font-size: 12px; color: #888; line-height: 1.5;
