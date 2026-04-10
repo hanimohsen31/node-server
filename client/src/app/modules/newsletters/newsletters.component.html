@@ -6,12 +6,15 @@
     <span class="nav-count">{{ section.count }}</span>
   </a>
   }
+  <button class="view-toggle" (click)="viewMode = viewMode === 'grid' ? 'list' : 'grid'" [title]="viewMode === 'grid' ? 'Switch to list view' : 'Switch to grid view'">
+    {{ viewMode === 'grid' ? '▤' : '⊞' }}
+  </button>
 </nav>
 @for (section of newsletters; track section.source) {
 <section [id]="section.source" class="nl-section">
   <h2>{{ getIcon(section.source) }} {{ section.source }} <span class="section-count">{{ section.count }} items</span>
   </h2>
-  <div class="cards">
+  <div class="cards" [class.cards--list]="viewMode === 'list'">
     @for (item of section.items; track $index) {
     <a class="card" [href]="getUrl(item)" target="_blank" rel="noopener noreferrer">
       @if (getImage(item)) {

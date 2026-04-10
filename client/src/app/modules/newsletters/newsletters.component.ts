@@ -20,6 +20,7 @@ import {
 })
 export class NewslettersComponent implements OnInit {
   newsletters: any[] = [];
+  viewMode: 'grid' | 'list' = 'grid';
 
   constructor(
     private newslettersService: NewslettersService,
