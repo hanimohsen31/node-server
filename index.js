@@ -1,4 +1,3 @@
-const startNotification = require('./modules/dev/notification')
 const { MongoClient, ServerApiVersion } = require('mongodb')
 const ErrorHandler = require('./utils/ErrorHandler')
 const sanitize = require('express-mongo-sanitize')
@@ -65,7 +64,7 @@ const MONGO_OPTIONS = {
 
 let dbConnected = false
 
-async function connectWithRetry(uri, maxAttempts = 3, delayMs = 3000) {
+async function connectWithRetry(uri, maxAttempts = 2, delayMs = 1000) {
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       const client = new MongoClient(uri, MONGO_OPTIONS)
@@ -102,7 +101,7 @@ async function initDatabase() {
       // Expose the working URI so Mongoose models can pick it up at require-time
       process.env.MONGO_CONNECT_URI = uri
       dbConnected = true
-      console.log(`📊 MongoDB Connected! (${uri.slice(0, 20)}…)`)
+      console.log(`📊 MongoDB Connected (${uri.slice(0, 20)}…)`)
       return true
     }
   }
@@ -153,32 +152,52 @@ process.on('SIGTERM', () => gracefulShutdown('SIGTERM'))
 process.on('SIGINT', () => gracefulShutdown('SIGINT'))
 
 // ---------------------  DIVIDER  main  ------------------------------------------------
-async function main() {
-  // IMPORTANT: await DB before requiring route modules — models read MONGO_CONNECT_URI
-  // at require-time, so the URI must be set first.
-  await initDatabase()
+const isVercel = !!process.env.VERCEL
 
-  initRoutes()
+if (isVercel) {
+  // Serverless (Vercel): initialize DB + routes once, then export the app as the handler.
+  // app.listen() must NOT be called — Vercel manages the HTTP layer.
+  const initPromise = initDatabase().then(initRoutes)
 
-  const PORT = Number(process.env.PORT) || 5000
-  server = app.listen(PORT, () => {
-    console.log(`🚀 Server Started on port ${PORT}`)
+  // Wrap the app so that the first request waits for initialization to finish.
+  const handler = async (req, res) => {
+    await initPromise
+    app(req, res)
+  }
+
+  module.exports = handler
+} else {
+  // Traditional long-running server (local / VPS / PM2).
+  async function main() {
+    await initDatabase()
+    initRoutes()
+
     if (isDev) {
-      try { startNotification() } catch (e) { console.warn('⚠️  Notification init failed:', e.message) }
+      try {
+        const startNotification = require('./modules/dev/notification')
+        startNotification()
+      } catch (e) {
+        console.warn('⚠️  Notification init failed:', e.message)
+      }
     }
-  })
 
-  server.on('error', (err) => {
-    if (err.code === 'EADDRINUSE') {
-      console.error(`❌ Port ${PORT} is already in use — exiting`)
-      process.exit(1)
-    } else {
-      console.error('❌ Server error:', err.message)
-    }
+    const PORT = Number(process.env.PORT) || 5000
+    server = app.listen(PORT, () => {
+      console.log(`🚀 Server Started (on port ${PORT})`)
+    })
+
+    server.on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        console.error(`❌ Port ${PORT} is already in use — exiting`)
+        process.exit(1)
+      } else {
+        console.error('❌ Server error:', err.message)
+      }
+    })
+  }
+
+  main().catch((err) => {
+    console.error('❌ Fatal startup error:', err)
+    process.exit(1)
   })
 }
-
-main().catch((err) => {
-  console.error('❌ Fatal startup error:', err)
-  process.exit(1)
-})
