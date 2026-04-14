@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"const fs=require\\('fs'\\);fs.readdirSync\\('d:/Projects/Node Server'\\).filter\\(f=>f.endsWith\\('.js'\\)\\).forEach\\(f=>console.log\\(f\\)\\)\")"
+    ]
+  }
+}

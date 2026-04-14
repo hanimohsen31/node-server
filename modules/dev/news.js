@@ -1,4 +1,4 @@
-import * as cheerio from "cheerio";
+const cheerio = require("cheerio");
 
 // ----------------  DIVIDER  CONFIG ----------------------------------------------------
 const KEYWORDS = ["ai", "agent", "llm", "gpt", "machine learning"];
