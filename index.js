@@ -2,6 +2,7 @@
 const ErrorHandler = require('./utils/ErrorHandler')
 const sanitize = require('express-mongo-sanitize')
 const rateLimit = require('express-rate-limit')
+const compression = require('compression')
 const express = require('express')
 const mongoose = require('mongoose')
 const helmet = require('helmet')
@@ -15,7 +16,15 @@ dotenv.config({ path: './.env' }) // environment variables
 // ---------------------  DIVIDER  restarting app ---------------------------------------
 process.on('uncaughtException', (err) => {
   console.log('uncaughtException error', err)
+  console.error(err.stack)
   process.exit(1)
+})
+
+// Do NOT exit on unhandledRejection — a MongoDB timeout should not crash the server.
+// Mongoose manages its own reconnection logic internally.
+process.on('unhandledRejection', (reason) => {
+  const msg = reason?.message || String(reason)
+  console.error('⚠️  unhandledRejection (non-fatal):', msg)
 })
 
 // ---------------------  DIVIDER  adding app -------------------------------------------
@@ -29,6 +38,7 @@ app.use(sanitize()) // noSql injections security
 app.use(xss()) // clean html data security
 app.use(hpp({ whitelist: ['duration'] })) // prevent parameter pollution (clear dublicated params fileds)
 app.use(morgan('dev')) // morgan dev lgos in terminal
+app.use(compression())
 app.use(express.static(`${__dirname}/public`)) // serving static path
 app.use(express.static(`${__dirname}/dev-assets`)) // serving static path
 app.use(rateLimit({ max: 10000, windowMs: 60 * 60 * 1000, message: 'Requsets limit exceeded for this ip' })) // 100 request per hour

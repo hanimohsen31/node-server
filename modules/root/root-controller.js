@@ -7,7 +7,7 @@ async function GetHtmlContent(req, res) {
   try {
     res.status(200).json({ message: 'Server Works' })
   } catch (err) {
-    return res.status(500).json({ error: 'Failed to fetch report' })
+    return res.status(500).json({ error: 'Server Error' })
   }
 }
 

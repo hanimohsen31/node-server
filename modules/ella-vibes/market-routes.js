@@ -138,13 +138,24 @@ async function DeletePost(req, res) {
   }
 }
 
-// create buld
+// create bulk
 async function CreateBulkPosts(req, res) {
-  // Extract products from request body
-  const posts = req.body
+  // Extract posts from request body
+  const body = req.body
   // Validate input
-  if (!posts || !Array.isArray(posts) || posts.length === 0)
+  if (!body || !Array.isArray(body) || body.length === 0)
     return res.status(400).json({ message: 'Invalid input: posts array is required', data: null })
+  // Map to known fields only
+  const posts = body.map(({ name, category, description, postImage, contentHeaderImage, content, author, tags }) => ({
+    name,
+    category,
+    description,
+    postImage,
+    contentHeaderImage,
+    content,
+    author,
+    tags,
+  }))
   // Start a mongoose session for transaction
   const session = await mongoose.startSession()
   session.startTransaction()
@@ -300,7 +311,7 @@ async function CreateBulkProducts(req, res) {
   }
 }
 // --------------------------  DIVIDER  apis ----------------------------------------------------------------
-router.route('/posts').get(GetAllPosts).post(ProtectedRoute, CreatePost)
+router.route('/posts').get(GetAllPosts).post(CreatePost)
 router.post('/posts/bulk', CreateBulkPosts)
 router.route('/posts/edit/:id').put(ProtectedRoute, UpdatePost)
 router.route('/posts/:slug').get(GetPostBySlug).delete(ProtectedRoute, DeletePost)
