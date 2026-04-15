@@ -37,7 +37,6 @@ const GetCars = async (req, res) => {
       brand,
       model,
       year,
-      category,
       condition,
       status,
       transmission,
@@ -63,7 +62,6 @@ const GetCars = async (req, res) => {
     if (brand) filter.brand = brand
     if (model) filter.model = model
     if (year) filter.year = Number(year)
-    if (category) filter.category = category
     if (condition) filter.condition = condition
     if (status) filter.status = status
     if (transmission) filter.transmission = transmission
@@ -241,11 +239,10 @@ const GetFilters = async (_req, res) => {
         cities: cities.sort(),
         priceRange: priceRange[0] ?? { min: 0, max: 0 },
         // static — from schema enums
-        categories: ['used', 'new', 'accident'],
-        conditions: ['factory_full', 'factory_in_out', 'factory_out', 'clean_paint', 'accident'],
-        statuses: ['available', 'reserved', 'inspection', 'viewing_booked', 'sold'],
+        conditions: ['fabrikaInAndOut', 'fabrikaIn', 'notFabrika', 'accident'],
+        statuses: ['available', 'reserved', 'sold'],
         transmissions: ['manual', 'automatic', 'cvt', 'dual_clutch'],
-        fuelTypes: ['petrol', 'diesel', 'electric', 'hybrid'],
+        fuelTypes: ['petrol', 'electric', 'hybrid'],
       },
     })
   } catch (err) {

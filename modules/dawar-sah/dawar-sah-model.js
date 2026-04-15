@@ -11,23 +11,17 @@ const carSchema = new mongoose.Schema(
     year: { type: Number, required: true, index: true },
     price: { type: Number, required: true, index: true },
     currency: { type: String, default: 'EGP' },
-    category: {
-      type: String,
-      enum: ['used', 'new', 'accident'],
-      index: true,
-    },
     condition: {
       type: String,
-      enum: ['factory_full', 'factory_in_out', 'factory_out', 'clean_paint', 'accident'],
+      enum: ['fabrikaInAndOut', 'fabrikaIn', 'notFabrika', 'accident'],
       index: true,
     },
     status: {
       type: String,
-      enum: ['available', 'reserved', 'inspection', 'viewing_booked', 'sold'],
+      enum: ['available', 'reserved', 'sold'],
       default: 'available',
       index: true,
     },
-    mileage: { type: Number, index: true },
     transmission: {
       type: String,
       enum: ['manual', 'automatic', 'cvt', 'dual_clutch'],
@@ -35,20 +29,16 @@ const carSchema = new mongoose.Schema(
     },
     fuelType: {
       type: String,
-      enum: ['petrol', 'diesel', 'electric', 'hybrid'],
+      enum: ['petrol', 'electric', 'hybrid'],
       index: true,
     },
+    mileage: { type: Number, index: true },
     color: String,
     city: { type: String, index: true },
     description: String,
     features: [String],
     mainImage: { type: String, required: true },
-    images: [
-      {
-        url: String,
-        isPrimary: { type: Boolean, default: false },
-      },
-    ],
+    images: [String],
     videos: [String],
     pdfUrl: { type: String },
     seller: {
@@ -70,7 +60,6 @@ const carSchema = new mongoose.Schema(
 
 carSchema.pre('save', function (next) {
   this.images = this.images.filter((img) => img.url !== this.mainImage)
-
   if (!this.slug) {
     const base = this.titleEn
       .toLowerCase()
@@ -81,7 +70,6 @@ carSchema.pre('save', function (next) {
     const suffix = this._id.toString().slice(-6)
     this.slug = `${base}-${suffix}`
   }
-
   next()
 })
 
