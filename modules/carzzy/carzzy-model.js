@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const CarsDB = mongoose.createConnection(process.env.MONGO_CONNECT_URI + 'dawarsah', {})
+const ModuleDB = mongoose.createConnection(process.env.MONGO_CONNECT_URI + 'carzzy', {})
 
 // 📦 Schema
 const carSchema = new mongoose.Schema(
@@ -40,6 +40,7 @@ const carSchema = new mongoose.Schema(
     mainImage: { type: String, required: true },
     images: [String],
     videos: [String],
+    youtubeUrls: [String],
     pdfUrl: { type: String },
     seller: {
       name: { type: String, required: true },
@@ -73,5 +74,5 @@ carSchema.pre('save', function (next) {
   next()
 })
 
-const Car = CarsDB.model('Car', carSchema)
+const Car = ModuleDB.model('Car', carSchema)
 module.exports = Car

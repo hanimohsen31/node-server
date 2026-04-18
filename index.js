@@ -51,7 +51,7 @@ mongoose.connect(DB, {}).then((con) => console.log('Mongo Connected'))
 app.use('/', require('./modules/root/root-controller'))
 app.use('/auth', require('./modules/auth/auth-routes'))
 app.use('/ella-vibes', require('./modules/ella-vibes/market-routes'))
-app.use('/dawar-sah', require('./modules/dawar-sah/dawar-sah-routes'))
+app.use('/carzzy', require('./modules/carzzy/carzzy-routes'))
 
 // ---------------------  DIVIDER  middleware -------------------------------------------
 app.all('*', (req, res, next) => next(ErrorHandler(res, null, 'Route not found', 404, null)))

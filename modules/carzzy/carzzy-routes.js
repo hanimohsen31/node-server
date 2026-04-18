@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const mongoose = require('mongoose')
-const Car = require('./dawar-sah-model')
+const Car = require('./carzzy-model')
 const ProtectedRoute = require('../../utils/ProtectedRoute')
 const ErrorHandler = require('../../utils/ErrorHandler')
 
