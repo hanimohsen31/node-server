@@ -78,7 +78,7 @@ async function setDeliveryLocationInteractive(page, zipCode = '10001') {
     console.log(`📍 Setting delivery location interactively to: ${zipCode}`)
     // Click on the delivery location element
     const locationSelector = '#nav-global-location-data-modal-action, #nav-packard-glow-loc-icon'
-    await page.click(locationSelector).catch(() => { })
+    await page.click(locationSelector).catch(() => {})
 
     await randomDelay(1000, 2000)
 
@@ -249,49 +249,61 @@ function cleanHtmlAndSave(html, outputPath) {
   console.log('✅ Cleaned HTML and Saved')
 }
 
-async function beforeChromeHandling() {
+async function beforeChromeHandling(kill = false, copy = false, launch = true, devTools = false, headless = true) {
   const profileSrc = 'C:\\Users\\YOUR_USERNAME\\AppData\\Local\\Google\\Chrome\\User Data\\Default'
   const chromePath = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
   const newUserDataDir = 'C:\\hani\\ChromeClone'
   const remotePort = 9222
   try {
-    // 1️⃣ Kill any Chrome process
-    console.log('Killing Chrome...')
-    await execAsync('taskkill /F /IM chrome.exe')
-    console.log('Chrome killed successfully')
+    if (kill) {
+      // 1️⃣ Kill any Chrome process
+      console.log('Killing Chrome...')
+      await execAsync('taskkill /F /IM chrome.exe')
+      console.log('Chrome killed successfully')
+    }
 
-    // 2️⃣ Copy your Chrome profile
-    // console.log('Copying Chrome profile...')
-    // const profileSrc = 'C:\\Users\\YOUR_USERNAME\\AppData\\Local\\Google\\Chrome\\User Data\\Default'
-    // const profileDest = 'C:\\hani\\ChromeClone'
-    // await execAsync(`xcopy /E /I "${profileSrc}" "${profileDest}"`)
-    // console.log('Profile copied successfully')
+    if (copy) {
+      // 2️⃣ Copy your Chrome profile
+      console.log('Copying Chrome profile...')
+      const profileSrc = 'C:\\Users\\YOUR_USERNAME\\AppData\\Local\\Google\\Chrome\\User Data\\Default'
+      const profileDest = 'C:\\hani\\ChromeClone'
+      await execAsync(`xcopy /E /I "${profileSrc}" "${profileDest}"`)
+      console.log('Profile copied successfully')
+    }
 
-    // 3️⃣ Launch Chrome with remote debugging
-    const chromeProcess = spawn(`"${chromePath}"`, [
-      `--remote-debugging-port=${remotePort}`,
-      `--user-data-dir=${newUserDataDir}`,
-      '--process-per-site',
-      '--disable-backgrounding-occluded-windows',
-      '--disable-background-timer-throttling',
-      '--disable-renderer-backgrounding',
-      '--enable-gpu-rasterization',
-      '--start-minimized'
-    ], {
-      shell: true,
-      detached: true,
-      stdio: 'inherit', // ignore
-    })
+    if (launch) {
+      // 3️⃣ Launch Chrome with remote debugging
+      const chromeProcess = spawn(
+        `"${chromePath}"`,
+        [
+          `--remote-debugging-port=${remotePort}`,
+          `--user-data-dir=${newUserDataDir}`,
+          ...(headless ? ['--headless=new'] : []),
+          '--process-per-site',
+          '--disable-backgrounding-occluded-windows',
+          '--disable-background-timer-throttling',
+          '--disable-renderer-backgrounding',
+          '--enable-gpu-rasterization',
+          '--start-minimized',
+        ],
+        {
+          shell: true,
+          detached: true,
+          stdio: 'inherit', // ignore
+        }
+      )
+      chromeProcess.unref() // allow Node to continue without waiting
+      await waitForChrome(9222)
+      console.log('Chrome launched in background.')
+    }
 
-    chromeProcess.unref() // allow Node to continue without waiting
-    await waitForChrome(9222)
-    console.log('Chrome launched in background.')
-
-    // // 4️⃣ Check Chrome DevTools endpoint
-    // console.log('Checking DevTools endpoint...')
-    // const res = await fetch('http://127.0.0.1:9222/json/version')
-    // const json = await res.json()
-    // console.log('Chrome DevTools info:', json)
+    if (devTools) {
+      // 4️⃣ Check Chrome DevTools endpoint
+      console.log('Checking DevTools endpoint...')
+      const res = await fetch('http://127.0.0.1:9222/json/version')
+      const json = await res.json()
+      console.log('Chrome DevTools info:', json)
+    }
   } catch (err) {
     console.error('Error in BeforeChromeHandling:', err)
   }
@@ -302,7 +314,7 @@ async function waitForChrome(port = 9222, retries = 20) {
     try {
       const res = await fetch(`http://127.0.0.1:${port}/json/version`)
       if (res.ok) return true
-    } catch (e) { }
+    } catch (e) {}
     await new Promise((r) => setTimeout(r, 1000))
   }
   throw new Error('Chrome did not open debugging port')

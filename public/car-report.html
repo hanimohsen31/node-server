@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>تقرير السيارة</title>
+    <style>
+      :root {
+        --bg: #0f172a;
+        --surface: #1e293b;
+        --surface2: #273549;
+        --border: #334155;
+        --accent: #3b82f6;
+        --accent2: #6366f1;
+        --green: #22c55e;
+        --yellow: #eab308;
+        --red: #ef4444;
+        --orange: #f97316;
+        --text: #f1f5f9;
+        --muted: #94a3b8;
+        --radius: 14px;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 1.5rem; }
+      a { color: var(--accent); text-decoration: none; }
+      a:hover { text-decoration: underline; }
+
+      /* ── Upload Card ── */
+      .upload-wrap { max-width: 700px; margin: 0 auto 2rem; }
+      .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.75rem; }
+      .card-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 1.25rem; display: flex; align-items: center; gap: .6rem; }
+      .card-title .icon { font-size: 1.4rem; }
+
+      /* ── Mode Toggle ── */
+      .mode-tabs { display: flex; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); margin-bottom: 1.5rem; }
+      .mode-tab { flex: 1; padding: .65rem; text-align: center; cursor: pointer; font-size: .9rem; font-weight: 600; background: transparent; color: var(--muted); border: none; transition: all .2s; }
+      .mode-tab.active { background: var(--accent); color: #fff; }
+      .mode-tab:not(.active):hover { background: var(--surface2); color: var(--text); }
+
+      /* ── Forms ── */
+      .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+      .form-full { grid-column: 1 / -1; }
+      .form-section-label { font-size: .72rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .08em; margin: 1.25rem 0 .75rem; border-top: 1px solid var(--border); padding-top: .75rem; grid-column: 1 / -1; }
+      label { display: block; font-size: .8rem; color: var(--muted); margin-bottom: .35rem; }
+
+      input[type="file"] { width: 100%; padding: .75rem 1rem; border: 2px dashed var(--border); border-radius: 10px; background: var(--bg); color: var(--text); cursor: pointer; font-size: .9rem; transition: border-color .2s; }
+      input[type="file"]:hover { border-color: var(--accent); }
+      input[type="number"], input[type="text"], select, textarea {
+        width: 100%; padding: .6rem 1rem; border: 1px solid var(--border); border-radius: 8px;
+        background: var(--bg); color: var(--text); font-size: .9rem; outline: none;
+        transition: border-color .2s; font-family: inherit;
+      }
+      input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+      textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
+      select option { background: var(--surface); }
+
+      .btn { display: flex; align-items: center; justify-content: center; gap: .5rem; width: 100%; padding: .85rem; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background .2s, transform .1s; margin-top: 1.25rem; }
+      .btn:hover:not(:disabled) { background: #2563eb; }
+      .btn:active:not(:disabled) { transform: scale(.98); }
+      .btn:disabled { background: #334155; color: var(--muted); cursor: not-allowed; }
+
+      /* ── Loader ── */
+      #loader { display: none; text-align: center; padding: 2rem; }
+      .spinner { width: 48px; height: 48px; border: 4px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 1rem; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .steps { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; margin-top: 1rem; }
+      .step { padding: .3rem .8rem; border-radius: 20px; font-size: .75rem; background: var(--surface2); color: var(--muted); transition: all .4s; }
+      .step.active { background: var(--accent); color: #fff; }
+      .step.done { background: #166534; color: var(--green); }
+      .step.skip { opacity: .35; }
+
+      /* ── Alerts ── */
+      #error-msg { display: none; background: #450a0a; border: 1px solid var(--red); color: #fca5a5; border-radius: 10px; padding: 1rem; margin-top: 1rem; font-size: .9rem; }
+
+      /* ── Results Layout ── */
+      #results { display: none; max-width: 1200px; margin: 0 auto; }
+      .section-title { font-size: 1rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 1rem; display: flex; align-items: center; gap: .5rem; }
+      .mb { margin-bottom: 1.5rem; }
+
+      /* ── Summary Row ── */
+      .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+      .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; text-align: center; }
+      .stat-card .val { font-size: 1.8rem; font-weight: 800; }
+      .stat-card .lbl { font-size: .78rem; color: var(--muted); margin-top: .25rem; }
+
+      /* ── AI Analysis ── */
+      .analysis-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+      @media (max-width: 700px) { .analysis-grid { grid-template-columns: 1fr; } .form-grid { grid-template-columns: 1fr; } }
+
+      .score-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem; }
+      .score-num { font-size: 3.5rem; font-weight: 900; line-height: 1; }
+      .score-sub { font-size: .8rem; color: var(--muted); margin-top: .25rem; }
+      .score-bar-bg { width: 100%; background: var(--border); border-radius: 8px; height: 10px; margin-top: .75rem; overflow: hidden; }
+      .score-bar { height: 100%; border-radius: 8px; transition: width .8s ease; }
+
+      .badge { display: inline-flex; align-items: center; gap: .3rem; padding: .3rem .75rem; border-radius: 20px; font-size: .78rem; font-weight: 600; }
+      .badge-green { background: #14532d; color: var(--green); }
+      .badge-yellow { background: #713f12; color: var(--yellow); }
+      .badge-red { background: #450a0a; color: #fca5a5; }
+      .badge-blue { background: #1e3a5f; color: #93c5fd; }
+
+      .list-card ul { list-style: none; padding: 0; }
+      .list-card ul li { padding: .5rem 0; border-bottom: 1px solid var(--border); font-size: .88rem; display: flex; align-items: flex-start; gap: .5rem; }
+      .list-card ul li:last-child { border-bottom: none; }
+      .li-icon { flex-shrink: 0; margin-top: .1rem; }
+
+      .price-range { display: flex; gap: 1rem; flex-wrap: wrap; }
+      .price-box { background: var(--surface2); border-radius: 10px; padding: .75rem 1.25rem; flex: 1; text-align: center; }
+      .price-box .p-val { font-size: 1.3rem; font-weight: 700; color: var(--green); }
+      .price-box .p-lbl { font-size: .75rem; color: var(--muted); }
+
+      .summary-ar { background: var(--surface2); border-radius: 10px; padding: 1rem; font-size: .95rem; line-height: 1.8; direction: rtl; }
+
+      /* ── Car Details ── */
+      .details-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: .75rem; }
+      .detail-item { background: var(--surface2); border-radius: 10px; padding: .75rem 1rem; }
+      .detail-item .d-key { font-size: .72rem; color: var(--muted); margin-bottom: .2rem; }
+      .detail-item .d-val { font-size: .95rem; font-weight: 600; }
+
+      .notes-list { list-style: none; padding: 0; }
+      .notes-list li { padding: .45rem 0; border-bottom: 1px solid var(--border); font-size: .88rem; }
+      .notes-list li:last-child { border-bottom: none; }
+      .notes-list li::before { content: "⚠️ "; }
+
+      /* ── Listings ── */
+      .listings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+      .listing-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: transform .2s, box-shadow .2s; }
+      .listing-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.4); }
+      .listing-card img { width: 100%; height: 140px; object-fit: cover; display: block; background: var(--surface2); }
+      .listing-card .lc-body { padding: .75rem; }
+      .listing-card .lc-price { font-size: 1rem; font-weight: 700; color: var(--green); margin-bottom: .3rem; }
+      .listing-card .lc-loc { font-size: .75rem; color: var(--muted); margin-bottom: .5rem; }
+      .listing-card .lc-title { font-size: .8rem; color: var(--text); margin-bottom: .5rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .listing-card .lc-link { font-size: .75rem; }
+      .listing-card .lc-meta { font-size: .75rem; color: var(--muted); margin-top: .3rem; }
+
+      /* ── Market Table ── */
+      .market-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+      .market-table th { background: var(--surface2); padding: .65rem 1rem; text-align: right; color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--border); }
+      .market-table td { padding: .65rem 1rem; border-bottom: 1px solid var(--border); }
+      .market-table tr:last-child td { border-bottom: none; }
+      .market-table tr:hover td { background: var(--surface2); }
+
+      /* ── Prompt Box ── */
+      .prompt-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .75rem; flex-wrap: wrap; gap: .5rem; }
+      .prompt-box { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; font-size: .76rem; font-family: 'Consolas', 'Courier New', monospace; white-space: pre-wrap; word-break: break-word; max-height: 380px; overflow-y: auto; direction: ltr; text-align: left; line-height: 1.65; color: #cbd5e1; }
+
+      /* ── Icon/Copy buttons ── */
+      .icon-btn { display: inline-flex; align-items: center; gap: .35rem; padding: .35rem .8rem; border: 1px solid var(--border); background: var(--surface2); color: var(--muted); border-radius: 8px; cursor: pointer; font-size: .8rem; transition: all .2s; }
+      .icon-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+      .icon-btn.copied { background: #166534; color: var(--green); border-color: #166534; }
+
+      /* ── Collapsible Raw JSON ── */
+      details { margin-top: .75rem; }
+      details summary { cursor: pointer; color: var(--muted); font-size: .82rem; padding: .5rem 0; user-select: none; }
+      details pre { margin-top: .5rem; background: var(--bg); padding: 1rem; border-radius: 10px; font-size: .75rem; overflow: auto; max-height: 300px; white-space: pre-wrap; word-break: break-all; border: 1px solid var(--border); direction: ltr; text-align: left; }
+
+      .copy-btn { font-size: .72rem; padding: .25rem .6rem; border: 1px solid var(--border); background: var(--surface2); color: var(--muted); border-radius: 6px; cursor: pointer; transition: all .2s; margin-right: .5rem; }
+      .copy-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+      .tabs { display: flex; gap: .5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+      .tab-btn { padding: .5rem 1.1rem; border: 1px solid var(--border); background: var(--surface); border-radius: 8px; color: var(--muted); cursor: pointer; font-size: .85rem; transition: all .2s; }
+      .tab-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+      .tab-panel { display: none; }
+      .tab-panel.active { display: block; }
+
+      .fb-count { font-size: .8rem; color: var(--muted); margin-bottom: 1rem; }
+    </style>
+  </head>
+  <body>
+
+    <!-- ── Upload Form ── -->
+    <div class="upload-wrap">
+      <div class="card">
+        <div class="card-title"><span class="icon">🚗</span> تقرير تقييم السيارة</div>
+
+        <!-- Mode Toggle -->
+        <div class="mode-tabs">
+          <button class="mode-tab active" id="mode-pdf-btn" onclick="switchMode('pdf')">📄 رفع PDF</button>
+          <button class="mode-tab" id="mode-manual-btn" onclick="switchMode('manual')">✏️ إدخال يدوي</button>
+        </div>
+
+        <!-- PDF Mode -->
+        <div id="form-pdf">
+          <label>ملف PDF (إستمارة السيارة)</label>
+          <input type="file" id="pdf" accept="application/pdf" />
+        </div>
+
+        <!-- Manual Mode -->
+        <div id="form-manual" style="display:none">
+          <label>نص بيانات السيارة</label>
+          <textarea id="m-text" rows="10" placeholder="الصق هنا نص إستمارة السيارة أو أي وصف نصي للسيارة، وسيقوم الذكاء الاصطناعي باستخراج البيانات تلقائياً..."></textarea>
+        </div>
+
+        <!-- Shared Params -->
+        <div class="form-grid" style="margin-top:1.25rem">
+          <div class="form-section-label">إعدادات البحث</div>
+          <div>
+            <label>الحد الأدنى للسعر (جنيه)</label>
+            <input type="number" id="minPrice" placeholder="300000" value="300000" />
+          </div>
+          <div>
+            <label>الحد الأقصى للسعر (جنيه)</label>
+            <input type="number" id="maxPrice" placeholder="550000" value="550000" />
+          </div>
+          <div>
+            <label>عدد التمرير على فيسبوك</label>
+            <input type="number" id="fbScroll" placeholder="10" value="10" min="1" max="50" />
+          </div>
+          <div>
+            <label>عدد صفحات هتلاقي</label>
+            <input type="number" id="h2ePaging" placeholder="10" value="10" min="1" max="20" />
+          </div>
+        </div>
+
+        <button class="btn" id="btn" onclick="submitForm()">
+          <span>🔍</span> توليد التقرير
+        </button>
+        <div id="error-msg"></div>
+      </div>
+    </div>
+
+    <!-- ── Loader ── -->
+    <div id="loader">
+      <div class="spinner"></div>
+      <p style="color:var(--muted);font-size:.9rem">جاري المعالجة... قد يستغرق هذا دقيقة أو اثنتين</p>
+      <div class="steps">
+        <span class="step" id="s1">📄 قراءة PDF</span>
+        <span class="step" id="s2">📘 فيسبوك</span>
+        <span class="step" id="s3">🔎 هتلاقي</span>
+        <span class="step" id="s4">📊 المقارنة</span>
+        <span class="step" id="s5">🤖 تحليل الذكاء الاصطناعي</span>
+      </div>
+    </div>
+
+    <!-- ── Results ── -->
+    <div id="results">
+
+      <!-- Verdict + Score header row -->
+      <div class="summary-grid" id="summary-row"></div>
+
+      <!-- AI Analysis section -->
+      <div class="mb" id="analysis-section" style="display:none">
+        <div class="section-title">📊 تحليل الذكاء الاصطناعي</div>
+        <div class="analysis-grid" id="analysis-grid"></div>
+        <div id="ai-summary-wrap" style="margin-top:1rem"></div>
+      </div>
+
+      <!-- Listings Tabs -->
+      <div class="mb">
+        <div class="section-title">📋 إعلانات السوق</div>
+        <div class="card">
+          <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('h2e-table', event)">📈 جدول الأسعار</button>
+            <button class="tab-btn" onclick="switchTab('fb', event)">📘 فيسبوك</button>
+            <button class="tab-btn" onclick="switchTab('h2e', event)">🔎 هتلاقي</button>
+          </div>
+          <div class="tab-panel" id="tab-fb"></div>
+          <div class="tab-panel" id="tab-h2e"></div>
+          <div class="tab-panel active" id="tab-h2e-table"></div>
+        </div>
+      </div>
+
+      <!-- Car Details -->
+      <div class="mb">
+        <div class="section-title">🚘 تفاصيل السيارة</div>
+        <div class="card">
+          <div class="details-grid" id="car-details"></div>
+          <div id="car-notes" style="margin-top:1rem"></div>
+        </div>
+      </div>
+
+      <!-- Final Prompt -->
+      <div class="mb" id="prompt-section" style="display:none">
+        <div class="section-title">📝 البرومبت النهائي</div>
+        <div class="card">
+          <div class="prompt-header">
+            <span style="font-size:.85rem;color:var(--muted)">النص المرسل للذكاء الاصطناعي للمقارنة</span>
+            <button class="icon-btn" id="copy-prompt-btn" onclick="copyPrompt(this)">📋 نسخ</button>
+          </div>
+          <div class="prompt-box" id="final-prompt-box"></div>
+        </div>
+      </div>
+
+      <!-- Raw JSON -->
+      <div class="mb">
+        <div class="card">
+          <details open>
+            <summary style="display:flex;align-items:center;gap:.6rem">
+              <span style="flex:1">📦 الاستجابة الكاملة (JSON)</span>
+              <button class="copy-btn" onclick="copyJson(event)">📋 نسخ</button>
+            </summary>
+            <pre id="raw-json"></pre>
+          </details>
+        </div>
+      </div>
+
+    </div>
+
+    <script>
+      let _stepTimer = null
+      let _data = null
+      let _finalPromptText = ''
+      let currentMode = 'pdf'
+
+      // ── Mode Toggle ──
+      function switchMode(mode) {
+        currentMode = mode
+        document.getElementById('form-pdf').style.display    = mode === 'pdf'    ? 'block' : 'none'
+        document.getElementById('form-manual').style.display = mode === 'manual' ? 'block' : 'none'
+        document.getElementById('mode-pdf-btn').classList.toggle('active', mode === 'pdf')
+        document.getElementById('mode-manual-btn').classList.toggle('active', mode === 'manual')
+      }
+
+      // ── Step animation ──
+      const ALL_STEPS = ['s1','s2','s3','s4','s5']
+      function startSteps(isManual) {
+        ALL_STEPS.forEach(id => { document.getElementById(id).className = 'step' })
+        if (isManual) document.getElementById('s1').className = 'step skip'
+        let i = isManual ? 1 : 0
+        _stepTimer = setInterval(() => {
+          if (i > (isManual ? 1 : 0)) document.getElementById(ALL_STEPS[i - 1]).className = 'step done'
+          if (i < ALL_STEPS.length) { document.getElementById(ALL_STEPS[i]).className = 'step active'; i++ }
+        }, 4000)
+      }
+      function stopSteps() {
+        clearInterval(_stepTimer)
+        ALL_STEPS.forEach(id => {
+          const el = document.getElementById(id)
+          if (!el.classList.contains('skip')) el.className = 'step done'
+        })
+      }
+
+      // ── Submit ──
+      async function submitForm() {
+        const btn = document.getElementById('btn')
+        const errEl = document.getElementById('error-msg')
+        errEl.style.display = 'none'
+        document.getElementById('results').style.display = 'none'
+
+        const minP = document.getElementById('minPrice').value
+        const maxP = document.getElementById('maxPrice').value
+        const fbS  = document.getElementById('fbScroll').value
+        const h2P  = document.getElementById('h2ePaging').value
+
+        let fetchUrl, fetchOptions
+
+        if (currentMode === 'pdf') {
+          const file = document.getElementById('pdf').files[0]
+          if (!file) { showError('الرجاء اختيار ملف PDF.'); return }
+          const form = new FormData()
+          form.append('file', file)
+          if (minP) form.append('minPriceLimit', minP)
+          if (maxP) form.append('maxPriceLimit', maxP)
+          if (fbS)  form.append('facebookScrollCount', fbS)
+          if (h2P)  form.append('hatla2eePaging', h2P)
+          fetchUrl = 'http://127.0.0.1:5000/car-report'
+          fetchOptions = { method: 'POST', body: form }
+        } else {
+          const text = document.getElementById('m-text').value.trim()
+          if (!text) { showError('الرجاء إدخال نص بيانات السيارة.'); return }
+          fetchUrl = 'http://127.0.0.1:5000/car-report/manual'
+          fetchOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pdfSummary: text, minPriceLimit: minP, maxPriceLimit: maxP, facebookScrollCount: fbS, hatla2eePaging: h2P }),
+          }
+        }
+
+        btn.disabled = true
+        document.getElementById('loader').style.display = 'block'
+        startSteps(currentMode === 'manual')
+
+        try {
+          const res = await fetch(fetchUrl, fetchOptions)
+          const json = await res.json()
+          stopSteps()
+          document.getElementById('loader').style.display = 'none'
+
+          if (!res.ok) { showError(json.message || 'خطأ في الخادم'); return }
+
+          _data = json.data
+          renderResults(_data)
+          document.getElementById('results').style.display = 'block'
+          document.getElementById('results').scrollIntoView({ behavior: 'smooth' })
+        } catch (err) {
+          stopSteps()
+          document.getElementById('loader').style.display = 'none'
+          showError('فشل الطلب: ' + err.message)
+        } finally {
+          btn.disabled = false
+        }
+      }
+
+      function showError(msg) {
+        const el = document.getElementById('error-msg')
+        el.textContent = '❌ ' + msg
+        el.style.display = 'block'
+      }
+
+      // ── Tab switching ──
+      function switchTab(id, e) {
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'))
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'))
+        document.getElementById('tab-' + id).classList.add('active')
+        if (e && e.target) e.target.classList.add('active')
+      }
+
+      // ── Copy helpers ──
+      function copyText(text, btn) {
+        navigator.clipboard.writeText(text).then(() => {
+          const orig = btn.textContent
+          btn.textContent = '✅ تم النسخ'
+          btn.classList.add('copied')
+          setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied') }, 2000)
+        })
+      }
+      function copyJson(e) {
+        e.preventDefault(); e.stopPropagation()
+        if (!_data) return
+        copyText(JSON.stringify(_data, null, 2), e.target)
+      }
+      function copyPrompt(btn) {
+        if (!_finalPromptText) return
+        copyText(_finalPromptText, btn)
+      }
+
+      // ── Render ──
+      function renderResults(data) {
+        const ai = data.aiData || {}
+        const result = data.result || null
+        const fb = data.facebook || {}
+        const h2e = data.hatla2ee || {}
+
+        renderFacebook(fb)
+        renderSummaryRow(ai, result, h2e, fb)
+        renderAnalysis(result)
+        renderCarDetails(ai)
+        renderHatla2ee(h2e)
+        renderFinalPrompt(data.finalPrompt)
+
+        document.getElementById('raw-json').textContent = JSON.stringify(data, null, 2)
+      }
+
+      // ── Summary Row ──
+      function renderSummaryRow(ai, result, h2e, fb) {
+        const wrap = document.getElementById('summary-row')
+        const price = ai.price ? ai.price.toLocaleString('ar-EG') + ' ج' : '—'
+        const mileage = ai.mileage ? ai.mileage.toLocaleString('ar-EG') + ' كم' : '—'
+        const year = ai.year || '—'
+
+        let verdictHtml = '', scoreHtml = ''
+        if (result) {
+          const vColor = result.finalVerdict === 'Good Deal' ? 'var(--green)' : result.finalVerdict === 'Bad Deal' ? 'var(--red)' : 'var(--yellow)'
+          const vLabel = result.finalVerdict === 'Good Deal' ? '✅ صفقة ممتازة' : result.finalVerdict === 'Bad Deal' ? '❌ صفقة سيئة' : '🟡 صفقة متوسطة'
+          verdictHtml = `<div class="stat-card"><div class="val" style="color:${vColor};font-size:1.2rem">${vLabel}</div><div class="lbl">الحكم النهائي</div></div>`
+          const scoreColor = result.conditionScore >= 7 ? 'var(--green)' : result.conditionScore >= 5 ? 'var(--yellow)' : 'var(--red)'
+          scoreHtml = `<div class="stat-card"><div class="val" style="color:${scoreColor}">${result.conditionScore}<span style="font-size:1rem;color:var(--muted)">/10</span></div><div class="lbl">حالة السيارة</div></div>`
+        }
+
+        wrap.innerHTML = `
+          ${scoreHtml}
+          ${verdictHtml}
+          <div class="stat-card"><div class="val">${price}</div><div class="lbl">سعر البائع</div></div>
+          <div class="stat-card"><div class="val">${year}</div><div class="lbl">سنة الصنع</div></div>
+          <div class="stat-card"><div class="val">${mileage}</div><div class="lbl">العداد</div></div>
+          <div class="stat-card"><div class="val" style="color:var(--accent)">${(fb||{}).count || 0}</div><div class="lbl">إعلانات فيسبوك</div></div>
+          <div class="stat-card"><div class="val" style="color:var(--accent2)">${h2e.listings?.count || 0}</div><div class="lbl">إعلانات هتلاقي</div></div>
+        `
+      }
+      let fb_count_global = 0
+
+      // ── AI Analysis ──
+      function renderAnalysis(result) {
+        const section = document.getElementById('analysis-section')
+        const grid = document.getElementById('analysis-grid')
+        const summaryWrap = document.getElementById('ai-summary-wrap')
+        if (!result) { section.style.display = 'none'; return }
+        section.style.display = 'block'
+
+        const scoreColor = result.conditionScore >= 7 ? 'var(--green)' : result.conditionScore >= 5 ? 'var(--yellow)' : 'var(--red)'
+        const scoreW = (result.conditionScore / 10 * 100).toFixed(0)
+
+        grid.innerHTML = `
+          <div class="card score-wrap">
+            <div class="score-num" style="color:${scoreColor}">${result.conditionScore}</div>
+            <div class="score-sub">من 10 — حالة السيارة</div>
+            <div class="score-bar-bg"><div class="score-bar" style="width:${scoreW}%;background:${scoreColor}"></div></div>
+            <div style="margin-top:1rem;display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center">
+              ${riskBadgeHtml(result.riskLevel)}
+              ${priceBadgeHtml(result.priceEvaluation)}
+            </div>
+          </div>
+          <div class="card">
+            <div style="font-size:.85rem;color:var(--muted);margin-bottom:.75rem">نطاق السعر العادل</div>
+            <div class="price-range">
+              <div class="price-box"><div class="p-val">${(result.estimatedFairPrice?.min || 0).toLocaleString('ar-EG')}</div><div class="p-lbl">الحد الأدنى</div></div>
+              <div class="price-box"><div class="p-val">${(result.estimatedFairPrice?.max || 0).toLocaleString('ar-EG')}</div><div class="p-lbl">الحد الأقصى</div></div>
+            </div>
+            <div style="margin-top:1rem;font-size:.8rem;color:var(--muted)">بالجنيه المصري</div>
+          </div>
+          <div class="card list-card">
+            <div style="font-size:.85rem;color:var(--muted);margin-bottom:.75rem">⚠️ النقاط السلبية</div>
+            <ul>${(result.mainIssues || []).map(i => `<li><span class="li-icon">🔴</span>${i}</li>`).join('') || '<li style="color:var(--muted)">لا توجد مشاكل مذكورة</li>'}</ul>
+          </div>
+          <div class="card list-card">
+            <div style="font-size:.85rem;color:var(--muted);margin-bottom:.75rem">✅ النقاط الإيجابية</div>
+            <ul>${(result.positivePoints || []).map(i => `<li><span class="li-icon">🟢</span>${i}</li>`).join('') || '<li style="color:var(--muted)">لا توجد نقاط إيجابية مذكورة</li>'}</ul>
+          </div>
+        `
+        summaryWrap.innerHTML = `
+          <div class="section-title" style="font-size:.85rem">💬 الخلاصة</div>
+          <div class="summary-ar">${result.summary || '—'}</div>
+        `
+      }
+
+      function riskBadgeHtml(level) {
+        if (!level) return ''
+        const map = { Low: ['badge-green','🟢 منخفض'], Medium: ['badge-yellow','🟡 متوسط'], High: ['badge-red','🔴 مرتفع'] }
+        const [cls, label] = map[level] || ['badge-blue', level]
+        return `<span class="badge ${cls}">${label}</span>`
+      }
+      function priceBadgeHtml(ev) {
+        if (!ev) return ''
+        const map = { Underpriced: ['badge-green','💚 سعر مناسب'], Fair: ['badge-blue','🔵 سعر عادل'], Overpriced: ['badge-red','🔴 سعر مرتفع'] }
+        const [cls, label] = map[ev] || ['badge-blue', ev]
+        return `<span class="badge ${cls}">${label}</span>`
+      }
+
+      // ── Car Details ──
+      function renderCarDetails(ai) {
+        const grid = document.getElementById('car-details')
+        const notesWrap = document.getElementById('car-notes')
+        const fields = [
+          ['الماركة', (ai.makeArabic || '') + (ai.makeEnglish ? ` (${ai.makeEnglish})` : '')],
+          ['الموديل', (ai.modelArabic || '') + (ai.modelEnglish ? ` (${ai.modelEnglish})` : '')],
+          ['سنة الصنع', ai.year],
+          ['ناقل الحركة', ai.transmission],
+          ['العداد', ai.mileage ? ai.mileage.toLocaleString('ar-EG') + ' كم' : null],
+          ['السعر', ai.price ? ai.price.toLocaleString('ar-EG') + ' ج' : null],
+          ['انتهاء الرخصة', ai.licenseExpiry],
+          ['المرور', ai.trafficDepartment],
+          ['المحرك', ai.engineCondition],
+          ['الفيتيس', ai.gearboxCondition],
+          ['العفشة', ai.suspensionCondition],
+          ['المكيف', ai.acCondition],
+          ['الإطارات', ai.tiresCondition],
+          ['الدهان الخارجي', ai.exteriorPaint],
+          ['الداخلية', ai.interiorCondition],
+        ]
+        grid.innerHTML = fields.filter(([,v]) => v != null && v !== '').map(([k, v]) =>
+          `<div class="detail-item"><div class="d-key">${k}</div><div class="d-val">${v}</div></div>`
+        ).join('')
+        notesWrap.innerHTML = ai.notes && ai.notes.length
+          ? `<div style="font-size:.8rem;color:var(--muted);margin-bottom:.5rem">ملاحظات الفحص</div><ul class="notes-list">${ai.notes.map(n => `<li>${n}</li>`).join('')}</ul>`
+          : ''
+      }
+
+      // ── Facebook ──
+      function renderFacebook(fb) {
+        const panel = document.getElementById('tab-fb')
+        const filteredListings = fb.filterdData || []
+        const allListings = (fb.listings || []).filter(l => Number(String(l.price||'').replace(/,/g,'')) > 1000)
+        fb_count_global = fb.count || allListings.length
+
+        if (!filteredListings.length && !allListings.length) {
+          panel.innerHTML = '<p style="color:var(--muted);padding:1rem">لا توجد نتائج</p>'
+          return
+        }
+
+        const minP = fb.minPrice ? fb.minPrice.toLocaleString('ar-EG') + ' ج' : '—'
+        const maxP = fb.maxPrice ? fb.maxPrice.toLocaleString('ar-EG') + ' ج' : '—'
+
+        const renderCards = (list) => list.map(l => {
+          const price = formatFbPrice(l.price)
+          return `<div class="listing-card">
+            <img src="${l.image||''}" alt="" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22140%22%3E%3Crect fill=%22%231e293b%22 width=%22200%22 height=%22140%22/%3E%3C/svg%3E'" />
+            <div class="lc-body">
+              ${l.title ? `<div class="lc-title" title="${l.title}">${l.title}</div>` : ''}
+              <div class="lc-price">${price}</div>
+              <div class="lc-loc">📍 ${l.location||'—'}</div>
+              <a class="lc-link" href="${l.url}" target="_blank" rel="noopener">عرض الإعلان ↗</a>
+            </div>
+          </div>`
+        }).join('')
+
+        panel.innerHTML = `
+          <div class="fb-count" style="display:flex;align-items:center;flex-wrap:wrap;gap:.6rem;margin-bottom:1rem">
+            <span>إجمالي النتائج: ${fb.count || allListings.length} إعلان</span>
+            <span style="background:#14532d;color:var(--green);padding:.2rem .65rem;border-radius:20px;font-weight:600">أدنى: ${minP}</span>
+            <span style="background:#450a0a;color:#fca5a5;padding:.2rem .65rem;border-radius:20px;font-weight:600">أعلى: ${maxP}</span>
+            ${fb.url ? `<a href="${fb.url}" target="_blank" rel="noopener" style="margin-right:auto;background:var(--surface2);color:var(--accent);padding:.2rem .75rem;border-radius:20px;font-size:.78rem;font-weight:600;text-decoration:none;border:1px solid var(--border)">🔗 فتح البحث ↗</a>` : ''}
+          </div>
+          <div class="fb-count" style="display:flex;align-items:center;flex-wrap:wrap;gap:.6rem;margin-bottom:1rem">
+            <span>ملحوظة: النطاق محدد بناء علي النتائج التي بياناتها مكتملة فقط ولا يعد نطاق لكل النتائج </span>
+          </div>
+          <div class="tabs" style="margin-bottom:.75rem">
+            <button class="tab-btn active" id="fb-sub-btn-filtered" onclick="switchFbSub('filtered')">✅ ضمن النطاق (${filteredListings.length})</button>
+            <button class="tab-btn" id="fb-sub-btn-all" onclick="switchFbSub('all')">📋 الكل (${allListings.length})</button>
+          </div>
+          <div id="fb-filtered-section"><div class="listings-grid">${renderCards(filteredListings)}</div></div>
+          <div id="fb-all-section" style="display:none"><div class="listings-grid">${renderCards(allListings)}</div></div>`
+      }
+      function switchFbSub(which) {
+        document.getElementById('fb-filtered-section').style.display = which === 'filtered' ? 'block' : 'none'
+        document.getElementById('fb-all-section').style.display      = which === 'all'      ? 'block' : 'none'
+        document.getElementById('fb-sub-btn-filtered').classList.toggle('active', which === 'filtered')
+        document.getElementById('fb-sub-btn-all').classList.toggle('active', which === 'all')
+      }
+      function formatFbPrice(raw) {
+        const n = Number(String(raw||'').replace(/,/g,''))
+        return (!n || n < 1000) ? '—' : n.toLocaleString('ar-EG') + ' ج'
+      }
+
+      // ── Hatla2ee ──
+      function renderHatla2ee(h2e) {
+        const listingsObj = h2e.listings || {}
+        const listings = listingsObj.data || []
+        const listCount = listingsObj.count || listings.length
+        const listMin = listingsObj.minPrice || 0
+        const listMax = listingsObj.maxPrice || 0
+        const table = (h2e.usedPricesTable && h2e.usedPricesTable.data) || []
+        const panel = document.getElementById('tab-h2e')
+
+        if (!listings.length) { panel.innerHTML = '<p style="color:var(--muted);padding:1rem">لا توجد نتائج</p>' }
+        else {
+          panel.innerHTML = `
+            <div class="fb-count" style="display:flex;align-items:center;flex-wrap:wrap;gap:.75rem">
+              <span>إجمالي النتائج: ${listCount}</span>
+              ${listMin ? `<span style="background:#14532d;color:var(--green);padding:.2rem .65rem;border-radius:20px;font-weight:600">أدنى: ${listMin.toLocaleString('ar-EG')} ج</span>` : ''}
+              ${listMax ? `<span style="background:#450a0a;color:#fca5a5;padding:.2rem .65rem;border-radius:20px;font-weight:600">أعلى: ${listMax.toLocaleString('ar-EG')} ج</span>` : ''}
+              ${listingsObj.url ? `<a href="${listingsObj.url}" target="_blank" rel="noopener" style="margin-right:auto;background:var(--surface2);color:var(--accent);padding:.2rem .75rem;border-radius:20px;font-size:.78rem;font-weight:600;text-decoration:none;border:1px solid var(--border)">🔗 فتح البحث ↗</a>` : ''}
+            </div>
+            <div class="listings-grid">
+              ${listings.map(l => `<div class="listing-card">
+                <img src="${l.image||''}" alt="" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2020/svg%22 width=%22200%22 height=%22140%22%3E%3Crect fill=%22%231e293b%22 width=%22200%22 height=%22140%22/%3E%3C/svg%3E'" />
+                <div class="lc-body">
+                  <div class="lc-title" title="${l.title||''}">${l.title||'—'}</div>
+                  <div class="lc-price">${l.price ? l.price.toLocaleString('ar-EG')+' ج' : '—'}</div>
+                  <div class="lc-loc">📍 ${l.location||'—'}</div>
+                  <div class="lc-meta">${l.year||''}${l.mileage?' · '+l.mileage.toLocaleString('ar-EG')+' كم':''}${l.transmission?' · '+l.transmission:''}</div>
+                  <a class="lc-link" href="${l.url}" target="_blank" rel="noopener">عرض الإعلان ↗</a>
+                </div>
+              </div>`).join('')}
+            </div>`
+        }
+
+        const tPanel = document.getElementById('tab-h2e-table')
+        if (!table.length) { tPanel.innerHTML = '<p style="color:var(--muted);padding:1rem">لا توجد بيانات جدول</p>' }
+        else {
+          const tableUrl = h2e.usedPricesTable && h2e.usedPricesTable.url
+          tPanel.innerHTML = `
+            ${tableUrl ? `<div style="margin-bottom:.75rem"><a href="${tableUrl}" target="_blank" rel="noopener" style="background:var(--surface2);color:var(--accent);padding:.2rem .75rem;border-radius:20px;font-size:.78rem;font-weight:600;text-decoration:none;border:1px solid var(--border)">🔗 فتح الجدول ↗</a></div>` : ''}
+            <div style="overflow-x:auto"><table class="market-table">
+            <thead><tr><th>الموديل</th><th>متوسط السعر</th><th>أدنى سعر</th><th>أعلى سعر</th></tr></thead>
+            <tbody>${table.map(r => `<tr>
+              <td><a href="${r.url||'#'}" target="_blank" rel="noopener">${r.modelArabic||r.modelEnglish||'—'}</a></td>
+              <td style="color:var(--accent)">${r.avgPrice ? r.avgPrice.toLocaleString('ar-EG')+' ج' : '—'}</td>
+              <td style="color:var(--green)">${r.minPrice ? r.minPrice.toLocaleString('ar-EG')+' ج' : '—'}</td>
+              <td style="color:var(--red)">${r.maxPrice ? r.maxPrice.toLocaleString('ar-EG')+' ج' : '—'}</td>
+            </tr>`).join('')}</tbody>
+          </table></div>`
+        }
+      }
+
+      // ── Final Prompt ──
+      function renderFinalPrompt(text) {
+        const section = document.getElementById('prompt-section')
+        const box = document.getElementById('final-prompt-box')
+        if (!text) { section.style.display = 'none'; return }
+        _finalPromptText = text
+        section.style.display = 'block'
+        box.textContent = text
+      }
+    </script>
+  </body>
+</html>

@@ -68,6 +68,7 @@ app.use('/ai', require('./modules/ai/index'))
 app.use('/newsletter', require('./modules/newsletter/newsletter-router'))
 app.use('/markdown/v3', require('./modules/markdown/markdown-routes-v3'))
 app.use('/markdown-fronend', require('./modules/markdown/markdown-frontend'))
+app.use('/car-report', require('./modules/car-report/car-report-routes'))
 app.all('*', (req, res, next) => next(ErrorHandler(res, null, 'Route not found', 404, null)))
 
 // ---------------------  DIVIDER  export app -------------------------------------------
