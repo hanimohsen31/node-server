@@ -3,6 +3,8 @@ const router = express.Router()
 const multer = require('multer')
 const axios = require('axios')
 const fs = require('fs')
+const path = require('path')
+const os = require('os')
 const ErrorHandler = require('../../utils/ErrorHandler')
 const convertPdfToJson = require('./pipeline/step1-convert-pdf-to-text')
 const sendPdfTextToAI = require('./pipeline/step2-send-pdf-text-to-ai')
@@ -56,7 +58,7 @@ const CreateCarReport = async (req, res) => {
       const fbResults = []
       for (const searchTerm of [aiData.modelArabic, aiData.modelEnglish].filter(Boolean)) {
         try {
-          const result = await scrapFacebook(searchTerm, 'cairo', minPriceLimit, maxPriceLimit, facebookScrollCount,browserClient)
+          const result = await scrapFacebook(searchTerm, 'cairo', minPriceLimit, maxPriceLimit, facebookScrollCount, browserClient)
           fbResults.push(result)
         } catch (e) {
           console.error(`[Facebook scrape failed for "${searchTerm}"]`, e.message)
@@ -96,7 +98,12 @@ const CreateCarReport = async (req, res) => {
       console.error('[Compare failed]', e.message)
     }
     console.log('step-6 analysis Data', analysis)
-    fs.writeFileSync('C:\\Users\\Hani Rashed\\Downloads\\result.json', JSON.stringify({ ...finalPayload, ...analysis }, null, 2))
+
+    // [7] Save report
+    const reportDir = path.join(os.homedir(), 'Downloads', `car-report-${Date.now()}`)
+    fs.mkdirSync(reportDir, { recursive: true })
+    fs.writeFileSync(path.join(reportDir, 'CarReportResult.json'), JSON.stringify({ ...finalPayload, ...analysis }, null, 2))
+    fs.writeFileSync(path.join(reportDir, 'finalPrompt.text'), JSON.stringify(analysis.finalPrompt))
     res.status(200).json({ message: 'Report processed successfully', data: { ...finalPayload, ...analysis } })
   } catch (err) {
     ErrorHandler(res, err.message, 'Failed to process report', 500, null)

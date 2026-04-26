@@ -25,6 +25,7 @@ ${optimizedPayload}
 - Be concise and direct.
 - Don't Accept any car if it has interior damage/Body Damage/Engine Damage very negative factor.
 - Be STRICTED TO JSON OUTPUT ONLY.
+- RESPOND WITH VALID JSON ONLY NOT MARKDOWN.
 
 ### OUTPUT FORMAT (JSON Strict), Always respond with valid JSON only — no explanation, no markdown, no code fences:
 {
@@ -53,11 +54,6 @@ Hatla2ee Market Table: \n${hatla2eeTable? hatla2eeTable : 'No Data'}
 ---------
 Hatla2ee Market Listing: \n${hatla2eeListing? hatla2eeListing : 'No Data'}`
   textFinal = SYSTEM_PROMPT(textFinal)
-  try {
-    fs.writeFileSync('C:\\Users\\Hani Rashed\\Downloads\\prompt.txt', textFinal)
-  } catch (e) {
-    console.error('[writeFileSync failed]', e.message)
-  }
   try {
     let result = await sendCompareResultToAI(textFinal)
     return { result, finalPrompt: textFinal }

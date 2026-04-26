@@ -177,6 +177,7 @@
         <div class="mode-tabs">
           <button class="mode-tab active" id="mode-pdf-btn" onclick="switchMode('pdf')">📄 رفع PDF</button>
           <button class="mode-tab" id="mode-manual-btn" onclick="switchMode('manual')">✏️ إدخال يدوي</button>
+          <button class="mode-tab" id="mode-json-btn" onclick="switchMode('json')">📥 استيراد JSON</button>
         </div>
 
         <!-- PDF Mode -->
@@ -191,8 +192,15 @@
           <textarea id="m-text" rows="10" placeholder="الصق هنا نص إستمارة السيارة أو أي وصف نصي للسيارة، وسيقوم الذكاء الاصطناعي باستخراج البيانات تلقائياً..."></textarea>
         </div>
 
+        <!-- JSON Import Mode -->
+        <div id="form-json" style="display:none">
+          <label>ملف JSON (استجابة محفوظة)</label>
+          <input type="file" id="json-file" accept="application/json,.json" />
+          <p style="font-size:.78rem;color:var(--muted);margin-top:.5rem">سيتم عرض البيانات مباشرة بدون معالجة من الخادم</p>
+        </div>
+
         <!-- Shared Params -->
-        <div class="form-grid" style="margin-top:1.25rem">
+        <div class="form-grid" id="search-params" style="margin-top:1.25rem">
           <div class="form-section-label">إعدادات البحث</div>
           <div>
             <label>الحد الأدنى للسعر (جنيه)</label>
@@ -213,7 +221,7 @@
         </div>
 
         <button class="btn" id="btn" onclick="submitForm()">
-          <span>🔍</span> توليد التقرير
+          <span id="btn-icon">🔍</span> <span id="btn-label">توليد التقرير</span>
         </button>
         <div id="error-msg"></div>
       </div>
@@ -309,8 +317,13 @@
         currentMode = mode
         document.getElementById('form-pdf').style.display    = mode === 'pdf'    ? 'block' : 'none'
         document.getElementById('form-manual').style.display = mode === 'manual' ? 'block' : 'none'
+        document.getElementById('form-json').style.display   = mode === 'json'   ? 'block' : 'none'
         document.getElementById('mode-pdf-btn').classList.toggle('active', mode === 'pdf')
         document.getElementById('mode-manual-btn').classList.toggle('active', mode === 'manual')
+        document.getElementById('mode-json-btn').classList.toggle('active', mode === 'json')
+        document.getElementById('search-params').style.display = mode === 'json' ? 'none' : 'grid'
+        document.getElementById('btn-icon').textContent  = mode === 'json' ? '📂' : '🔍'
+        document.getElementById('btn-label').textContent = mode === 'json' ? 'عرض التقرير' : 'توليد التقرير'
       }
 
       // ── Step animation ──
@@ -338,6 +351,25 @@
         const errEl = document.getElementById('error-msg')
         errEl.style.display = 'none'
         document.getElementById('results').style.display = 'none'
+
+        if (currentMode === 'json') {
+          const file = document.getElementById('json-file').files[0]
+          if (!file) { showError('الرجاء اختيار ملف JSON.'); return }
+          btn.disabled = true
+          try {
+            const text = await file.text()
+            const parsed = JSON.parse(text)
+            _data = parsed && parsed.data ? parsed.data : parsed
+            renderResults(_data)
+            document.getElementById('results').style.display = 'block'
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth' })
+          } catch (err) {
+            showError('فشل قراءة ملف JSON: ' + err.message)
+          } finally {
+            btn.disabled = false
+          }
+          return
+        }
 
         const minP = document.getElementById('minPrice').value
         const maxP = document.getElementById('maxPrice').value
