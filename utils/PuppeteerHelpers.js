@@ -7,6 +7,7 @@ const { exec } = require('child_process')
 const util = require('util')
 const fetch = require('node-fetch')
 const { spawn } = require('child_process')
+const execAsync = util.promisify(exec)
 const config = { headless: true, delayBetweenRequests: 5000, timeout: 30000 }
 
 async function getButtonAndClick(page, rootId, btnSelector, elementText) {
@@ -101,8 +102,7 @@ async function setDeliveryLocationInteractive(page, zipCode = '10001') {
     console.log('3- apply button clicked')
     await randomDelay(2000, 3000)
 
-    const doneButtonSelector =
-      '#a-autoid-136 , [data-action="GLUXConfirmAction"] , #GLUXConfirmClose , button[name="glowDoneButton"] , #GLUXConfirmClose-announce , .a-popover-footer button , .a-button.a-column.a-button-primary span'
+    const doneButtonSelector = '#a-autoid-136 , [data-action="GLUXConfirmAction"] , #GLUXConfirmClose , button[name="glowDoneButton"] , #GLUXConfirmClose-announce , .a-popover-footer button , .a-button.a-column.a-button-primary span'
     await page.waitForSelector(doneButtonSelector, { visible: true })
     await page.click(doneButtonSelector)
     console.log('4- done Button clicked')
@@ -119,12 +119,7 @@ async function setDeliveryLocationInteractive(page, zipCode = '10001') {
 
 // Check if we got blocked by Amazon
 function IsAmazonBlocked(content) {
-  return (
-    content.includes('api-services-support@amazon.com') ||
-    content.includes('automated access') ||
-    content.includes('captcha') ||
-    content.length < 5000
-  ) // Very short content usually means blocking
+  return content.includes('api-services-support@amazon.com') || content.includes('automated access') || content.includes('captcha') || content.length < 5000 // Very short content usually means blocking
 }
 
 // Add random delay between actions
@@ -185,16 +180,7 @@ async function autoScroll(
 async function initBrowser() {
   const browser = await puppeteer.launch({
     headless: config.headless,
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-blink-features=AutomationControlled',
-      '--disable-features=VizDisplayCompositor',
-      '--no-first-run',
-      '--no-default-browser-check',
-      '--disable-default-apps',
-      '--disable-popup-blocking',
-    ],
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled', '--disable-features=VizDisplayCompositor', '--no-first-run', '--no-default-browser-check', '--disable-default-apps', '--disable-popup-blocking'],
   })
 
   const page = await browser.newPage()
@@ -249,10 +235,11 @@ function cleanHtmlAndSave(html, outputPath) {
   console.log('✅ Cleaned HTML and Saved')
 }
 
-async function beforeChromeHandling(kill = false, copy = false, launch = true, devTools = false, headless = true) {
-  const profileSrc = 'C:\\Users\\YOUR_USERNAME\\AppData\\Local\\Google\\Chrome\\User Data\\Default'
+async function beforeChromeHandling(kill = false, copy = false, launch = true, devTools = false, headless = false, profileMode = 'clone') {
+  const defaultUserDataDir = 'C:\\Users\\Hani Rashed\\AppData\\Local\\Google\\Chrome\\User Data'
+  const cloneUserDataDir = 'C:\\hani\\ChromeClone'
   const chromePath = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-  const newUserDataDir = 'C:\\hani\\ChromeClone'
+  const userDataDir = profileMode === 'default' ? defaultUserDataDir : cloneUserDataDir
   const remotePort = 9222
   try {
     if (kill) {
@@ -265,26 +252,25 @@ async function beforeChromeHandling(kill = false, copy = false, launch = true, d
     if (copy) {
       // 2️⃣ Copy your Chrome profile
       console.log('Copying Chrome profile...')
-      const profileSrc = 'C:\\Users\\YOUR_USERNAME\\AppData\\Local\\Google\\Chrome\\User Data\\Default'
-      const profileDest = 'C:\\hani\\ChromeClone'
+      const profileSrc = 'C:\\Users\\Hani Rashed\\AppData\\Local\\Google\\Chrome\\User Data\\Default'
+      const profileDest = cloneUserDataDir
       await execAsync(`xcopy /E /I "${profileSrc}" "${profileDest}"`)
       console.log('Profile copied successfully')
     }
 
     if (launch) {
-      // 3️⃣ Launch Chrome with remote debugging
       const chromeProcess = spawn(
         `"${chromePath}"`,
         [
           `--remote-debugging-port=${remotePort}`,
-          `--user-data-dir=${newUserDataDir}`,
-          ...(headless ? ['--headless=new'] : []),
+          `--user-data-dir=${userDataDir}`,
           '--process-per-site',
           '--disable-backgrounding-occluded-windows',
           '--disable-background-timer-throttling',
           '--disable-renderer-backgrounding',
           '--enable-gpu-rasterization',
-          '--start-minimized',
+          ...(headless ? ['--headless=new'] : []), // false opens browser
+          // ...(headless ? ['--start-minimized'] : []),
         ],
         {
           shell: true,

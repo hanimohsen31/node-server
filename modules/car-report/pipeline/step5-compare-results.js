@@ -41,19 +41,23 @@ ${optimizedPayload}
 
 async function compareResults(finalPayload) {
   const reviewdCar = finalPayload.aiData
-  const facebookListing = (finalPayload.facebook.filterdData || []).map((elm) => `title: ${elm.title}, ${elm.imageAlt} - Price: ${elm.price} in EGP`).join('\n')
-  const hatla2eeTable = (finalPayload.hatla2ee.usedPricesTable.data || []).map((elm) => `Model: ${elm.modelArabic} - avgPrice: ${elm.avgPrice} - minPrice: ${elm.minPrice} - maxPrice: ${elm.maxPrice} - Prices in EGP`).join('\n')
-  const hatla2eeListing = (finalPayload.hatla2ee.listings.data || []).map((elm) => `title: ${elm.title} - year: ${elm.year} - mileage: ${elm.mileage} - transmission: ${elm.transmission} - price: ${elm.price} - Prices in EGP`).join('\n')
+  const facebookListing = (finalPayload?.facebook?.filterdData || []).map((elm) => `title: ${elm.title}, ${elm.imageAlt} - Price: ${elm.price} in EGP`).join('\n')
+  const hatla2eeTable = (finalPayload?.hatla2ee?.usedPricesTable?.data || []).map((elm) => `Model: ${elm.modelArabic} - avgPrice: ${elm.avgPrice} - minPrice: ${elm.minPrice} - maxPrice: ${elm.maxPrice} - Prices in EGP`).join('\n')
+  const hatla2eeListing = (finalPayload?.hatla2ee?.listings?.data || []).map((elm) => `title: ${elm.title} - year: ${elm.year} - mileage: ${elm.mileage} - transmission: ${elm.transmission} - price: ${elm.price} - Prices in EGP`).join('\n')
   let textFinal = `The Car Details Iam into buy in json format: \n ${JSON.stringify(reviewdCar)}
 ---------
 and here is some market data:
-Facebook Market Listing: \n${facebookListing}
+Facebook Market Listing: \n${facebookListing? facebookListing : 'No Data'}
 ---------
-Hatla2ee Market Table: \n${hatla2eeTable}
+Hatla2ee Market Table: \n${hatla2eeTable? hatla2eeTable : 'No Data'}
 ---------
-Hatla2ee Market Listing: \n${hatla2eeListing}`
+Hatla2ee Market Listing: \n${hatla2eeListing? hatla2eeListing : 'No Data'}`
   textFinal = SYSTEM_PROMPT(textFinal)
-  fs.writeFileSync('C:\\Users\\Hani Rashed\\Downloads\\output.txt', textFinal)
+  try {
+    fs.writeFileSync('C:\\Users\\Hani Rashed\\Downloads\\prompt.txt', textFinal)
+  } catch (e) {
+    console.error('[writeFileSync failed]', e.message)
+  }
   try {
     let result = await sendCompareResultToAI(textFinal)
     return { result, finalPrompt: textFinal }

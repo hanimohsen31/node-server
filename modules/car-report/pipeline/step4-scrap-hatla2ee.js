@@ -52,7 +52,7 @@ async function scrapHatla2ee(brand, model, year = null, minPriceLimit = 300_000,
     console.log(`✅ Listings scraped (${listings.length} total items across ${pagesNum} pages)`)
 
     // ------------------------  DIVIDER  [4] return json -------------------------------------------------------------
-    const prices = listings.map((l) => l.price).filter((p) => p !== null && p >= minPriceLimit && p <= maxPriceLimit)
+    const prices = listings.map((l) => l.price).filter((p) => p !== null)
     const minPrice = prices.length ? Math.min(...prices) : null
     const maxPrice = prices.length ? Math.max(...prices) : null
 
@@ -65,6 +65,8 @@ async function scrapHatla2ee(brand, model, year = null, minPriceLimit = 300_000,
       maxPrice: Number(item.maxPrice.replace(/,/g, '')),
     }))
 
+    const listingItems = [...new Map(listings.map((l) => [l.id, { ...l, url: `${BASE_URL}${l.url}` }])).values()]
+
     return {
       usedPricesTable: {
         url: usedPricesUrl,
@@ -73,19 +75,20 @@ async function scrapHatla2ee(brand, model, year = null, minPriceLimit = 300_000,
       },
       listings: {
         url: listingsBaseUrl,
-        data: listings.map((l) => ({ ...l, url: `${BASE_URL}${l.url}` })),
-        count: listings.length,
+        data: listingItems,
+        count: listingItems.length,
         minPrice,
         maxPrice,
       },
     }
   } finally {
-    await browser.close()
+    browser.disconnect()
   }
 }
 
 // ------------------------  DIVIDER  helpers -------------------------------------------------------------
 function normalize(str) {
+  if (!str) return ''
   return str.toLowerCase().replace(/[-\s]/g, '')
 }
 

@@ -67,7 +67,7 @@ app.use('/fba-automation', require('./modules/fba-automation/index'))
 app.use('/ai', require('./modules/ai/index'))
 app.use('/newsletter', require('./modules/newsletter/newsletter-router'))
 app.use('/markdown/v3', require('./modules/markdown/markdown-routes-v3'))
-app.use('/markdown-fronend', require('./modules/markdown/markdown-frontend'))
+app.use('/markdown-frontend', require('./modules/markdown/markdown-frontend'))
 app.use('/car-report', require('./modules/car-report/car-report-routes'))
 app.all('*', (req, res, next) => next(ErrorHandler(res, null, 'Route not found', 404, null)))
 
@@ -80,4 +80,6 @@ let port = process.env.PORT || 5000
 // host = "https://node-server-seven-gamma.vercel.app"
 app.listen(port, () => {
   console.log(`Server Started`)
+  console.log(`Client: http://127.0.0.1:5000/markdown-frontend`)
+  console.log(`Car Report: http://127.0.0.1:5000/car-report`)
 })

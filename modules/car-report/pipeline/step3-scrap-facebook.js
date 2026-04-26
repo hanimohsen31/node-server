@@ -23,8 +23,9 @@ const LOCATIONS = {
  * @returns {Promise<{ location: string, carModel: string, url: string, count: number, listings: object[] }>}
  */
 async function scrapFacebook(carModel, location = 'cairo', minPriceLimit = 300_000, maxPriceLimit = 550_000, scrollsInPage = 8) {
+  const showBrowser = false
   try {
-    await beforeChromeHandling(false, false, true, false, true)
+    await beforeChromeHandling(false, false, true, false, !showBrowser)
   } catch (err) {
     throw new Error('Error Happened In Opening Chrome Bash')
   }
@@ -36,10 +37,16 @@ async function scrapFacebook(carModel, location = 'cairo', minPriceLimit = 300_0
   await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36')
   await page.setViewport({ width: 1500, height: 5000, zoom: 0.25, deviceScaleFactor: 0.25 })
 
-  try {
+  const cleanPrice = (price) => {
+    if (!price) return NaN
+    return Number(price.replace(/[^\d.]/g, ''))
+  }
+
+  const attemptScrap = async () => {
     // ------------------------  DIVIDER  [2] go to page -------------------------------------------------------------
     const locConfig = LOCATIONS[location] ?? LOCATIONS.cairo
     const url = buildUrl(carModel, locConfig)
+    console.log(url)
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 })
     await new Promise((resolve) => setTimeout(resolve, 5_000)) // wait
     // ------------------------  DIVIDER  [3] start scrapping -------------------------------------------------------------
@@ -64,11 +71,17 @@ async function scrapFacebook(carModel, location = 'cairo', minPriceLimit = 300_0
         if (!listingId || seen.has(listingId)) return
         seen.add(listingId)
         const img = a.querySelector('img')
+        // fallback: extract text spans when aria-label regex doesn't match
+        const spans = Array.from(a.querySelectorAll('span'))
+          .map((s) => s.textContent?.trim())
+          .filter(Boolean)
+        const fallbackTitle = match?.[1]?.trim() || spans.find((s) => !s.startsWith('EGP') && !/^\d/.test(s)) || null
+        const fallbackPrice = match?.[2]?.trim().replace('EGP', '') || spans.find((s) => s.startsWith('EGP'))?.replace('EGP', '') || null
         items.push({
           listingId,
           url: 'https://www.facebook.com' + href.split('?')[0],
-          title: match?.[1]?.trim() || null,
-          price: match?.[2]?.trim().replace('EGP', '') || null,
+          title: fallbackTitle,
+          price: fallbackPrice,
           location: match?.[3]?.trim() || null,
           image: img?.getAttribute('src') || null,
           imageAlt: img?.getAttribute('alt')?.trim() || null,
@@ -76,20 +89,36 @@ async function scrapFacebook(carModel, location = 'cairo', minPriceLimit = 300_0
       })
       return items
     })
-    // ------------------------  DIVIDER  [5] states -------------------------------------------------------------
-    const cleanPrice = (price) => {
-      if (!price) return NaN
-      return Number(price.replace(/[^\d.]/g, ''))
+    if (listings.length === 0) throw new Error('No listings found')
+    return { listings, url: buildUrl(carModel, LOCATIONS[location] ?? LOCATIONS.cairo) }
+  }
+
+  try {
+    // ------------------------  DIVIDER  [5] scrap with 1 retry -------------------------------------------------------------
+    let listings, url
+    try {
+      ;({ listings, url } = await attemptScrap())
+    } catch (err) {
+      console.warn('⚠️ Facebook scrap failed, retrying...', err.message)
+      await new Promise((r) => setTimeout(r, 5000))
+      ;({ listings, url } = await attemptScrap())
     }
-    let filterdData = listings
-      .filter((x) => x.title?.includes(carModel) || x.imageAlt?.includes(carModel))
-      .map((x) => ({ ...x, price: cleanPrice(x.price) }))
-      .filter((x) => !isNaN(x.price) && x.price >= minPriceLimit && x.price <= maxPriceLimit)
-    let minPrice = Math.min(...filterdData.map((x) => x.price))
-    let maxPrice = Math.max(...filterdData.map((x) => x.price))
-    // ------------------------  DIVIDER  [6] return -------------------------------------------------------------
+    // ------------------------  DIVIDER  [6] states -------------------------------------------------------------
+    const modelLower = carModel.toLowerCase()
+    const listingWithUpdatedPrice = listings.map((x) => ({ ...x, price: cleanPrice(x.price) })).map((x) => ({ ...x, price: Number(x.price) !== NaN ? x.price : 0 }))
+
+    const pricesList = listings.filter((x) => !isNaN(x.price) && x.price >= 50_000).map((x) => x.price)
+    const overAllMinPrice = listingWithUpdatedPrice.length ? Math.min(...pricesList) : NaN
+    const overAllMaxPrice = listingWithUpdatedPrice.length ? Math.max(...pricesList) : NaN
+
+    const filterdData = listingWithUpdatedPrice
+      .filter((x) => x.title?.toLowerCase().includes(modelLower) || x.imageAlt?.toLowerCase().includes(modelLower))
+      .filter((x) => !isNaN(x.price) && x.price >= 50_000)
+    const minPrice = filterdData.length ? Math.min(...filterdData.map((x) => x.price)) : NaN
+    const maxPrice = filterdData.length ? Math.max(...filterdData.map((x) => x.price)) : NaN
+    // ------------------------  DIVIDER  [7] return -------------------------------------------------------------
     console.log('✅ Facebook Scrapped')
-    return { location, carModel, url, count: listings.length, listings, filterdData, filterdDataCount: filterdData.length, minPrice, maxPrice }
+    return { location, carModel, url, count: listings.length, listings, filterdData, filterdDataCount: filterdData.length, minPrice, maxPrice, overAllMinPrice, overAllMaxPrice }
   } finally {
     browser.disconnect()
   }
@@ -125,6 +154,7 @@ async function scrollToLoadMore(page, scrolls = 8) {
   for (let i = 0; i < scrolls; i++) {
     await page.evaluate(() => window.scrollBy(0, window.innerHeight))
     await new Promise((r) => setTimeout(r, 1500))
+    console.log('scrolled')
   }
 }
 
