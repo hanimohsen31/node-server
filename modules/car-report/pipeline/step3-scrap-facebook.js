@@ -22,10 +22,10 @@ const LOCATIONS = {
  * @param {{ location?: 'cairo' | 'mansoura' }} options
  * @returns {Promise<{ location: string, carModel: string, url: string, count: number, listings: object[] }>}
  */
-async function scrapFacebook(carModel, location = 'cairo', minPriceLimit = 300_000, maxPriceLimit = 550_000, scrollsInPage = 8) {
+async function scrapFacebook(carModel, location = 'cairo', minPriceLimit = 300_000, maxPriceLimit = 550_000, scrollsInPage = 8, browserClient = 'clone') {
   const showBrowser = false
   try {
-    await beforeChromeHandling(false, false, true, false, !showBrowser)
+    await beforeChromeHandling(false, false, true, false, !showBrowser, browserClient)
   } catch (err) {
     throw new Error('Error Happened In Opening Chrome Bash')
   }
@@ -111,9 +111,7 @@ async function scrapFacebook(carModel, location = 'cairo', minPriceLimit = 300_0
     const overAllMinPrice = listingWithUpdatedPrice.length ? Math.min(...pricesList) : NaN
     const overAllMaxPrice = listingWithUpdatedPrice.length ? Math.max(...pricesList) : NaN
 
-    const filterdData = listingWithUpdatedPrice
-      .filter((x) => x.title?.toLowerCase().includes(modelLower) || x.imageAlt?.toLowerCase().includes(modelLower))
-      .filter((x) => !isNaN(x.price) && x.price >= 50_000)
+    const filterdData = listingWithUpdatedPrice.filter((x) => x.title?.toLowerCase().includes(modelLower) || x.imageAlt?.toLowerCase().includes(modelLower)).filter((x) => !isNaN(x.price) && x.price >= 50_000)
     const minPrice = filterdData.length ? Math.min(...filterdData.map((x) => x.price)) : NaN
     const maxPrice = filterdData.length ? Math.max(...filterdData.map((x) => x.price)) : NaN
     // ------------------------  DIVIDER  [7] return -------------------------------------------------------------

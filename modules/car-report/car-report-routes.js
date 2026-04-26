@@ -24,7 +24,7 @@ const upload = multer({
 // =========================
 const CreateCarReport = async (req, res) => {
   try {
-    console.log(req.body)
+    // console.log(req.body)
     if (!req.file && !req.body.pdfSummary?.trim()) {
       return ErrorHandler(res, null, 'No Input Data', 400, null)
     }
@@ -32,6 +32,7 @@ const CreateCarReport = async (req, res) => {
     const maxPriceLimit = Number(req.body.maxPriceLimit) || 550_000
     const facebookScrollCount = Number(req.body.facebookScrollCount) || 10
     const hatla2eePaging = Number(req.body.hatla2eePaging) || 10
+    const browserClient = req.body.browserClient || 'clone'
 
     // [1] Convert PDF to JSON (skip if manual text was provided)
     let pdfSummary
@@ -55,7 +56,7 @@ const CreateCarReport = async (req, res) => {
       const fbResults = []
       for (const searchTerm of [aiData.modelArabic, aiData.modelEnglish].filter(Boolean)) {
         try {
-          const result = await scrapFacebook(searchTerm, 'cairo', minPriceLimit, maxPriceLimit, facebookScrollCount)
+          const result = await scrapFacebook(searchTerm, 'cairo', minPriceLimit, maxPriceLimit, facebookScrollCount,browserClient)
           fbResults.push(result)
         } catch (e) {
           console.error(`[Facebook scrape failed for "${searchTerm}"]`, e.message)
