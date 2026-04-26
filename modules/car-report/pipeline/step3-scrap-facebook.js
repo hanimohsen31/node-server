@@ -38,8 +38,27 @@ async function scrapFacebook(carModel, location = 'cairo', minPriceLimit = 300_0
   await page.setViewport({ width: 1500, height: 5000, zoom: 0.25, deviceScaleFactor: 0.25 })
 
   const cleanPrice = (price) => {
-    if (!price) return NaN
-    return Number(price.replace(/[^\d.]/g, ''))
+    if (!price || typeof price !== 'string') return null
+
+    let normalized = price
+      .replace(/,/g, '') // remove commas
+      .replace(/EGP|ج\.م|جنيه/gi, '') // remove currency
+      .trim()
+
+    // Handle "K" (e.g. 390K)
+    if (/k$/i.test(normalized)) {
+      const num = parseFloat(normalized.replace(/k/i, ''))
+      return Number.isFinite(num) ? num * 1000 : null
+    }
+
+    // Handle "million" or "مليون"
+    if (/million|مليون/i.test(normalized)) {
+      const num = parseFloat(normalized)
+      return Number.isFinite(num) ? num * 1_000_000 : null
+    }
+
+    const num = parseFloat(normalized)
+    return Number.isFinite(num) ? num : null
   }
 
   const attemptScrap = async () => {
@@ -105,15 +124,16 @@ async function scrapFacebook(carModel, location = 'cairo', minPriceLimit = 300_0
     }
     // ------------------------  DIVIDER  [6] states -------------------------------------------------------------
     const modelLower = carModel.toLowerCase()
-    const listingWithUpdatedPrice = listings.map((x) => ({ ...x, price: cleanPrice(x.price) })).map((x) => ({ ...x, price: Number(x.price) !== NaN ? x.price : 0 }))
+    const listingWithUpdatedPrice = listings.map((x) => ({ ...x, price: cleanPrice(x.price) }))
 
-    const pricesList = listings.filter((x) => !isNaN(x.price) && x.price >= 50_000).map((x) => x.price)
-    const overAllMinPrice = listingWithUpdatedPrice.length ? Math.min(...pricesList) : NaN
-    const overAllMaxPrice = listingWithUpdatedPrice.length ? Math.max(...pricesList) : NaN
+    const pricesList = listingWithUpdatedPrice.map((x) => x.price).filter((p) => Number.isFinite(p) && p >= 50_000)
+    const overAllMinPrice = pricesList.length ? Math.min(...pricesList) : null
+    const overAllMaxPrice = pricesList.length ? Math.max(...pricesList) : null
 
-    const filterdData = listingWithUpdatedPrice.filter((x) => x.title?.toLowerCase().includes(modelLower) || x.imageAlt?.toLowerCase().includes(modelLower)).filter((x) => !isNaN(x.price) && x.price >= 50_000)
-    const minPrice = filterdData.length ? Math.min(...filterdData.map((x) => x.price)) : NaN
-    const maxPrice = filterdData.length ? Math.max(...filterdData.map((x) => x.price)) : NaN
+    const filterdData = listingWithUpdatedPrice.filter((x) => x.title?.toLowerCase().includes(modelLower) || x.imageAlt?.toLowerCase().includes(modelLower)).filter((x) => Number.isFinite(x.price) && x.price >= 50_000)
+    const filterdPrices = filterdData.map((x) => x.price)
+    const minPrice = filterdPrices.length ? Math.min(...filterdPrices) : null
+    const maxPrice = filterdPrices.length ? Math.max(...filterdPrices) : null
     // ------------------------  DIVIDER  [7] return -------------------------------------------------------------
     console.log('✅ Facebook Scrapped')
     return { location, carModel, url, count: listings.length, listings, filterdData, filterdDataCount: filterdData.length, minPrice, maxPrice, overAllMinPrice, overAllMaxPrice }

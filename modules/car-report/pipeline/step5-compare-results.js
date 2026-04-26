@@ -48,11 +48,11 @@ async function compareResults(finalPayload) {
   let textFinal = `The Car Details Iam into buy in json format: \n ${JSON.stringify(reviewdCar)}
 ---------
 and here is some market data:
-Facebook Market Listing: \n${facebookListing? facebookListing : 'No Data'}
+Facebook Market Listing: \n${facebookListing ? facebookListing : 'No Data'}
 ---------
-Hatla2ee Market Table: \n${hatla2eeTable? hatla2eeTable : 'No Data'}
+Hatla2ee Market Table: \n${hatla2eeTable ? hatla2eeTable : 'No Data'}
 ---------
-Hatla2ee Market Listing: \n${hatla2eeListing? hatla2eeListing : 'No Data'}`
+Hatla2ee Market Listing: \n${hatla2eeListing ? hatla2eeListing : 'No Data'}`
   textFinal = SYSTEM_PROMPT(textFinal)
   try {
     let result = await sendCompareResultToAI(textFinal)
@@ -68,23 +68,55 @@ async function sendCompareResultToAI(content) {
   try {
     const response = await axios.post(url, { content })
     const raw = response.data.data.content
-    try {
-      return JSON.parse(raw)
-    } catch {
-      try {
-        const stripped = raw
-          ?.replace(/^```(?:json)?\s*/i, '')
-          ?.replace(/\s*```$/, '')
-          ?.trim()
-        return JSON.parse(stripped)
-      } catch {
-        return raw
-      }
+    const parsed = extractJSON(raw)
+    if (!parsed) {
+      console.warn('⚠️ AI returned invalid JSON:\n', raw)
+      return null
     }
+    return parsed
   } catch (e) {
     console.log(e)
     return null
   }
+}
+
+function extractJSON(raw) {
+  if (!raw || typeof raw !== 'string') return null
+
+  // 1) Try direct parse
+  try {
+    return JSON.parse(raw)
+  } catch {}
+
+  // 2) Remove code fences
+  const noFences = raw
+    .replace(/```json/gi, '')
+    .replace(/```/g, '')
+    .trim()
+
+  try {
+    return JSON.parse(noFences)
+  } catch {}
+
+  // 3) Extract FIRST valid JSON object from text
+  const match = noFences.match(/\{[\s\S]*\}/)
+  if (match) {
+    try {
+      return JSON.parse(match[0])
+    } catch {}
+  }
+
+  // 4) Last resort: fix common JSON issues
+  try {
+    const fixed = noFences
+      .replace(/,\s*}/g, '}') // trailing commas
+      .replace(/,\s*]/g, ']')
+
+    const match2 = fixed.match(/\{[\s\S]*\}/)
+    if (match2) return JSON.parse(match2[0])
+  } catch {}
+
+  return null
 }
 
 module.exports = compareResults

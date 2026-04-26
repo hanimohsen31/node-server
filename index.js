@@ -54,6 +54,11 @@ app.use('/ella-vibes', require('./modules/ella-vibes/market-routes'))
 app.use('/carzzy', require('./modules/carzzy/carzzy-routes'))
 app.use('/cars-reports', require('./modules/cars-reports/caars-reports-routes'))
 
+// ---------------------  DIVIDER  telegram bots ----------------------------------------
+if (process.env.TELEGRAM_CAR_REPORT_ENABLED === 'true') {
+  require('./modules/car-report/car-report-telegram').startCarReportTelegramBot()
+}
+
 // ---------------------  DIVIDER  middleware -------------------------------------------
 app.all('*', (req, res, next) => next(ErrorHandler(res, null, 'Route not found', 404, null)))
 

@@ -4,7 +4,11 @@
       "Bash(node -e \"const fs=require\\('fs'\\);fs.readdirSync\\('d:/Projects/Node Server'\\).filter\\(f=>f.endsWith\\('.js'\\)\\).forEach\\(f=>console.log\\(f\\)\\)\")",
       "WebFetch(domain:www.npmjs.com)",
       "Bash(powershell -command \"\\(Get-Content 'D:\\\\\\\\Projects\\\\\\\\Node Server\\\\\\\\modules\\\\\\\\car-report\\\\\\\\utils\\\\\\\\reponse-final.json'\\).Count\")",
-      "PowerShell(\\(Get-Content 'D:\\\\Projects\\\\Node Server\\\\modules\\\\car-report\\\\utils\\\\reponse-final.json'\\).Count)"
+      "PowerShell(\\(Get-Content 'D:\\\\Projects\\\\Node Server\\\\modules\\\\car-report\\\\utils\\\\reponse-final.json'\\).Count)",
+      "Bash(node --check \"d:/Projects/Node/Node Server/modules/car-report/car-report-pipeline.js\")",
+      "Bash(node --check \"d:/Projects/Node/Node Server/modules/car-report/car-report-routes.js\")",
+      "Bash(node --check \"d:/Projects/Node/Node Server/modules/car-report/car-report-telegram.js\")",
+      "Bash(node --check \"d:/Projects/Node/Node Server/index.js\")"
     ]
   }
 }

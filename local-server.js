@@ -70,6 +70,8 @@ app.use('/markdown/v3', require('./modules/markdown/markdown-routes-v3'))
 app.use('/markdown-frontend', require('./modules/markdown/markdown-frontend'))
 app.use('/car-report', require('./modules/car-report/car-report-routes'))
 app.all('*', (req, res, next) => next(ErrorHandler(res, null, 'Route not found', 404, null)))
+// ---------------------  DIVIDER  telegram bots ----------------------------------------
+require('./modules/car-report/car-report-telegram').startCarReportTelegramBot()
 
 // ---------------------  DIVIDER  export app -------------------------------------------
 // Start the server
