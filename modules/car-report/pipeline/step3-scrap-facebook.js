@@ -126,11 +126,14 @@ async function scrapFacebook(carModel, location = 'cairo', minPriceLimit = 300_0
     const modelLower = carModel.toLowerCase()
     const listingWithUpdatedPrice = listings.map((x) => ({ ...x, price: cleanPrice(x.price) }))
 
-    const pricesList = listingWithUpdatedPrice.map((x) => x.price).filter((p) => Number.isFinite(p) && p >= 50_000)
+    const pricesList = listingWithUpdatedPrice
+      .map((x) => x.price || 0).filter((p) => Number.isFinite(p) && !isNaN(p) && typeof p === 'number' && p >= 50_000)
     const overAllMinPrice = pricesList.length ? Math.min(...pricesList) : null
     const overAllMaxPrice = pricesList.length ? Math.max(...pricesList) : null
 
-    const filterdData = listingWithUpdatedPrice.filter((x) => x.title?.toLowerCase().includes(modelLower) || x.imageAlt?.toLowerCase().includes(modelLower)).filter((x) => Number.isFinite(x.price) && x.price >= 50_000)
+    const filterdData = listingWithUpdatedPrice
+      .filter((x) => x.title?.toLowerCase().includes(modelLower) || x.imageAlt?.toLowerCase().includes(modelLower))
+      .filter((x) => Number.isFinite(x.price) && !isNaN(p) && typeof p === 'number' && x.price >= 50_000)
     const filterdPrices = filterdData.map((x) => x.price)
     const minPrice = filterdPrices.length ? Math.min(...filterdPrices) : null
     const maxPrice = filterdPrices.length ? Math.max(...filterdPrices) : null
