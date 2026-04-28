@@ -285,9 +285,28 @@
         <div class="card">
           <div class="prompt-header">
             <span style="font-size:.85rem;color:var(--muted)">النص المرسل للذكاء الاصطناعي للمقارنة</span>
-            <button class="icon-btn" id="copy-prompt-btn" onclick="copyPrompt(this)">📋 نسخ</button>
+            <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+              <button class="icon-btn" id="copy-prompt-btn" onclick="copyPrompt(this)">📋 نسخ</button>
+              <button class="icon-btn" onclick="downloadPrompt()">⬇️ تنزيل TXT</button>
+            </div>
           </div>
           <div class="prompt-box" id="final-prompt-box"></div>
+        </div>
+      </div>
+
+      <!-- Override Result -->
+      <div class="mb">
+        <div class="section-title">✏️ تعديل النتيجة (result)</div>
+        <div class="card">
+          <div class="prompt-header">
+            <span style="font-size:.85rem;color:var(--muted)">الصق هنا JSON الخاص بـ <code>result</code> فقط لاستبدال التحليل الحالي وتحديث الـ JSON الخام</span>
+            <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+              <button class="icon-btn" onclick="loadCurrentResult()">📥 تحميل الحالي</button>
+              <button class="icon-btn" onclick="applyNewResult(this)">✅ تطبيق</button>
+            </div>
+          </div>
+          <textarea id="result-override" rows="10" placeholder='{ "conditionScore": 8, "finalVerdict": "Good Deal", ... }' style="font-family:'Consolas','Courier New',monospace;font-size:.8rem;direction:ltr;text-align:left;min-height:180px"></textarea>
+          <div id="result-override-msg" style="margin-top:.5rem;font-size:.8rem;display:none"></div>
         </div>
       </div>
 
@@ -297,7 +316,11 @@
         <div class="card">
           <div class="prompt-header">
             <span style="font-size:.85rem;color:var(--muted)">البيانات الخام المُعادة من الخادم</span>
-            <button class="icon-btn" onclick="copyJson(event)">📋 نسخ</button>
+            <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+              <button class="icon-btn" onclick="copyJson(event)">📋 نسخ</button>
+              <button class="icon-btn" onclick="downloadJson()">⬇️ تنزيل JSON</button>
+              <button class="icon-btn" onclick="downloadJsonAsText()">⬇️ تنزيل TXT</button>
+            </div>
           </div>
           <pre id="raw-json" class="raw-json-box"></pre>
         </div>
@@ -458,6 +481,36 @@
       function copyPrompt(btn) {
         if (!_finalPromptText) return
         copyText(_finalPromptText, btn)
+      }
+
+      // ── Download helpers ──
+      function timestamp() {
+        const d = new Date()
+        const pad = n => String(n).padStart(2, '0')
+        return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`
+      }
+      function downloadFile(content, filename, mime) {
+        const blob = new Blob([content], { type: mime })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = filename
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        setTimeout(() => URL.revokeObjectURL(url), 100)
+      }
+      function downloadPrompt() {
+        if (!_finalPromptText) return
+        downloadFile(_finalPromptText, `final-prompt_${timestamp()}.txt`, 'text/plain;charset=utf-8')
+      }
+      function downloadJson() {
+        if (!_data) return
+        downloadFile(JSON.stringify(_data, null, 2), `car-report_${timestamp()}.json`, 'application/json;charset=utf-8')
+      }
+      function downloadJsonAsText() {
+        if (!_data) return
+        downloadFile(JSON.stringify(_data, null, 2), `car-report_${timestamp()}.txt`, 'text/plain;charset=utf-8')
       }
 
       // ── Render ──
@@ -710,6 +763,60 @@
         document.querySelectorAll('#h2e-grid .listing-card').forEach(card => {
           card.style.display = (!year || card.dataset.year == year) ? '' : 'none'
         })
+      }
+
+      // ── Override Result ──
+      function loadCurrentResult() {
+        const ta = document.getElementById('result-override')
+        const msg = document.getElementById('result-override-msg')
+        if (!_data) {
+          msg.style.display = 'block'
+          msg.style.color = 'var(--red)'
+          msg.textContent = '❌ لا توجد بيانات لتحميلها. ولّد التقرير أولاً.'
+          return
+        }
+        ta.value = JSON.stringify(_data.result || {}, null, 2)
+        msg.style.display = 'block'
+        msg.style.color = 'var(--muted)'
+        msg.textContent = 'تم تحميل النتيجة الحالية. عدّلها ثم اضغط "تطبيق".'
+      }
+
+      function applyNewResult(btn) {
+        const ta = document.getElementById('result-override')
+        const msg = document.getElementById('result-override-msg')
+        const raw = ta.value.trim()
+        if (!raw) {
+          msg.style.display = 'block'
+          msg.style.color = 'var(--red)'
+          msg.textContent = '❌ الرجاء لصق JSON الخاص بالنتيجة.'
+          return
+        }
+        if (!_data) {
+          msg.style.display = 'block'
+          msg.style.color = 'var(--red)'
+          msg.textContent = '❌ لا توجد بيانات أساسية. ولّد التقرير أولاً.'
+          return
+        }
+        let parsed
+        try {
+          parsed = JSON.parse(raw)
+        } catch (err) {
+          msg.style.display = 'block'
+          msg.style.color = 'var(--red)'
+          msg.textContent = '❌ JSON غير صالح: ' + err.message
+          return
+        }
+        _data.result = parsed
+        renderResults(_data)
+        msg.style.display = 'block'
+        msg.style.color = 'var(--green)'
+        msg.textContent = '✅ تم تطبيق النتيجة الجديدة وتحديث العرض و JSON الخام.'
+        if (btn) {
+          const orig = btn.textContent
+          btn.textContent = '✅ تم'
+          btn.classList.add('copied')
+          setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied') }, 1500)
+        }
       }
 
       // ── Final Prompt ──
