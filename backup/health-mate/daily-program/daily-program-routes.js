@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const ErrorHandler = require('../../../utils/ErrorHandler')
+const ErrorHandler = require('../../../middlewares/ErrorHandler')
 const jwt = require('jsonwebtoken')
 const DayDiet = require('./day-diet-model')
 

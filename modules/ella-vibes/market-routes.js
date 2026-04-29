@@ -2,8 +2,8 @@ const express = require('express')
 const router = express.Router()
 const Post = require('./market-posts-model')
 const Product = require('./market-products-model')
-const ProtectedRoute = require('../../utils/ProtectedRoute')
-const ErrorHandler = require('../../utils/ErrorHandler')
+const ProtectedRoute = require('../../middlewares/ProtectedRoute')
+const ErrorHandler = require('../../middlewares/ErrorHandler')
 const mongoose = require('mongoose')
 
 // --------------------------  DIVIDER  posts ---------------------------------------------------------------

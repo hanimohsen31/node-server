@@ -3,8 +3,8 @@ const router = express.Router()
 const crypto = require('crypto')
 const jwt = require('jsonwebtoken')
 const User = require('./auth-model')
-const ErrorHandler = require('../../utils/ErrorHandler')
-const ProtectedRoute = require('../../utils/ProtectedRoute')
+const ErrorHandler = require('../../middlewares/ErrorHandler')
+const ProtectedRoute = require('../../middlewares/ProtectedRoute')
 const SendEmail = require('../../utils/SendEmail')
 
 function createToken(userData) {

@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const FoodList = require('./food-list-model')
-const ErrorHandler = require('../../../utils/ErrorHandler')
+const ErrorHandler = require('../../../middlewares/ErrorHandler')
 
 // --------------------------  DIVIDER  functions -------------------------------------------------
 // Get all food items

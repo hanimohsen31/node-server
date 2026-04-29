@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const ErrorHandler = require('../../../utils/ErrorHandler')
+const ErrorHandler = require('../../../middlewares/ErrorHandler')
 const models = {
   'gpt-oss-120b': {
     // max_completion_tokens: 1024,

@@ -4,13 +4,13 @@
 // [3] scrap items using extension "Instant Data Scraper" + save as csv
 // [4] make to json + return json
 
-const puppeteerExtra = require('puppeteer-extra')
 const path = require('path')
-const StealthPlugin = require('puppeteer-extra-plugin-stealth')
 const puppeteer = require('puppeteer')
 const { JSDOM } = require('jsdom')
+const puppeteerExtra = require('puppeteer-extra')
+const StealthPlugin = require('puppeteer-extra-plugin-stealth')
 const { extractAll } = require('../utils/pattern-extractor')
-const { beforeChromeHandling } = require('../../../utils/PuppeteerHelpers')
+const { launchChrome } = require('../../../puppeteer/browser')
 puppeteerExtra.use(StealthPlugin())
 const LOCATIONS = {
   cairo: { citySlug: 'cairo', latitude: 30.0626, longitude: 31.2497, radius: 250 },
@@ -23,9 +23,8 @@ const LOCATIONS = {
  * @returns {Promise<{ location: string, carModel: string, url: string, count: number, listings: object[] }>}
  */
 async function scrapFacebook(carModel, location = 'cairo', minPriceLimit = 300_000, maxPriceLimit = 550_000, scrollsInPage = 8, browserClient = 'clone') {
-  const showBrowser = false
   try {
-    await beforeChromeHandling(false, false, true, false, !showBrowser, browserClient)
+    await launchChrome()
   } catch (err) {
     throw new Error('Error Happened In Opening Chrome Bash')
   }

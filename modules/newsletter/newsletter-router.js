@@ -1,11 +1,11 @@
+const fs = require('fs')
+const path = require('path')
 const { SOURCES, ScrapePage, ScrapeYoutubeChannel, ScrapeReutersPage, ScrapeGoogleNews } = require('./newsletter-helpers.js')
 const { extractAll, generateHTML } = require('./paresers/index.js')
 const { MongoClient } = require('mongodb')
 const express = require('express')
 const puppeteer = require('puppeteer')
 const router = express.Router()
-const fs = require('fs')
-const path = require('path')
 
 const CACHE_TTL_MS = 12 * 60 * 60 * 1000 // 12 hours
 

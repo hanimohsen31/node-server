@@ -1,4 +1,4 @@
-const ErrorHandler = require('./utils/ErrorHandler')
+const ErrorHandler = require('./middlewares/ErrorHandler')
 const sanitize = require('express-mongo-sanitize')
 const rateLimit = require('express-rate-limit')
 const express = require('express')

@@ -1,5 +1,5 @@
 // const { MongoClient, ServerApiVersion } = require('mongodb');
-// const ErrorHandler = require('./utils/ErrorHandler')
+// const ErrorHandler = require('./middlewares/ErrorHandler')
 // const mongoose = require('mongoose')
 const sanitize = require('express-mongo-sanitize')
 const rateLimit = require('express-rate-limit')

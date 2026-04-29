@@ -55,7 +55,9 @@ async function runCarReportPipeline({ pdfBuffer, pdfSummary, options = {}, onPro
   let facebook = null
   try {
     const fbResults = []
-    for (const searchTerm of [aiData.modelArabic, aiData.modelEnglish, `${aiData.makeArabic} ${aiData.modelArabic} ${aiData.year}`, `${aiData.makeEnglish} ${aiData.modelEnglish} ${aiData.year}`].filter(Boolean)) {
+    for (const searchTerm of [aiData.modelArabic, aiData.modelEnglish, 
+      // `${aiData.makeArabic} ${aiData.modelArabic} ${aiData.year}`, `${aiData.makeEnglish} ${aiData.modelEnglish} ${aiData.year}`
+    ].filter(Boolean)) {
       try {
         const result = await scrapFacebook(searchTerm, 'cairo', minPriceLimit, maxPriceLimit, facebookScrollCount, browserClient)
         fbResults.push(result)

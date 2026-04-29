@@ -1,4 +1,4 @@
-import { LoaderService } from './../../shared/services/loader.service';
+import { LoaderService } from '../../shared/services/loader.service';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { NewslettersService } from './newsletters.service';
 import { finalize } from 'rxjs/internal/operators/finalize';

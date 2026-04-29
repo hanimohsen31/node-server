@@ -4,7 +4,7 @@ const Tour = require('../modals/tours-modal')
 const APIsFeatures = require('../../utils/APIsFeatures')
 const ProtectedRoute = require('../../utils/ProtectedRoute')
 const RestrictTo = require('../../utils/RestrictTo')
-const ErrorHandler = require('../../utils/ErrorHandler')
+const ErrorHandler = require('../../middlewares/ErrorHandler')
 
 function top5(req, res, next) {
   req.query.pageCount = 5

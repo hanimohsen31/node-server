@@ -1,4 +1,5 @@
 const fs = require('fs')
+const os = require('os')
 const cheerio = require('cheerio')
 const puppeteer = require('puppeteer')
 const https = require('https')
@@ -8,6 +9,37 @@ const util = require('util')
 const fetch = require('node-fetch')
 const { spawn } = require('child_process')
 const execAsync = util.promisify(exec)
+
+function getChromePaths() {
+  const platform = process.platform
+  const home = os.homedir()
+  if (platform === 'win32') {
+    const localAppData = process.env.LOCALAPPDATA || path.join(home, 'AppData', 'Local')
+    const programFiles = process.env['ProgramFiles'] || 'C:\\Program Files'
+    const programFilesX86 = process.env['ProgramFiles(x86)'] || 'C:\\Program Files (x86)'
+    const candidateExes = [
+      path.join(programFiles, 'Google', 'Chrome', 'Application', 'chrome.exe'),
+      path.join(programFilesX86, 'Google', 'Chrome', 'Application', 'chrome.exe'),
+      path.join(localAppData, 'Google', 'Chrome', 'Application', 'chrome.exe'),
+    ]
+    return {
+      chromePath: candidateExes.find((p) => fs.existsSync(p)) || candidateExes[0],
+      defaultUserDataDir: path.join(localAppData, 'Google', 'Chrome', 'User Data'),
+    }
+  }
+  if (platform === 'darwin') {
+    return {
+      chromePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+      defaultUserDataDir: path.join(home, 'Library', 'Application Support', 'Google', 'Chrome'),
+    }
+  }
+  // linux & others
+  const candidateExes = ['/usr/bin/google-chrome', '/usr/bin/google-chrome-stable', '/usr/bin/chromium', '/usr/bin/chromium-browser', '/snap/bin/chromium']
+  return {
+    chromePath: candidateExes.find((p) => fs.existsSync(p)) || 'google-chrome',
+    defaultUserDataDir: path.join(home, '.config', 'google-chrome'),
+  }
+}
 const config = { headless: true, delayBetweenRequests: 5000, timeout: 30000 }
 
 async function getButtonAndClick(page, rootId, btnSelector, elementText) {
@@ -200,7 +232,7 @@ async function initBrowser() {
   await page.setViewport({
     width: 1366 + Math.floor(Math.random() * 100),
     height: 768 + Math.floor(Math.random() * 100),
-    deviceScaleFactor: 1,
+    deviceScaleFactor: 0.1,
     hasTouch: false,
     isLandscape: false,
     isMobile: false,
@@ -235,58 +267,64 @@ function cleanHtmlAndSave(html, outputPath) {
   console.log('✅ Cleaned HTML and Saved')
 }
 
-async function beforeChromeHandling(kill = false, copy = false, launch = true, devTools = false, headless = false, profileMode = 'clone') {
-  const defaultUserDataDir = 'C:\\Users\\Hani Rashed\\AppData\\Local\\Google\\Chrome\\User Data'
-  const cloneUserDataDir = 'C:\\hani\\ChromeClone'
-  const chromePath = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-  const userDataDir = profileMode === 'default' ? defaultUserDataDir : cloneUserDataDir
+async function beforeChromeHandling(kill = false, copy = false, launch = true, devTools = false, headless = false, profileMode = 'default') {
+  const { chromePath, defaultUserDataDir } = getChromePaths()
+  const platform = process.platform
+  const cloneUserDataDir = platform === 'win32' ? 'C:\\hani\\ChromeClone' : path.join(os.homedir(), '.chrome-clone')
+  const profileSrc = path.join(defaultUserDataDir, 'Default')
   const remotePort = 9222
+
+  let userDataDir = profileMode === 'clone' ? cloneUserDataDir : defaultUserDataDir
   try {
     if (kill) {
-      // 1️⃣ Kill any Chrome process
       console.log('Killing Chrome...')
-      await execAsync('taskkill /F /IM chrome.exe')
+      const killCmd = platform === 'win32' ? 'taskkill /F /IM chrome.exe' : platform === 'darwin' ? 'pkill -f "Google Chrome"' : 'pkill -f chrome'
+      await execAsync(killCmd).catch((e) => console.warn('Kill Chrome warning:', e.message))
       console.log('Chrome killed successfully')
     }
 
     if (copy) {
-      // 2️⃣ Copy your Chrome profile
-      console.log('Copying Chrome profile...')
-      const profileSrc = 'C:\\Users\\Hani Rashed\\AppData\\Local\\Google\\Chrome\\User Data\\Default'
-      const profileDest = cloneUserDataDir
-      await execAsync(`xcopy /E /I "${profileSrc}" "${profileDest}"`)
+      console.log('Copying Chrome profile from', profileSrc, 'to', cloneUserDataDir)
+      if (!fs.existsSync(profileSrc)) {
+        throw new Error(`Profile source not found: ${profileSrc}`)
+      }
+      const copyCmd = platform === 'win32' ? `xcopy /E /I /Y "${profileSrc}" "${cloneUserDataDir}\\Default"` : `mkdir -p "${cloneUserDataDir}" && cp -R "${profileSrc}" "${cloneUserDataDir}/Default"`
+      await execAsync(copyCmd)
       console.log('Profile copied successfully')
     }
 
     if (launch) {
+      if (profileMode === 'clone' && !fs.existsSync(cloneUserDataDir)) {
+        console.warn(`Clone user data dir not found at ${cloneUserDataDir}, falling back to default: ${defaultUserDataDir}`)
+        userDataDir = defaultUserDataDir
+      }
+
       const chromeProcess = spawn(
         `"${chromePath}"`,
         [
           `--remote-debugging-port=${remotePort}`,
-          `--user-data-dir=${userDataDir}`,
+          `--user-data-dir="${userDataDir}"`,
           '--process-per-site',
           '--disable-backgrounding-occluded-windows',
           '--disable-background-timer-throttling',
           '--disable-renderer-backgrounding',
           '--enable-gpu-rasterization',
-          ...(headless ? ['--headless=new'] : []), // false opens browser
-          // ...(headless ? ['--start-minimized'] : []),
+          ...(headless ? ['--headless=new'] : []),
         ],
         {
           shell: true,
           detached: true,
-          stdio: 'inherit', // ignore
+          stdio: 'inherit',
         }
       )
-      chromeProcess.unref() // allow Node to continue without waiting
-      await waitForChrome(9222)
-      console.log('Chrome launched in background.')
+      chromeProcess.unref()
+      await waitForChrome(remotePort)
+      console.log('Chrome launched in background using:', userDataDir)
     }
 
     if (devTools) {
-      // 4️⃣ Check Chrome DevTools endpoint
       console.log('Checking DevTools endpoint...')
-      const res = await fetch('http://127.0.0.1:9222/json/version')
+      const res = await fetch(`http://127.0.0.1:${remotePort}/json/version`)
       const json = await res.json()
       console.log('Chrome DevTools info:', json)
     }

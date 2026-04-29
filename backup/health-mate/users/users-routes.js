@@ -3,7 +3,7 @@ const express = require('express')
 const jwt = require('jsonwebtoken')
 const User = require('./users-model')
 const SendEmail = require('../../../utils/SendEmail')
-const ErrorHandler = require('../../../utils/ErrorHandler')
+const ErrorHandler = require('../../../middlewares/ErrorHandler')
 const ProtectedRoute = require('../../../utils/ProtectedRoute')
 const router = express.Router()
 

@@ -1,5 +1,5 @@
 const startNotification = require('./modules/dev/notification')
-const ErrorHandler = require('./utils/ErrorHandler')
+const ErrorHandler = require('./middlewares/ErrorHandler')
 const { app, isDev } = require('../server-seperated/configs')
 const { startDatabase } = require('./database')
 

@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const multer = require('multer')
-const ErrorHandler = require('../../utils/ErrorHandler')
+const ErrorHandler = require('../../middlewares/ErrorHandler')
 const runCarReportPipeline = require('./car-report-pipeline')
 const upload = multer({
   storage: multer.memoryStorage(),

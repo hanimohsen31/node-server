@@ -1,7 +1,7 @@
 const Anthropic = require("@anthropic-ai/sdk");
 const express = require('express')
 const router = express.Router()
-const ErrorHandler = require('../../../utils/ErrorHandler')
+const ErrorHandler = require('../../../middlewares/ErrorHandler')
 const client = new Anthropic({apiKey: process.env.CLAUDE_API_KEY,});
 
 async function AskClaude(req, res) {

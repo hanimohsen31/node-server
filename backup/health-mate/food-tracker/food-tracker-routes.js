@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const Tracker = require('./food-tracker-model')
-const ErrorHandler = require('../../../utils/ErrorHandler')
+const ErrorHandler = require('../../../middlewares/ErrorHandler')
 const jwt = require('jsonwebtoken')
 
 // --------------------------  DIVIDER  functions -------------------------------------------------

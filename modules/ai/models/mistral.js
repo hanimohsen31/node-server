@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const ErrorHandler = require('../../../utils/ErrorHandler')
+const ErrorHandler = require('../../../middlewares/ErrorHandler')
 const API_KEY = process.env.MISTRAL_API_KEY;
 
 // https://console.mistral.ai/build/playground

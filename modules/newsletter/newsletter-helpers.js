@@ -1,6 +1,5 @@
 const axios = require('axios')
 const cheerio = require('cheerio')
-
 const BaseHtml = (hmtlContent) => `<html><head><title>AI Dashboard</title></head><body><h1>🔥 AI Trends Dashboard</h1>${hmtlContent}</body>`
 
 const SOURCES = [

@@ -2,8 +2,8 @@ const express = require('express')
 const router = express.Router()
 const mongoose = require('mongoose')
 const Car = require('./carzzy-model')
-const ProtectedRoute = require('../../utils/ProtectedRoute')
-const ErrorHandler = require('../../utils/ErrorHandler')
+const ProtectedRoute = require('../../middlewares/ProtectedRoute')
+const ErrorHandler = require('../../middlewares/ErrorHandler')
 
 const isValidId = (id) => mongoose.Types.ObjectId.isValid(id)
 

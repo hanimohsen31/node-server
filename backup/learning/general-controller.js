@@ -4,7 +4,7 @@ const Tour = require('../tours/tours-modal')
 const APIsFeatures = require('../../utils/APIsFeatures')
 const ProtectedRoute = require('../../utils/ProtectedRoute')
 const RestrictTo = require('../../utils/RestrictTo')
-const ErrorHandler = require('../../utils/ErrorHandler')
+const ErrorHandler = require('../../middlewares/ErrorHandler')
 
 // get all
 async function GetAllPosts(req, res) {

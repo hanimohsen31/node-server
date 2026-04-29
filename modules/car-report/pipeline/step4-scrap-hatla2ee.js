@@ -7,7 +7,6 @@
 
 const puppeteer = require('puppeteer')
 const Anthropic = require('@anthropic-ai/sdk')
-const { beforeChromeHandling } = require('../../../utils/PuppeteerHelpers')
 const Hatla2eeBaseData = require('../utils/hatla2ee-lists')
 const BASE = 'https://eg.hatla2ee.com/en/car'
 const HATLA2EE_HOME = 'https://eg.hatla2ee.com/en'
@@ -26,19 +25,15 @@ async function scrapHatla2ee(brand, model, year = null, minPriceLimit = 300_000,
   brand = resolved.brand
   model = resolved.model
 
-  try {
-    await beforeChromeHandling(false, false, true, false, true)
-  } catch (err) {
-    throw new Error('Error Happened In Opening Chrome Bash')
-  }
-
-  // ------------------------  DIVIDER  [1] open default browser -------------------------------------------------------------
-  const browser = await puppeteer.connect({ browserURL: 'http://127.0.0.1:9222', defaultViewport: null })
-  const pages = await browser.pages()
-  const page = pages[0] || (await browser.newPage())
-  await page.bringToFront()
+  // ------------------------  DIVIDER  [1] launch puppeteer's default chromium -------------------------------------------------------------
+  const browser = await puppeteer.launch({
+    headless: true,
+    defaultViewport: null,
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-blink-features=AutomationControlled'],
+  })
+  const page = await browser.newPage()
   await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36')
-  await page.setViewport({ width: 1500, height: 5000, zoom: 0.25, deviceScaleFactor: 0.25 })
+  await page.setViewport({ width: 1500, height: 5000, deviceScaleFactor: 0.25 })
 
   try {
     // ------------------------  DIVIDER  [2] scrap used-prices table -------------------------------------------------------------
@@ -82,7 +77,7 @@ async function scrapHatla2ee(brand, model, year = null, minPriceLimit = 300_000,
       },
     }
   } finally {
-    browser.disconnect()
+    await browser.close()
   }
 }
 

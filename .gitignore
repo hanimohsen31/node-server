@@ -3,4 +3,4 @@ config.env
 .vercel
 .env
 outputs
-mock-rules.js
+puppeteer/ChromeClone/*

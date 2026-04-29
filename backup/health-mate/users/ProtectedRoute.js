@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const ErrorHandler = require('../../../utils/ErrorHandler')
+const ErrorHandler = require('../../../middlewares/ErrorHandler')
 const User = require('./users-model')
 
 async function ProtectedRoute(req, res, next) {

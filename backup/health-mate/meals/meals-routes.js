@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const Meals = require('./meals-model')
-const ErrorHandler = require('../../../utils/ErrorHandler')
+const ErrorHandler = require('../../../middlewares/ErrorHandler')
 
 async function GetAllMeals(req, res) {
   try {

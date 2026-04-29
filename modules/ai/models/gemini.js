@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const ErrorHandler = require('../../../utils/ErrorHandler')
+const ErrorHandler = require('../../../middlewares/ErrorHandler')
 const { GoogleGenAI } = require('@google/genai')
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })
 const multer = require('multer')

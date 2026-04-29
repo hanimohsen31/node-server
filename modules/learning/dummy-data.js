@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const ErrorHandler = require('../../utils/ErrorHandler')
+const ErrorHandler = require('../../middlewares/ErrorHandler')
 const { v4: uuid } = require("uuid");
 
 // const path = require('path')
